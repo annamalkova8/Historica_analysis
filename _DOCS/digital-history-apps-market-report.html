@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital history apps: short competitive report vs Historica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Newsreader:opsz,wght@6..72,600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#12212b;--muted:#4f6370;--paper:#f3f6f8;--panel:#fff;--line:#d3dde4;--sea:#0f5f6b;--sea-soft:#dcedf0;--hist:#2c4bd6;--hist-soft:#e3e8fb;--good:#1d7a48;--warn:#a86500;--bad:#b3362c;--unk:#6b7b86;
+--serif:'Newsreader',Georgia,serif;--sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media (prefers-color-scheme:dark){:root{--ink:#e6eef3;--muted:#9fb2bf;--paper:#0e171d;--panel:#16232b;--line:#2a3b46;--sea:#5cc2d1;--sea-soft:#15323a;--hist:#8ea2ff;--hist-soft:#1c2547;--good:#58c58a;--warn:#e0a23c;--bad:#ef7d72;--unk:#8da0ac}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.65 var(--sans)}
+a{color:var(--sea)} a:focus-visible{outline:3px solid var(--hist);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto;padding:0 22px}
+header{background:var(--panel);border-bottom:1px solid var(--line);padding:44px 0 28px}
+h1{font:600 clamp(1.9rem,4.5vw,2.8rem)/1.1 var(--serif);margin:0 0 12px}
+header p{margin:0;color:var(--muted)}
+nav{display:flex;flex-wrap:wrap;gap:6px 20px;padding:14px 0;font-size:.95rem}
+nav a{text-decoration:none}
+section{padding:36px 0 8px}
+h2{font:600 1.7rem/1.2 var(--serif);margin:0 0 14px}
+p{margin:0 0 14px}
+ul.short{margin:0 0 14px;padding-left:1.2em} ul.short li{margin:8px 0}
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--sea-soft);white-space:nowrap}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+.hc{background:var(--hist-soft)}
+.y{color:var(--good);font-weight:600}.p{color:var(--warn);font-weight:600}.n{color:var(--bad);font-weight:600}.u{color:var(--unk)}
+.mapbox{background:var(--panel);border:1px solid var(--line);padding:10px;overflow-x:auto}
+.mapbox svg{display:block;min-width:600px;width:100%;height:auto}
+svg text{font-family:var(--sans);fill:var(--ink)} svg .axis{stroke:var(--line);fill:none} svg .ax{font-size:12px;fill:var(--muted)}
+svg .dot{fill:var(--sea)} svg .dot.h{fill:var(--hist)} svg .l{font-size:13px} svg .l.h{font-weight:600;fill:var(--hist)}
+.small{font-size:.85rem;color:var(--muted)}
+.callout{background:var(--panel);border-left:4px solid var(--hist);padding:14px 18px;margin:14px 0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.steps div{background:var(--panel);border:1px solid var(--line);padding:14px 16px;font-size:.93rem}
+.steps b{display:block;margin-bottom:4px}
+@media (max-width:700px){.steps{grid-template-columns:1fr}}
+footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Digital history apps: where Historica stands</h1>
+<p>Short competitive report. 23 October 2026. Based on public web sources.</p>
+</div></header>
+
+<div class="wrap">
+<nav aria-label="Sections"><a href="#summary">Summary</a><a href="#products">1. Similar products</a><a href="#compare">2. Comparison</a><a href="#newcomers">Panchronia &amp; Natagant</a><a href="#builder">Map Builder</a><a href="#take">3. What we can take</a><a href="#limits">Limits</a></nav>
+
+<section id="summary">
+<h2>Summary</h2>
+<ul class="short">
+<li><b>Our edge is the method.</b> Historica builds borders with AI and algorithms. No rival advertises this. The downside: our own site says the maps may be inaccurate.</li>
+<li><b>Map plus time slider is common.</b> Geacron, Chronas, OpenHistoricalMap and paid iOS atlases all offer it. We must stand out on trust and tools.</li>
+<li><b>Mobile is open ground.</b> We have no native app. Paid iOS atlases stop at 1900. Geacron's Android app was last updated in 2018.</li>
+<li><b>Layers help us.</b> Users can switch countries, regions, cities, tribes and events on and off, and find a specific object in the search panel. Most atlases show borders only.</li>
+<li><b>Newer small sites win on habit, not depth.</b> Panchronia and Natagant offer daily games, quizzes and printable posters. We have none of that.</li>
+<li><b>Map Builder is our best lever,</b> but it is invite-only while rivals already let anyone edit.</li>
+</ul>
+</section>
+
+<section id="products">
+<h2>1. Similar products</h2>
+<div class="mapbox">
+<svg viewBox="0 0 720 400" role="img" aria-label="Positioning map. Horizontal: how data is produced, archive-curated to AI-generated. Vertical: local to global scope. Historica is top right.">
+<rect x="70" y="14" width="620" height="330" class="axis"/>
+<line x1="380" y1="14" x2="380" y2="344" class="axis" stroke-dasharray="4 4"/>
+<line x1="70" y1="179" x2="690" y2="179" class="axis" stroke-dasharray="4 4"/>
+<text x="70" y="366" class="ax">Archive-curated</text><text x="380" y="366" class="ax" text-anchor="middle">Community-edited</text><text x="690" y="366" class="ax" text-anchor="end">AI-generated</text>
+<text x="62" y="28" class="ax" text-anchor="end">Global</text><text x="62" y="340" class="ax" text-anchor="end">Local</text>
+<circle cx="140" cy="60" r="7" class="dot"/><text x="154" y="64" class="l">World History Maps</text>
+<circle cx="150" cy="125" r="7" class="dot"/><text x="164" y="129" class="l">HistoricalAtlas</text>
+<circle cx="260" cy="92" r="7" class="dot"/><text x="274" y="96" class="l">Geacron</text>
+<circle cx="410" cy="60" r="7" class="dot"/><text x="424" y="64" class="l">Chronas</text>
+<circle cx="430" cy="200" r="7" class="dot"/><text x="444" y="204" class="l">OpenHistoricalMap</text>
+<circle cx="330" cy="36" r="7" class="dot"/><text x="344" y="40" class="l">Panchronia</text>
+<circle cx="320" cy="150" r="7" class="dot"/><text x="334" y="154" class="l">TimeMap.org</text>
+<circle cx="100" cy="215" r="7" class="dot"/><text x="114" y="219" class="l">Natagant (timeline)</text>
+<circle cx="640" cy="60" r="11" class="dot h"/><text x="624" y="64" class="l h" text-anchor="end">Historica</text>
+<circle cx="200" cy="270" r="7" class="dot"/><text x="214" y="274" class="l">OldMapsOnline</text>
+<circle cx="110" cy="315" r="7" class="dot"/><text x="124" y="319" class="l">Rumsey</text>
+<circle cx="480" cy="300" r="7" class="dot"/><text x="494" y="304" class="l">Historypin</text>
+</svg></div>
+<p class="small">Analyst judgement, not measured data.</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>Product</th><th>What it is</th><th>Platform</th><th>Model</th></tr></thead>
+<tbody>
+<tr><td><b>Geacron</b></td><td>World atlas, 3000 BC to today; embeds and data export</td><td>Web, Android (2018 update)</td><td>Freemium</td></tr>
+<tr><td><b>Chronas</b></td><td>Wikipedia-linked map, 50M+ data points, user editing</td><td>Web</td><td>Free, Patreon</td></tr>
+<tr><td><b>World History Maps</b></td><td>Map for every year of history; maps added up to 2020</td><td>iOS</td><td>Paid ($4.99 in one store listing)</td></tr>
+<tr><td><b>HistoricalAtlas</b></td><td>3000 BC to 1900 AD slider, animated routes</td><td>iOS</td><td>$9.99; Lite free</td></tr>
+<tr><td><b>Panchronia</b></td><td>Globe with borders by year, events, people, daily game and quiz (RU, EN)</td><td>Web, installable on phone</td><td>Free, no ads; donations</td></tr>
+<tr><td><b>Natagant</b></td><td>"All history at once" timeline (not a map) with printable posters (RU)</td><td>Web</td><td>Free</td></tr>
+<tr><td><b>TimeMap.org</b></td><td>World map 4000 BCE to 2010 with tabs for regions, rulers, people, battles</td><td>Web</td><td>Free</td></tr>
+<tr><td><b>Histography</b></td><td>Wikipedia-based timeline from the Big Bang; not a map</td><td>Web</td><td>Free</td></tr>
+<tr><td><b>OldMapsOnline</b></td><td>500,000+ scanned maps with timeline</td><td>Web, iOS</td><td>Free, in-app purchases</td></tr>
+<tr><td><b>David Rumsey</b></td><td>Large archive of scanned maps</td><td>Web</td><td>Free</td></tr>
+<tr><td><b>OpenHistoricalMap</b></td><td>Open, editable map with time slider (4001 BCE on)</td><td>Web</td><td>Free, open source</td></tr>
+<tr><td><b>Pelagios / Recogito</b></td><td>Research tools linking sources by place</td><td>Web</td><td>Free</td></tr>
+<tr><td><b>Historypin</b></td><td>Old photos and stories pinned to maps (status not verified)</td><td>Web, mobile</td><td>Free</td></tr>
+<tr><td><b>Timelines &amp; Maps</b></td><td>Events plus map points; authoring tool</td><td>iOS</td><td>App</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="compare">
+<h2>2. Comparison with Historica</h2>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th class="hc">Historica</th><th>Geacron</th><th>Chronas</th><th>OldMaps</th><th>OHM</th><th>iOS atlases</th></tr></thead>
+<tbody>
+<tr><td>Native mobile app</td><td class="hc n">None found</td><td class="p">Old</td><td class="u">?</td><td class="y">Yes</td><td class="n">No</td><td class="y">Yes</td></tr>
+<tr><td>Time range</td><td class="hc y">4000 BCE to today</td><td>3000 BC to today</td><td>About 4,000 years</td><td>Mostly scanned maps, 15th to 20th c.</td><td>4001 BCE to today</td><td>3000 BC to 1900, or every year to 2020</td></tr>
+<tr><td>Borders to today</td><td class="hc y">Yes</td><td class="y">Yes</td><td class="y">Yes</td><td class="p">Partly</td><td class="y">Yes</td><td class="p">Some stop at 1900</td></tr>
+<tr><td>Monthly time steps</td><td class="hc y">Modern era</td><td class="n">Yearly</td><td class="n">Yearly</td><td class="n">No</td><td class="u">?</td><td class="n">Yearly</td></tr>
+<tr><td>Search for objects</td><td class="hc y">Search panel</td><td class="y">Yes</td><td class="y">Yes</td><td class="y">Place search</td><td class="y">Yes</td><td class="u">?</td></tr>
+<tr><td>Wikipedia links in events</td><td class="hc y">Yes</td><td class="y">Yes</td><td class="y">Yes</td><td class="u">?</td><td class="u">?</td><td class="u">?</td></tr>
+<tr><td>Map screenshots</td><td class="hc y">Yes</td><td class="u">?</td><td class="u">?</td><td class="u">?</td><td class="u">?</td><td class="u">?</td></tr>
+<tr><td>Switchable layers</td><td class="hc y">Countries, regions, cities, tribes, events</td><td class="u">?</td><td class="y">Yes</td><td class="u">?</td><td class="u">?</td><td class="n">No</td></tr>
+<tr><td>Events layer</td><td class="hc y">Layer</td><td class="y">Yes</td><td class="y">Yes</td><td class="p">Partial</td><td class="p">Partial</td><td class="u">?</td></tr>
+<tr><td>User editing</td><td class="hc p">Closed beta</td><td class="u">?</td><td class="y">Yes</td><td class="y">Add maps</td><td class="y">Yes</td><td class="n">No</td></tr>
+<tr><td>Embed / export</td><td class="hc u">?</td><td class="y">Yes</td><td class="u">?</td><td class="u">?</td><td class="y">Open data</td><td class="u">?</td></tr>
+<tr><td>Paid tier</td><td class="hc n">Donations only</td><td class="y">Yes</td><td class="n">Patreon</td><td class="y">In-app</td><td class="n">No</td><td class="y">Yes</td></tr>
+</tbody></table></div>
+<p class="small">Wikipedia links are common (Geacron, Chronas, TimeMap.org, Histography), so they are expected rather than a differentiator.</p>
+<p class="small">A built-in screenshot is useful for teachers and students making slides, and for sharing on social media. I could not confirm it in rivals, though Geacron offers image and data export (KML, shapefile).</p>
+<p class="small">? = not found in public sources. It does not prove the feature is absent.</p>
+<p><b>We lead on:</b> the longest continuous range with borders to the present (4000 BCE to today), monthly resolution, coverage to the present, five switchable layers (countries, regions, cities, tribes, events), a search panel for finding specific objects, Wikipedia links in events, a built-in screenshot option, open method notes, and a scalable data engine.<br>
+<b>We trail on:</b> mobile, open editing, embeds and export, and a paid tier. We also have no real historical documents; archives like OldMapsOnline and Rumsey own that.</p>
+</section>
+
+<section id="newcomers">
+<h2>Panchronia, Natagant and similar</h2>
+<p>Two newer sites that sell the idea of "all history at once". Both are small, free and aimed at Russian speakers. They are worth studying because they win users with daily habits and learning content, not with map depth.</p>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th class="hc">Historica</th><th>Panchronia</th><th>Natagant</th></tr></thead>
+<tbody>
+<tr><td>Format</td><td class="hc">Map with layers and search</td><td>Globe, flat map, and rulers / art-style lanes</td><td>Timeline in columns, scale or table; not a map</td></tr>
+<tr><td>Content</td><td class="hc">Dataset of about 340,000 events</td><td>1,866 events, 1,669 states, 783 people, 64 art styles</td><td>People, art, religions, philosophy, inventions</td></tr>
+<tr><td>Time range</td><td class="hc">4000 BCE to today</td><td>300,000 years ago to 2012</td><td>Not stated</td></tr>
+<tr><td>Border data</td><td class="hc">AI-generated</td><td>Scholarly database (Cliopatria / Seshat), with licences listed; says borders are simplified and approximate</td><td>Not applicable</td></tr>
+<tr><td>Habit features</td><td class="hc n">None found</td><td class="y">Daily "guess the year" game, "what came first" quiz, 91 time paradoxes, tours, articles</td><td class="y">Free printable posters, tables and colouring sheets</td></tr>
+<tr><td>Access</td><td class="hc">Free; donations</td><td>Free, no sign-up, no ads; donations in RUB, foreign cards and monthly</td><td>Free; author-led brand with Instagram</td></tr>
+<tr><td>Mobile</td><td class="hc n">No app found</td><td class="y">Works on phones; can be added to the home screen</td><td class="u">Not stated</td></tr>
+<tr><td>Team</td><td class="hc">Foundation and tech team</td><td>One developer</td><td>One author</td></tr>
+</tbody></table></div>
+<p><b>What this means for us:</b></p>
+<ul class="short">
+<li>They do not match our depth or monthly time steps. Panchronia stops at 2012.</li>
+<li>They are ahead on engagement: games, quizzes, shareable "paradoxes" and printables give people a reason to return.</li>
+<li>Panchronia is clear about where its borders come from and under what licence. That is the trust message we lack.</li>
+<li>Both target Russian speakers directly. An older developer article complained that localised history tools were scarce, so this niche is being filled. Our language support is not verified.</li>
+</ul>
+<p class="small"><b>Other similar products:</b> TimeMap.org (regions, rulers, people and battles with Wikipedia links) and Histography (a self-updating Wikipedia timeline with 18 categories). Neither is a threat on borders, but both show how simple, free tools gain attention.</p>
+</section>
+
+<section id="builder">
+<h2>Map Builder (closed beta)</h2>
+<p>Map Builder lets users edit borders, names and cities (the same layers as on the main map), add their own sources, and build custom timelines. Access is limited to researchers with a Master's or PhD. Our tech notes suggest that adding a source point can redraw borders automatically. Chronas and OHM make users edit shapes by hand, so this is a real difference (my reading of the notes; please verify).</p>
+<p><b>Strengths:</b> unique "edit the evidence, borders follow" idea; starts from a full map; a natural paid feature.</p>
+<p><b>Risks:</b></p>
+<ul class="short">
+<li>The announcement invites teachers and enthusiasts, but the beta gate excludes them.</li>
+<li>Rivals already collect contributions from open communities.</li>
+<li>User scenarios next to scholarly maps could blur trust unless labelled.</li>
+<li>The team lists stability as ongoing work, so opening too fast could hurt.</li>
+</ul>
+<p><b>Suggested opening path:</b></p>
+<div class="steps">
+<div><b>1. Deepen beta</b>20 to 50 researchers. Case studies. Fix stability and data upload.</div>
+<div><b>2. Waitlist</b>Public form. Invite teachers in batches. Add share links. Label "Historica model" vs "User version".</div>
+<div><b>3. Open with limits</b>Free tier plus Pro (export, embeds). Institutional licences.</div>
+</div>
+<p class="callout">Marketing line to test: "Don't just view history. Rebuild it with your sources."</p>
+</section>
+
+<section id="take">
+<h2>3. What we can take</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Lesson</th><th>From</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><b>Make contributing easy</b></td><td>Chronas, OHM, OldMapsOnline</td><td>Add a "suggest a correction" button with contributor credit.</td></tr>
+<tr><td><b>Show sources</b></td><td>Chronas, Geacron (Wikipedia links)</td><td>Add confidence labels and a "sources behind this border" panel. Publish an accuracy benchmark.</td></tr>
+<tr><td><b>Win mobile</b></td><td>Paid iOS atlases</td><td>Ship a mobile-friendly web app first, then native. Market "antiquity to today".</td></tr>
+<tr><td><b>Open a publisher channel</b></td><td>Geacron</td><td>Offer embeds and GeoJSON or image export.</td></tr>
+<tr><td><b>Add a paid tier</b></td><td>Geacron, iOS atlases</td><td>Keep reading free. Sell Map Builder, export and licences.</td></tr>
+<tr><td><b>Give daily hooks</b></td><td>Historypin, OHM</td><td>Launch "events near me" and "on this day" with the events map.</td></tr>
+<tr><td><b>Partner with archives</b></td><td>OldMapsOnline, Rumsey</td><td>Show scans as an optional layer to prove accuracy.</td></tr>
+<tr><td><b>Build daily habits</b></td><td>Panchronia</td><td>Add a daily "guess the year" game and a "what came first" quiz from our events data.</td></tr>
+<tr><td><b>Publish printables and articles</b></td><td>Natagant, Panchronia</td><td>Offer free posters and PDFs, plus articles such as "world map in 1914", to win search traffic.</td></tr>
+<tr><td><b>State sources and licences</b></td><td>Panchronia</td><td>Add a public sources page for border and event data.</td></tr>
+<tr><td><b>Offer "add to home screen"</b></td><td>Panchronia</td><td>A quick mobile step before a native app.</td></tr>
+<tr><td><b>Localise</b></td><td>Panchronia, Natagant</td><td>Test Russian and other languages for the map and search.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="limits">
+<h2>Limits</h2>
+<p>The layer list, search panel, Wikipedia links and screenshot option come from the product team, not from my own testing of the map. No traffic, user or revenue data was available, so market size is not estimated. map.historica.org blocks automated access, so our map was assessed from the website and technology notes, not by using it. App-store data comes from third-party snapshots. Priorities are my judgement; please check them with user interviews.</p>
+<p class="small"><b>Sources:</b> historica.org (home, technology, Map Builder news); oldmapsonline.org and App Store listing; historylab.es/geacron, alternativeto.net, apkcombo.com; patreon.com/chronas, news.elearninginside.com; en.wikipedia.org/wiki/OpenHistoricalMap; similarweb.com and marlvel.ai app pages; apps.apple.com/app/id675442567; dar.cah.ucf.edu; oro.open.ac.uk/79923; 9to5google.com (Historypin); panchronia.com/ru; natagant.com and natagant.com/skachat; mentalfloss.com (TimeMap.org); birdinflight.com (Histography); apps.apple.com/us/app/-/id1013483861.</p>
+</section>
+</div>
+<footer><div class="wrap">Based on public information as of 23 October 2026. Verify before external use.</div></footer>
+</body>
+</html>

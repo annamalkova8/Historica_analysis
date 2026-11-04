@@ -1,0 +1,20 @@
+{
+  "name": "historica-hub",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Historica Analyst Hub: dashboards, trackers and AI search services (funds, conferences, communities)",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.0"
+  },
+  "scripts": {
+    "test": "node scripts/smoke-test.mjs",
+    "dev": "node scripts/dev-server.mjs"
+  }
+}

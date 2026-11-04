@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historica Analyst Hub</title>
+<style>
+:root{--bg:#0a1020;--side:#0e172a;--card:#131f34;--line:#273751;--txt:#e8eef9;--mut:#8a9bb4;--mut2:#9aaac2;--blue:#4e9bff;--teal:#5fd6b8;--amber:#f1c477;--violet:#c08bff;--red:#f08a8a;--green:#70e0b7;--field:#0d182b}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--txt);background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.side{width:236px;background:var(--side);border-right:1px solid #23304a;padding:24px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;flex:none}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.7px;padding:4px 12px}.brand span{color:#6bb8ff}
+.sub{color:#8190aa;font-size:11px;letter-spacing:1.7px;text-transform:uppercase;padding:0 12px;margin:2px 0 28px}
+.nav{width:100%;text-align:left;color:#9dacc4;background:none;border:0;padding:11px 12px;border-radius:10px;margin:2px 0;display:flex;gap:10px;align-items:center;font-size:14px}
+.nav:hover,.nav.active{background:#203457;color:#fff}.nav b{width:20px;text-align:center;font-weight:400}
+.nav .cnt{margin-left:auto;font-size:11px;background:#2a3d5e;border-radius:10px;padding:1px 7px;color:#bcd3f5}
+.foot{margin-top:auto;color:#75849f;font-size:11.5px;padding:10px 12px;line-height:1.5}
+.foot button{margin-top:8px}
+.main{flex:1;min-width:0;padding:28px 36px 60px;max-width:1560px;margin:auto}
+.top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:22px}
+.eyebrow{color:#66b5ff;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1.6px}
+h1{font-size:28px;margin:6px 0 5px;letter-spacing:-.6px}h2{font-size:16px;margin:0}h3{font-size:13.5px;margin:0 0 8px}
+p{color:var(--mut2);margin:0;line-height:1.55}
+.pill{border:1px solid #35547a;background:#142741;border-radius:30px;color:#8bcaff;padding:8px 13px;font-size:12px;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
+.stats.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.metric{color:#93a5bf;font-size:12px}.number{font-size:27px;font-weight:750;margin:8px 0 3px}
+.trend{color:#61d4a4;font-size:12px}.trend.warn{color:var(--amber)}.muted{color:var(--mut);font-size:12px}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin:16px 0}
+.grid.eq{grid-template-columns:1fr 1fr}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.barrow{display:grid;grid-template-columns:130px 1fr 54px;gap:12px;align-items:center;margin:11px 0;font-size:12px;color:#b6c5d9}
+.track{background:#24324a;height:9px;border-radius:12px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#4e8af0,#65d5c0);border-radius:12px}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:12.5px}
+th{color:#8598b2;font-weight:600;padding:11px 9px;border-bottom:1px solid #2b3950;white-space:nowrap}
+td{padding:11px 9px;border-bottom:1px solid #25334a;color:#d7e0ee;vertical-align:middle}tr:last-child td{border:0}
+td a{color:#8bcaff;text-decoration:none}td a:hover{text-decoration:underline}
+.status{display:inline-block;padding:4px 9px;border-radius:20px;background:#263955;color:#a8c9ff;font-size:11px;white-space:nowrap}
+.status.green{background:#173c37;color:var(--green)}.status.amber{background:#47371f;color:var(--amber)}.status.red{background:#4a2630;color:var(--red)}
+.btn{background:#438cf0;border:0;border-radius:9px;color:#fff;padding:9px 13px;font-size:12px;font-weight:700}
+.btn.secondary{background:#253853;color:#c9def7}.btn.small{padding:6px 10px;font-size:11.5px}.btn:hover{filter:brightness(1.1)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{background:#1a2a43;border:1px solid #31445f;color:#b9c9dd;border-radius:8px;padding:8px 13px;font-size:13px}
+.tab.active{background:#28508a;color:#fff;border-color:#3d6db4}
+.seg{display:inline-flex;background:#0d182b;border:1px solid #30425e;border-radius:9px;padding:3px}
+.seg button{background:none;border:0;padding:7px 14px;border-radius:7px;color:#9fb2cc;font-size:12.5px}
+.seg button.active{background:#28508a;color:#fff}
+.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.field,.mini{background:var(--field);border:1px solid #30425e;border-radius:8px;padding:10px;width:100%;font-size:13px}
+.mini{padding:5px 7px;width:auto;font-size:12px;max-width:150px}
+.inl{background:transparent;border:1px dashed #3a4f6e;border-radius:6px;padding:4px 7px;font-size:12px;width:150px;color:#d7e0ee}
+textarea.field{min-height:340px;resize:vertical;line-height:1.55;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+.note{background:#17283e;border:1px solid #2e4d6e;border-radius:11px;padding:12px 14px;color:#b3cce5;font-size:12px;line-height:1.6;margin:14px 0 0}
+.note.warn{background:#2e2616;border-color:#5b4a22;color:#ecd7a6}
+.tag{font-size:10.5px;border-radius:5px;padding:2px 6px;background:#2b2147;color:#cdb0ff;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.tag.now{background:#173c37;color:var(--green)}
+.spark{width:100%;display:block}
+.axis{display:flex;justify-content:space-between;color:var(--mut);font-size:11px;margin-top:4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:#aebfd6;margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.fn{display:grid;grid-template-columns:minmax(120px,190px) 1fr 150px;gap:12px;align-items:center;margin:9px 0;font-size:12.5px}
+.fn .bar{height:30px;background:#1b2a42;border-radius:7px;overflow:hidden;position:relative}
+.fn .bar div{height:100%;background:linear-gradient(90deg,#3f78d8,#4e9bff);border-radius:7px}
+.fn code,.ev{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#c7dcff}
+.fn .drop{font-size:11px;color:var(--amber)}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;align-items:center;gap:8px;background:#0f1b30;border:1px solid #2c405d;border-radius:9px;padding:7px 10px}
+.step .n{width:22px;height:22px;border-radius:50%;background:#28508a;font-size:11px;display:grid;place-items:center;flex:none}
+.step .ev{flex:1}.ibtn{background:none;border:0;color:#8ea3c0;padding:3px 6px;border-radius:5px}.ibtn:hover{background:#243652;color:#fff}
+.tpls{display:flex;flex-direction:column;gap:7px}
+.tpl{text-align:left;background:#0f1b30;border:1px solid #2c405d;border-radius:10px;padding:10px 12px}
+.tpl.active{border-color:#4e9bff;background:#17294a}.tpl b{display:block;font-size:13px}.tpl span{font-size:11px;color:var(--mut)}
+.preview{background:#f6f3ea;color:#222;border-radius:10px;padding:18px;font-size:13px;line-height:1.6;white-space:pre-wrap;max-height:380px;overflow:auto;font-family:Georgia,serif}
+.preview mark{background:#ffd76a;color:#5a3d00;border-radius:3px;padding:0 2px}
+.preview .subj{font-family:Inter,sans-serif;font-weight:700;border-bottom:1px solid #d9d2bd;padding-bottom:8px;margin-bottom:12px;display:block}
+.score{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.ring{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
+.issue{font-size:12.5px;padding:7px 10px;border-radius:8px;margin:6px 0;background:#2e2616;color:#ecd7a6}
+.issue.ok{background:#173c37;color:var(--green)}.issue.bad{background:#4a2630;color:#f4b3b3}
+.vars{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vars label{font-size:11px;color:var(--mut)}.vars input{margin-top:3px;padding:7px 9px;font-size:12.5px}
+iframe.dash{width:100%;height:420px;border:1px solid #30425e;border-radius:10px;background:#0d182b}
+.mock{display:grid;place-items:center;height:260px;border:1px dashed #3a4f6e;border-radius:10px;color:var(--mut);text-align:center;padding:20px;font-size:13px}
+.hide{display:none!important}
+@media(max-width:1100px){.stats,.stats.five{grid-template-columns:repeat(2,1fr)}.grid,.grid.eq{grid-template-columns:1fr}.main{padding:22px}}
+@media(max-width:720px){.side{width:60px;padding:14px 5px}.brand{font-size:13px;padding:6px}.brand span,.sub,.nav .t,.nav .cnt,.foot{display:none}.nav{justify-content:center;padding:12px 6px}.main{padding:16px}.pill{display:none}.fn{grid-template-columns:1fr}.barrow{grid-template-columns:96px 1fr 44px}.vars{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand">H<span>istorica</span></div>
+  <div class="sub">Analyst Hub</div>
+  <nav id="nav"></nav>
+  <div class="foot">Historica Analyst Hub<br>Data lives in your database.<br>Funds, conferences and communities are searched by AI services.</div>
+</aside>
+<main class="main">
+  <div class="top"><div><div class="eyebrow" id="eyebrow"></div><h1 id="title"></h1><p id="subtitle"></p></div><div class="pill" id="syncpill">● Loading…</div></div>
+  <div id="content"></div>
+</main>
+</div>
+<script>
+/* ---------- helpers ---------- */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const pct=(a,b)=>b?((a/b)*100).toFixed(a/b<.1?1:0)+'%':'—';
+const hash=s=>{let x=0;for(const c of s)x=(x*31+c.charCodeAt(0))>>>0;return x};
+const rnd=(seed,i)=>{const x=Math.sin(seed*12.9898+i*78.233)*43758.5453;return x-Math.floor(x)};
+const series=(seed,n,a,b,noise=.06)=>Array.from({length:n},(_,i)=>Math.max(0,(a+(b-a)*i/(n-1))*(1+(rnd(seed,i)-.5)*2*noise)));
+const COL=['#4e9bff','#5fd6b8','#f1c477','#c08bff'];
+const stat=(a,b,c,w)=>`<div class="card"><div class="metric">${a}</div><div class="number">${b}</div><div class="trend ${w?'warn':''}">${c||''}</div></div>`;
+const card=x=>`<div class="card">${x}</div>`;
+const bars=rows=>rows.map(([a,n,l])=>`<div class="barrow"><span>${esc(a)}</span><div class="track"><div class="fill" style="width:${Math.min(100,n)}%"></div></div><span>${l??n+'%'}</span></div>`).join('');
+const table=(h,r)=>`<div class="tablewrap"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const badge=s=>{const g=/^(accepted|yes|replied|applied|in conversation|pilot|form|both|interview|active)$/i,a=/^(planned|pending|drafted|sent|contacted|to apply|open)$/i,r=/^(rejected|declined|no response)$/i;return `<span class="status ${g.test(s)?'green':a.test(s)?'amber':r.test(s)?'red':''}">${esc(s)}</span>`};
+const sel=(opts,val,fn)=>`<select class="mini" onchange="${fn}">${opts.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+function line(sets,h=170){const W=600,all=sets.flatMap(s=>s.d),mx=Math.max(...all)*1.08,n=sets[0].d.length;
+ const X=i=>i/(n-1)*W,Y=v=>h-6-v/mx*(h-16);
+ const grid=[0,1,2,3].map(i=>`<line x1="0" x2="${W}" y1="${6+i*(h-12)/3}" y2="${6+i*(h-12)/3}" stroke="#2a3a54" vector-effect="non-scaling-stroke"/>`).join('');
+ const paths=sets.map((s,k)=>{const p=s.d.map((v,i)=>`${i?'L':'M'}${X(i).toFixed(1)} ${Y(v).toFixed(1)}`).join(' ');
+  return (sets.length===1?`<path d="${p} L${W} ${h} L0 ${h}Z" fill="${COL[k]}" opacity=".15"/>`:'')+`<path d="${p}" fill="none" stroke="${COL[k]}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`}).join('');
+ return `<svg class="spark" viewBox="0 0 ${W} ${h}" preserveAspectRatio="none" style="height:${h}px">${grid}${paths}</svg><div class="axis"><span>12 weeks ago</span><span>peak ${fmt(Math.max(...all))}</span><span>this week</span></div>`+(sets.length>1||sets[0].name?`<div class="legend">${sets.map((s,k)=>`<span><i style="background:${COL[k]}"></i>${esc(s.name||'')}</span>`).join('')}</div>`:'')}
+
+/* ---------- persistent state ---------- */
+const KEY='historica_analyst_hub_v1';
+const DEFAULTS=()=>({
+ confs:[],
+ grants:[
+  {name:'NGI Zero Commons Fund – Restack',source:'NLnet',link:'https://nlnet.nl/restack/',deadline:'unknown',sum:'unknown',period:'unknown',oss:'?',articles:'?',docs:'unknown',applied:'Yes',result:'Pending'},
+  {name:'OIS Restack 1st Open Call',source:'NGI (Next Generation Internet)',link:'https://ngi.eu/opencalls/',deadline:'unknown',sum:'unknown',period:'unknown',oss:'?',articles:'?',docs:'unknown',applied:'Yes',result:'Pending'},
+  {name:'AWS Activate Credits',source:'AWS Activate (Startup Credits)',link:'https://aws.amazon.com/startups/credits/',deadline:'unknown',sum:'unknown',period:'unknown',oss:'?',articles:'?',docs:'unknown',applied:'Yes',result:'Pending'},
+  {name:'NVIDIA Inception Program',source:'NVIDIA Inception Program',link:'https://www.nvidia.com/en-us/startups/',deadline:'unknown',sum:'unknown',period:'unknown',oss:'?',articles:'?',docs:'unknown',applied:'Yes',result:'Pending'}],
+ unis:[
+  {name:'University of Oxford',country:'UK',dept:'Digital Humanities / e-Research',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''},
+  {name:'University of Amsterdam',country:'NL',dept:'Humanities / Digital Humanities',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''},
+  {name:'University of Helsinki',country:'FI',dept:'Helsinki Centre for Digital Humanities',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''},
+  {name:"King's College London",country:'UK',dept:'Dept. of Digital Humanities',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''},
+  {name:'University of Luxembourg',country:'LU',dept:'C²DH – Digital History',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''},
+  {name:'Leiden University',country:'NL',dept:'History / Digital Scholarship',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''}],
+ testers:[],
+ comms:[{"name": "r/historyteachers", "platform": "Reddit", "audience": "School history teachers", "url": "https://www.reddit.com/r/historyteachers/", "priority": "Very high", "approach": "Share a classroom activity using Historica", "goal": "Feedback", "rules": "Contribute first; avoid repeated promo", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "AHA Teaching and Learning History", "platform": "Community platform", "audience": "Teachers, university lecturers, museum educators", "url": "https://communities.historians.org/communities/community-home?communitykey=4ea04032-7b21-44fd-835a-5a8a558b8c52", "priority": "Very high", "approach": "Request educational feedback or propose a teaching resource", "goal": "Partnership", "rules": "Membership needed to start topics", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "NCHE History Hangouts", "platform": "Discord", "audience": "History educators", "url": "https://ncheteach.org/historyhangouts/", "priority": "Very high", "approach": "Introduce Historica; ask teachers to test a classroom activity", "goal": "Feedback", "rules": "Ask permission before sharing", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "EuroClio Hubs", "platform": "Association hubs", "audience": "European history teacher associations", "url": "https://euroclio.eu/euroclio-hubs/", "priority": "Very high", "approach": "Contact regional coordinators about sharing with educators / pilots", "goal": "Partnership", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "Geovistory Community", "platform": "Community + Discord", "audience": "Digital historians, developers, humanities researchers", "url": "https://www.geovistory.org/community", "priority": "High", "approach": "Technical feedback; introduce Map Builder beta", "goal": "Feedback", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "UK–Ireland Digital Humanities Association", "platform": "Mailing list", "audience": "Digital humanities researchers", "url": "https://digitalhumanities-uk-ie.org/join/", "priority": "High", "approach": "Share the project via its open mailing list", "goal": "Partnership", "rules": "Mailing list allows project announcements", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "Digital Medievalist", "platform": "Website / list", "audience": "Medieval historians, DH specialists", "url": "https://digitalmedievalist.org/", "priority": "High", "approach": "Introduce medieval coverage; ask for scholarly feedback", "goal": "Feedback", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "The Education Forum", "platform": "Forum", "audience": "History and geography teachers", "url": "https://educationforum.ipbhost.com/", "priority": "Medium", "approach": "Post a teaching-resource discussion in a relevant section", "goal": "Acquisition", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "r/Maps", "platform": "Reddit", "audience": "Map enthusiasts", "url": "https://www.reddit.com/r/Maps/", "priority": "High", "approach": "Show a concrete map feature and ask for feedback", "goal": "Acquisition", "rules": "Check subreddit rules", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "r/MapPorn", "platform": "Reddit", "audience": "Large audience, cartographic visuals", "url": "https://www.reddit.com/r/MapPorn/", "priority": "Medium", "approach": "Share a compelling historical map with context", "goal": "Acquisition", "rules": "Check promotion rules", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "r/HistoricalMaps", "platform": "Reddit", "audience": "Historical cartography audience", "url": "https://www.reddit.com/r/HistoricalMaps/", "priority": "Medium", "approach": "Share a historical map comparison", "goal": "Acquisition", "rules": "Check subreddit rules", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "H-Maps / H-Net", "platform": "Academic network", "audience": "Historical cartography researchers", "url": "https://networks.h-net.org/h-maps", "priority": "High", "approach": "Introduce Historica as a research and teaching tool", "goal": "Partnership", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "ProFantasy Historical Maps Forum", "platform": "Forum", "audience": "Cartography hobbyists, map creators", "url": "https://forum.profantasy.com/discussion/10430/historical-maps", "priority": "Medium", "approach": "Share Historica as a resource for historical geography", "goal": "Acquisition", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}],
+ funnels:[],
+ tpl:0,tplVars:{},ctx:null,dashUrl:''
+});
+const TPL=()=>[
+ {name:'University outreach — first letter',type:'Academia',subject:'Interactive historical maps for {{department}} teaching and research',body:`Dear {{contact_name}},
+
+My name is {{sender_name}}, and I am part of the team behind Historica — an interactive platform that lets people explore how borders, cities and empires changed over time.
+
+I am writing to you because the work of {{department}} at {{university}} is closely related to what we are building. Our Map Builder tool allows teachers and researchers to create their own historical maps and publish them for students and the public, without GIS expertise.
+
+We would be glad to offer {{university}} early access, and to learn from your feedback on how the tool could support your courses or research.
+
+Would you be open to a 20-minute call in the next few weeks? You can see the platform at {{website}}.
+
+Thank you for your time.
+
+Best regards,
+{{sender_name}}
+Historica`},
+ {name:'University outreach — follow-up',type:'Academia',subject:'Following up: Historica Map Builder for {{university}}',body:`Dear {{contact_name}},
+
+I wrote to you recently about Historica's Map Builder, and wanted to follow up in case my message was lost.
+
+In short: it is a free tool for creating interactive historical maps, and we are looking for {{department}} colleagues to try it and share honest feedback.
+
+Would a short call or a 10-minute demo video work better for you?
+
+Best regards,
+{{sender_name}}`},
+ {name:'Map Builder — tester invitation',type:'Testers',subject:'Invitation to test Historica Map Builder',body:`Hello {{contact_name}},
+
+We are inviting a small group of teachers, researchers and students to test Historica Map Builder before its wider release.
+
+What it takes: about 30 minutes to build a first map, plus a short feedback form ({{form_link}}). If you prefer, we can do a 20-minute interview instead.
+
+Would you like to take part?
+
+Thank you,
+{{sender_name}}`},
+ {name:'Map Builder — Google Form questions',type:'Testers',subject:'Map Builder feedback form',body:`1. Which best describes you? (Teacher / PhD student / Professor / Researcher / Museum or archive / Other)
+2. How did you hear about Map Builder? (LinkedIn / Facebook / Newsletter / University / Colleague / Other)
+3. How easy was it to create your first map? (1 = very hard … 5 = very easy)
+4. Which step was the most confusing? (Import data / Add objects / Timeline / Styling / Publishing)
+5. Did you publish a map? If not, what stopped you?
+6. What would you use maps for? (Teaching / Research / Publication / Museum / Other)
+7. What is the one thing we should fix first?
+8. May we contact you for a 20-minute interview? (Yes / No) — Email:`},
+ {name:'Map Builder — interview guide',type:'Testers',subject:'Interview guide (20 min)',body:`Intro (2 min): purpose, recording consent, no right or wrong answers.
+Context (3 min): What do you teach / research? How do you use maps today?
+Task (10 min): "Please create a map showing {{task_topic}}." Observe silently; note where they hesitate.
+Reflection (5 min): What was hardest? What surprised you? Would you use this in class or research?
+Close: Can we contact you when new features ship?`},
+ {name:'Community post — explore changing borders',type:'Communities',subject:'Explore 300 years of changing borders with an interactive historical map',body:`Hi everyone!
+
+I'm part of the team behind Historica ({{map_link}}), a project developing interactive historical maps.
+
+We're working on making historical geography easier to explore, whether you're a history enthusiast, teacher, student, or researcher. You can move through different years, explore historical borders, and use different map layers.
+
+We're looking for feedback from people who enjoy history and historical cartography. I'd love to hear:
+
+- Which historical periods or regions would you explore?
+- Would a tool like this be useful for teaching or research?
+- What features or information would make it more valuable?
+
+Explore the maps: {{map_link}}
+
+I'm happy to answer questions and hear your suggestions!`},
+ {name:'Community message — educator demo & pilot',type:'Communities',subject:'15-minute demo: comparing borders across centuries with Historica',body:`Dear {{contact_name}},
+
+I'm {{sender_name}} from Historica, an interactive historical map project. Teachers can use it to compare borders and regions across centuries, for example {{use_case}}.
+
+I would like to offer {{community}} members a 15–20-minute demonstration and a small classroom pilot. In return, we would ask for honest feedback on what helps in lessons and what is missing.
+
+Would you be open to sharing this with your members, or to a short call?
+
+Thank you,
+{{sender_name}}`},
+ {name:'Conference abstract',type:'Conferences',subject:'Abstract for {{conference}}',body:`Title: Mapping change: building interactive historical maps with LLM-assisted data extraction
+
+Historica turns historical documents into structured, geolocated data and presents them as interactive maps. This talk presents the Map Builder, a tool that lets teachers and researchers create and publish their own historical maps, and reports on early tester feedback from {{tester_count}} users.
+
+We discuss the pipeline, open challenges in temporal data, and implications for teaching with maps.`},
+ {name:'Grant cover note',type:'Grants',subject:'Application: {{grant_name}}',body:`Dear {{contact_name}},
+
+Please find attached our application to {{grant_name}}.
+
+Historica is an open knowledge project that extracts historical documents into structured, geographically located data using LLMs, and makes it explorable through interactive maps. We are a small, self-funded team of three.
+
+We would welcome the opportunity to discuss the project further.
+
+Kind regards,
+{{sender_name}}`}];
+let S,SNAP={},syncT=null,syncing=false,dirty=false;
+const COLLS=['grants','confs','comms','unis','testers','tplList','funnels'];
+const UIKEY='historica_hub_ui_v1';
+const uid=()=>'c_'+(window.crypto&&crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function setPill(t,c){const e=document.getElementById('syncpill');if(e){e.textContent=t;e.style.color=c||''}}
+function loadUi(){try{const u=JSON.parse(localStorage.getItem(UIKEY)||'{}');S.tpl=u.tpl||0;S.tplVars=u.tplVars||{};S.ctx=u.ctx||null}catch(e){}}
+function saveUi(){try{localStorage.setItem(UIKEY,JSON.stringify({tpl:S.tpl,tplVars:S.tplVars,ctx:S.ctx}))}catch(e){}}
+const snapOf=d=>{const {_id,...r}=d;return JSON.stringify(r)};
+async function api(path,opt={}){const r=await fetch(path,{credentials:'same-origin',headers:{'content-type':'application/json'},method:opt.method||'GET',body:opt.body?JSON.stringify(opt.body):undefined});
+ if(r.status===401){showLogin();throw new Error('login')}
+ const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.statusText);return j}
+function save(){saveUi();dirty=true;setPill('● Saving…','#f1c477');clearTimeout(syncT);syncT=setTimeout(flush,500)}
+async function flush(markSeeded){
+ if(syncing){dirty=true;return}
+ const ups=[],dels=[];
+ COLLS.forEach(k=>{const seen=new Set();(S[k]||[]).forEach(it=>{if(!it._id)it._id=uid();seen.add(it._id);const sn=snapOf(it);if(SNAP[k+':'+it._id]!==sn)ups.push({kind:k,id:it._id,data:it,sn})});
+  Object.keys(SNAP).filter(x=>x.startsWith(k+':')&&!seen.has(x.slice(k.length+1))).forEach(x=>dels.push({kind:k,id:x.slice(k.length+1),sk:x}))});
+ if(!ups.length&&!dels.length&&markSeeded!==true){dirty=false;setPill('● Saved');return}
+ syncing=true;dirty=false;
+ try{await api('/api/sync',{method:'POST',body:{upserts:ups.map(({kind,id,data})=>({kind,id,data})),deletes:dels.map(({kind,id})=>({kind,id})),markSeeded:markSeeded===true}});
+  ups.forEach(u=>SNAP[u.kind+':'+u.id]=u.sn);dels.forEach(d=>delete SNAP[d.sk]);setPill('● Saved')}
+ catch(e){dirty=true;if(e.message!=='login'){setPill('● Offline – retrying','#f08a8a');setTimeout(flush,5000)}}
+ finally{syncing=false;if(dirty)setTimeout(flush,300)}}
+function applyState(st){
+ const D=DEFAULTS();SNAP={};
+ if(!st.seeded){COLLS.forEach(k=>{S[k]=k==='tplList'?TPL():(D[k]||[])});flush(true);return}
+ COLLS.forEach(k=>{S[k]=st.data[k]||[];S[k].forEach(it=>{SNAP[k+':'+it._id]=snapOf(it)})});
+ let added=false;TPL().forEach(t=>{if(!S.tplList.some(x=>x.name===t.name)){S.tplList.push(t);added=true}});if(added)save()}
+async function refreshFromServer(){for(let i=0;i<50&&(syncing||dirty);i++)await sleep(200);applyState(await api('/api/state'));render()}
+async function boot(){S=DEFAULTS();S.tplList=TPL();loadUi();
+ try{applyState(await api('/api/state'))}catch(e){if(e.message==='login')return;document.getElementById('content').innerHTML=`<div class="note warn">Cannot reach the server: ${esc(e.message)}</div>`;setPill('● Offline','#f08a8a');return}
+ setPill('● Saved');render()}
+function showLogin(){if(document.getElementById('login'))return;const d=document.createElement('div');d.id='login';
+ d.style.cssText='position:fixed;inset:0;background:#0a1020;display:grid;place-items:center;z-index:99';
+ d.innerHTML='<form class="card" style="width:min(360px,90vw)" onsubmit="doLogin(event)"><div class="brand" style="padding:0 0 4px">H<span>istorica</span></div><p style="margin-bottom:14px">Analyst Hub — sign in</p><input class="field" type="password" id="lpw" placeholder="Password" autofocus><div id="lerr" class="trend warn" style="margin:6px 0"></div><button class="btn" style="width:100%">Sign in</button></form>';
+ document.body.appendChild(d)}
+async function doLogin(ev){ev.preventDefault();const r=await fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:document.getElementById('lpw').value})});
+ if(r.ok){document.getElementById('login').remove();boot()}else document.getElementById('lerr').textContent=(await r.json().catch(()=>({}))).error||'Login failed'}
+const newTag=(c,i,x)=>x.isNew?` <span class="tag now">NEW</span><button class="ibtn" title="Keep" onclick="setF('${c}',${i},'isNew',false)">✓</button><button class="ibtn" title="Hide" onclick="hideRec('${c}',${i})">✕</button>`:'';
+function hideRec(c,i){S[c][i].hidden=true;S[c][i].isNew=false;save();render()}
+const visible=(x,f)=>x.hidden?f==='Hidden':(f!=='New'||x.isNew);
+const SORT={confs:{k:'date',d:1},grants:{k:'name',d:1},comms:{k:'priority',d:1}};
+function sortBy(c,k){const s=SORT[c];s.d=s.k===k?-s.d:1;s.k=k;render()}
+const th=(c,k,l)=>`<span style="cursor:pointer;user-select:none" onclick="sortBy('${c}','${k}')">${l}${SORT[c].k===k?(SORT[c].d>0?' ▲':' ▼'):' ↕'}</span>`;
+const cmp=c=>(a,b)=>{const k=SORT[c].k,x=S[c][a][k],y=S[c][b][k];const PR={'Very high':0,'High':1,'Medium':2};return (['cost','responses','visits','testers'].includes(k)?(+x-+y):k==='priority'?(PR[x]-PR[y]):String(x).localeCompare(String(y)))*SORT[c].d};
+let confFilter='All',commFilter='All',page='analytics',aTab='website',aMode='now',fPage='funnel',flowAnchor='map_opened',grantFilter='All',roleFilter='All';
+
+/* ---------- event catalogue (from historica_tracking_spec.md) ---------- */
+const EVENTS={
+ 'Website':['page_viewed','navigation_clicked','section_engagement','map_cta_clicked','donation_clicked','payment_started','donation_completed'],
+ 'Map':['map_opened','year_selected','year_engagement','multiple_years_viewed','tool_used','engaged_map_session','search_opened','search_submitted','search_result_selected','layer_toggled','screenshot_completed','feedback_opened','feedback_submitted'],
+ 'Map Builder (proposed)':['mapbuilder_signup','map_created','objects_added','map_published'],
+ 'Social (proposed, via UTM)':['social_post_click','newsletter_click']};
+const PRESETS=[
+ ['Website → Map',['page_viewed','map_cta_clicked','map_opened','year_selected','engaged_map_session']],
+ ['Social → Map',['social_post_click','page_viewed','map_cta_clicked','map_opened','year_selected']],
+ ['Map Builder → published map',['mapbuilder_signup','map_created','objects_added','map_published']],
+ ['Donations',['page_viewed','donation_clicked','payment_started','donation_completed']],
+ ['Map engagement',['map_opened','year_selected','multiple_years_viewed','tool_used']],
+ ['Search',['search_opened','search_submitted','search_result_selected']],
+ ['Feedback',['map_opened','feedback_opened','feedback_submitted']]];
+const PAIR={'page_viewed>map_cta_clicked':.27,'map_cta_clicked>map_opened':.82,'map_opened>year_selected':.71,'year_selected>engaged_map_session':.46,'page_viewed>donation_clicked':.035,'donation_clicked>payment_started':.58,'payment_started>donation_completed':.64,'mapbuilder_signup>map_created':.52,'map_created>objects_added':.74,'objects_added>map_published':.38,'social_post_click>page_viewed':.88,'map_opened>feedback_opened':.06,'feedback_opened>feedback_submitted':.41,'search_opened>search_submitted':.66,'search_submitted>search_result_selected':.72,'map_opened>multiple_years_viewed':.48,'multiple_years_viewed>tool_used':.6};
+const START={page_viewed:12840,map_opened:8420,search_opened:2100,mapbuilder_signup:640,social_post_click:4300};
+const SEGS={none:[['All users',1,1]],source:[['Organic search',.4,1],['Social',.28,1.15],['Direct',.22,.9],['Referral',.1,1.05]],device:[['Desktop',.58,1.1],['Mobile',.38,.8],['Tablet',.04,.95]]};
+let FS={steps:[...PRESETS[0][1]],win:'7d',by:'none',unit:'visitors',name:PRESETS[0][0]};
+const rate=(a,b,w)=>{let r=PAIR[a+'>'+b]??(.3+(hash(a+b)%45)/100);return Math.min(.97,r*({'1d':.85,'7d':1,'30d':1.12}[w]))};
+function computeFunnel(steps,win,mult=1,share=1,unit='visitors'){let c=(START[steps[0]]??5000)*share*(unit==='sessions'?1.35:1);const out=[{n:steps[0],c}];
+ for(let i=1;i<steps.length;i++){c=c*Math.min(.97,rate(steps[i-1],steps[i],win)*mult);out.push({n:steps[i],c})}return out}
+function funnelHTML(res){const t=res[0].c;return res.map((s,i)=>{const prev=i?res[i-1].c:s.c;return `<div class="fn"><code>${esc(s.n)}</code><div class="bar"><div style="width:${(s.c/t*100).toFixed(1)}%"></div></div><div><b>${fmt(s.c)}</b> <span class="muted">${i?pct(s.c,prev)+' of prev':'entered'}</span>${i?`<div class="drop">−${fmt(prev-s.c)} dropped</div>`:''}</div></div>`}).join('')+`<div class="muted" style="margin-top:6px">Overall conversion: <b style="color:#e8eef9">${pct(res.at(-1).c,t)}</b></div>`}
+const miniFunnel=(steps,title)=>card(`<div class="sectionhead"><h2>${title} <span class="tag">needs event tracking</span></h2><button class="btn secondary small" onclick="openFunnel(${JSON.stringify(steps).replace(/"/g,'&quot;')},'${esc(title)}')">Open in Funnel Builder →</button></div>${funnelHTML(computeFunnel(steps,'7d'))}`);
+
+/* ---------- pages ---------- */
+const PAGES=[['analytics','▥','Analytics'],['services','⌕','Search services'],['funnels','⫶','Funnels'],['testers','♙','Map Builder Testers'],['conferences','▦','Conferences'],['grants','◇','Grants & Funding'],['academia','◎','Academic Outreach'],['communities','◉','Communities'],['templates','✎','Templates & Letters']];
+const META={services:['Automation','Search services','AI pipelines that look for funds, conferences and communities — manually or on a daily schedule.'],analytics:['Dashboards','Analytics','What we have today, and what we expect once event tracking is live.'],funnels:['Mixpanel-style, specific to Historica','Funnels','Build funnels from the tracking-spec events and compare segments.'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
+
+/* Analytics */
+function analytics(){const exp=aMode==='expected';
+ const head=`<div class="toolbar" style="margin-top:0"><div class="tabs">${[['website','Website'],['map','Map'],['social','Social & Newsletter'],['publicity','Publicity'],['builder','Map Builder users']].map(([k,l])=>`<button class="tab ${aTab===k?'active':''}" onclick="aTab='${k}';render()">${l}</button>`).join('')}</div>
+ <div class="seg"><button class="${!exp?'active':''}" onclick="aMode='now';render()">Right now</button><button class="${exp?'active':''}" onclick="aMode='expected';render()">What we expect</button></div></div>
+ <div class="note" style="margin:0 0 14px">${exp?'<b>Expected version</b> — funnels and engagement metrics that become possible after the events from the tracking spec (P0) are implemented. Values are simulated.':'<b>Right now</b> — only what is measured today: visitors, followers, subscribers, content counts. Followers/subscribers/articles/authors follow the brief; other numbers are illustrative.'}</div>`;
+ return head+({website,map:mapTab,social,publicity,builder}[aTab])(exp)}
+function website(exp){const v=series(1,12,8200,12840),m=series(2,12,3100,8420);
+ let h=`<div class="stats">${stat('Website visitors · 30d','12,840','↑ 14% vs prev 30d')}${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Social followers','20,000+','FB + LinkedIn')}${stat('Newsletter','5,000+','subscribers')}</div>
+ <div class="grid">${card(`<div class="sectionhead"><h2>Weekly visitors</h2></div>${line([{name:'Website',d:v},{name:'Map',d:m}])}`)}${card(`<h2 style="margin-bottom:8px">Traffic sources</h2>${bars([['Organic search',38],['Direct',22],['Social',18],['Newsletter',12],['Referral',10]])}`)}</div>`;
+ if(exp)h+=`<div class="stats">${stat('CTR website → map','27%','needs map_cta_clicked')}${stat('Donation conversion','0.4%','needs donation_completed')}${stat('Avg active time','1m 48s','needs section_engagement')}${stat('Avg donation','€18','needs webhook')}</div><div class="grid eq">${miniFunnel(PRESETS[0][1],'Website → Map')}${miniFunnel(PRESETS[3][1],'Website → Donation')}</div>`;
+ return h}
+function mapTab(exp){let h=`<div class="stats">${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Returning visitors','31%','illustrative')}${stat('Avg session','3m 12s','illustrative')}${stat('Mobile share','38%','illustrative')}</div>
+ <div class="grid">${card(`<h2 style="margin-bottom:8px">Map visitors, weekly</h2>${line([{d:series(2,12,3100,8420)}])}`)}${card(`<h2 style="margin-bottom:8px">Where map visitors come from</h2>${bars([['Website button',44],['Social',27],['Direct / bookmark',17],['Search',12]])}`)}</div>`;
+ if(exp)h+=`<div class="grid eq">${card(`<h2 style="margin-bottom:8px">Most explored periods <span class="tag">needs year_selected</span></h2>${bars([['1700–1800',82],['1900–2000',71],['1800–1900',64],['Ancient (BCE)',53],['Medieval',46]])}`)}${card(`<h2 style="margin-bottom:8px">Tool usage <span class="tag">needs top-bar events</span></h2>${bars([['Layers',58],['Search',41],['Map view',33],['Screenshot',19],['Feedback',6]])}`)}</div><div class="grid eq">${miniFunnel(PRESETS[4][1],'Map engagement')}${miniFunnel(PRESETS[6][1],'Feedback')}</div>`;
+ return h}
+function social(exp){const ch=[['Facebook',11400,312,1840,720],['LinkedIn',8700,148,960,310],['Newsletter',5120,27,1310,690]];
+ let h=`<div class="stats five">${stat('Social followers','20,000+','Facebook + LinkedIn')}${stat('Newsletter subscribers','5,000+','↑ 2.1% / month')}${stat('Comments · 30d','487','FB + LinkedIn')}${stat('Clicks → website','4,110','all channels')}${stat('Clicks → map','1,720','all channels')}</div>
+ <div class="grid">${card(`<h2 style="margin-bottom:8px">Followers growth</h2>${line([{name:'Facebook',d:series(4,12,9800,11400,.01)},{name:'LinkedIn',d:series(5,12,7100,8700,.01)},{name:'Newsletter',d:series(6,12,4300,5120,.01)}])}`)}${card(`<h2 style="margin-bottom:8px">Clicks to map, share by channel</h2>${bars(ch.map(c=>[c[0],Math.round(c[4]/1720*100)]))}<div class="muted">Click counts come from UTM links (utm_source / utm_medium).</div>`)}</div>
+ ${card(`<h2 style="margin-bottom:10px">Channels · last 30 days</h2>${table(['Channel','Audience','Comments','→ Website','→ Map','Map click rate'],ch.map(c=>[`<b>${c[0]}</b>`,fmt(c[1])+(c[0]==='Newsletter'?' subscribers':''),fmt(c[2]),fmt(c[3]),fmt(c[4]),pct(c[4],c[3])]))}`)}`;
+ if(exp)h+=`<div class="grid eq" style="margin-top:16px">${miniFunnel(PRESETS[1][1],'Social → Map')}${card(`<h2 style="margin-bottom:8px">Best posts <span class="tag">needs UTM per post</span></h2>${table(['Post','Channel','→ Map'],[['Borders of Europe, 1815','Facebook','212'],['Map Builder beta call','LinkedIn','148'],['Newsletter #42 · Silk Roads','Newsletter','167']])}`)}</div>`;
+ return h}
+function publicity(exp){let h=`<div class="stats">${stat('Published articles','70+','since launch')}${stat('Contributing authors','45+','guest + core')}${stat('Articles · last 90d','9','illustrative')}${stat('Avg reads / article','640','illustrative')}</div>
+ <div class="grid">${card(`<h2 style="margin-bottom:8px">Articles published per month</h2>${line([{d:series(8,12,3,9,.25)}])}`)}${card(`<h2 style="margin-bottom:8px">Authors by background</h2>${bars([['University / PhD',48],['Independent historians',27],['Teachers',15],['Museum / archive',10]])}`)}</div>
+ ${card(`<h2 style="margin-bottom:10px">Top articles <span class="tag now">illustrative titles</span></h2>${table(['Article','Reads','→ Map clicks','Conv.'],[['How the borders of Europe changed after 1815','3,240','412','13%'],['The Silk Roads, mapped','2,870','356','12%'],['Lost cities of the Bronze Age','2,115','198','9%'],['Teaching with historical maps','1,480','211','14%']])}`)}`;
+ if(exp)h+=`<div style="margin-top:16px">${miniFunnel(['article_viewed','map_cta_clicked','map_opened','year_selected'],'Article → Map')}</div>`;return h}
+function builder(exp){const users=S.testers.length;let h=`<div class="stats">${stat('Map Builder users','412','↑ 18% · illustrative')}${stat('Maps built','1,036','illustrative')}${stat('Maps / user','2.5','illustrative')}${stat('Beta testers','<b>'+users+'</b>','see Testers page')}</div>
+ <div class="grid">${card(`<h2 style="margin-bottom:8px">Users and maps built, weekly</h2>${line([{name:'Users (cumulative)',d:series(9,12,60,412,.02)},{name:'Maps built (cumulative)',d:series(10,12,120,1036,.02)}])}`)}${card(`<h2 style="margin-bottom:8px">Who builds maps</h2>${bars([['Teachers',34],['PhD students',26],['Professors',16],['Students',14],['Other',10]])}`)}</div>`;
+ if(exp)h+=`<div class="grid eq">${miniFunnel(PRESETS[2][1],'Map Builder → published map')}${card(`<h2 style="margin-bottom:8px">Where users drop <span class="tag">needs builder events</span></h2>${bars([['Import data',38],['Add objects',24],['Timeline setup',19],['Publish step',11]])}<div class="muted">Share of drop-offs by step — feeds the UX backlog.</div>`)}</div>`;
+ return h}
+/* Funnels */
+function funnels(){const seg=SEGS[FS.by];
+ const evOpts=Object.entries(EVENTS).map(([g,e])=>`<optgroup label="${g}">${e.map(x=>`<option>${x}</option>`).join('')}</optgroup>`).join('');
+ const res=computeFunnel(FS.steps,FS.win,1,1,FS.unit);
+ let breakdown='';
+ if(FS.by!=='none')breakdown=card(`<h2 style="margin-bottom:10px">Breakdown by ${FS.by}</h2>${table(['Segment','Entered','Completed','Conversion','vs average'],seg.map(([n,sh,m])=>{const r=computeFunnel(FS.steps,FS.win,m,sh,FS.unit),c=r.at(-1).c/r[0].c,avg=res.at(-1).c/res[0].c;return [`<b>${n}</b>`,fmt(r[0].c),fmt(r.at(-1).c),pct(r.at(-1).c,r[0].c),`<span class="trend ${c<avg?'warn':''}">${c>=avg?'▲':'▼'} ${Math.abs((c/avg-1)*100).toFixed(0)}%</span>`]}))}`);
+ return `<div class="toolbar" style="margin-top:0"><div class="actions"><span class="muted">Presets:</span>${PRESETS.map((p,i)=>`<button class="tab ${FS.name===p[0]?'active':''}" onclick="openFunnel(PRESETS[${i}][1],PRESETS[${i}][0])">${p[0]}</button>`).join('')}</div></div>
+ <div class="grid" style="grid-template-columns:minmax(280px,.8fr) 1.7fr">
+ ${card(`<div class="sectionhead"><h2>Steps</h2><span class="muted">${esc(FS.name)}</span></div><div class="steps">${FS.steps.map((s,i)=>`<div class="step"><span class="n">${i+1}</span><span class="ev">${s}</span><button class="ibtn" title="Up" onclick="mvStep(${i},-1)">↑</button><button class="ibtn" title="Down" onclick="mvStep(${i},1)">↓</button><button class="ibtn" title="Remove" onclick="rmStep(${i})">✕</button></div>`).join('')}</div>
+ <div class="actions" style="margin-top:12px"><select class="mini" id="addEv" style="max-width:190px">${evOpts}</select><button class="btn small" onclick="addStep()">+ Add step</button></div>
+ <hr style="border:0;border-top:1px solid #2b3950;margin:16px 0">
+ <div class="vars"><div><label>Conversion window</label>${sel(['1d','7d','30d'],FS.win,`FS.win=this.value;render()`).replace('class="mini"','class="field"')}</div><div><label>Count by</label>${sel(['visitors','sessions'],FS.unit,`FS.unit=this.value;render()`).replace('class="mini"','class="field"')}</div></div>
+ <div style="margin-top:8px"><label class="muted">Break down by</label><div class="seg" style="display:flex;margin-top:4px">${['none','source','device'].map(b=>`<button style="flex:1" class="${FS.by===b?'active':''}" onclick="FS.by='${b}';render()">${b==='none'?'None':b[0].toUpperCase()+b.slice(1)}</button>`).join('')}</div></div>
+ <div class="actions" style="margin-top:14px"><button class="btn" onclick="saveFunnel()">Save funnel</button></div>`)}
+ <div>${card(`<div class="sectionhead"><h2>${esc(FS.name)}</h2><span class="muted">${FS.win} window · by ${FS.unit} · simulated</span></div>${FS.steps.length<2?'<div class="mock">Add at least two steps.</div>':funnelHTML(res)}`)}${breakdown?`<div style="margin-top:16px">${breakdown}</div>`:''}</div></div>
+ ${S.funnels.length?card(`<h2 style="margin-bottom:10px">Saved funnels</h2>${table(['Name','Steps','Window',''],S.funnels.map((f,i)=>[`<b>${esc(f.name)}</b>`,f.steps.length+' steps',f.win,`<button class="btn secondary small" onclick="openFunnel(S.funnels[${i}].steps,S.funnels[${i}].name,S.funnels[${i}].win)">Open</button> <button class="ibtn" onclick="S.funnels.splice(${i},1);save();render()">✕</button>`]))}`):''}
+ <div class="note">Event names come from <b>historica_tracking_spec.md</b>. Events tagged “proposed” (Map Builder, Social) are not in the spec yet — adding them is a recommendation for the developer.</div>`}
+function openFunnel(steps,name,win){FS={...FS,steps:[...steps],name,win:win||FS.win};page='funnels';fPage='funnel';render();window.scrollTo(0,0)}
+function addStep(){FS.steps.push(document.getElementById('addEv').value);FS.name='Custom funnel';render()}
+function rmStep(i){FS.steps.splice(i,1);FS.name='Custom funnel';render()}
+function mvStep(i,d){const j=i+d;if(j<0||j>=FS.steps.length)return;[FS.steps[i],FS.steps[j]]=[FS.steps[j],FS.steps[i]];FS.name='Custom funnel';render()}
+function saveFunnel(){const n=prompt('Funnel name:',FS.name==='Custom funnel'?'':FS.name);if(!n)return;S.funnels.push({name:n,steps:[...FS.steps],win:FS.win});FS.name=n;save();render()}
+/* Testers */
+function testers(){const T=S.testers,n=T.length,by=k=>{const m={};T.forEach(t=>m[t[k]]=(m[t[k]]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+ const form=T.filter(t=>t.fb==='Google Form'||t.fb==='Both').length,iv=T.filter(t=>t.fb==='Interview'||t.fb==='Both').length,any=T.filter(t=>t.fb!=='None').length;
+ const rows=T.filter(t=>roleFilter==='All'||t.role===roleFilter);const roles=['Teacher','PhD student','Professor','Researcher','Museum / archive','Student'],srcs=['LinkedIn','Facebook','Newsletter','University list','Personal outreach','Conference'];
+ const fbT=S.tplList.findIndex(t=>t.name.includes('Google Form'));
+ return `<div class="stats five">${stat('Testers','<b>'+n+'</b>','invited & active')}${stat('Gave any feedback',any,pct(any,n)+' of testers')}${stat('Google Form',form,pct(form,n))}${stat('Interviews',iv,pct(iv,n))}${stat('No feedback yet',n-any,pct(n-any,n),1)}</div>
+ <div class="grid eq">${card(`<h2 style="margin-bottom:8px">Where testers came from</h2>${bars(by('src').map(([k,v])=>[k,Math.round(v/n*100),v]))}`)}${card(`<h2 style="margin-bottom:8px">Who the testers are</h2>${bars(by('role').map(([k,v])=>[k,Math.round(v/n*100),v]))}`)}</div>
+ <div class="grid">${card(`<div class="sectionhead"><h2>Tester list</h2><div class="actions"><select class="mini" onchange="roleFilter=this.value;render()">${['All',...roles].map(r=>`<option ${r===roleFilter?'selected':''}>${r}</option>`).join('')}</select></div></div>
+ <div class="actions" style="margin-bottom:12px"><select class="mini" id="nr">${roles.map(r=>`<option>${r}</option>`).join('')}</select><select class="mini" id="ns">${srcs.map(r=>`<option>${r}</option>`).join('')}</select><button class="btn small" onclick="addTester()">+ Add tester</button></div>
+ ${table(['ID','Role','Source','Feedback'],rows.slice(0,14).map(t=>[t.id,t.role,t.src,sel(['None','Google Form','Interview','Both'],t.fb,`setT('${t.id}',this.value)`)]))}<div class="muted" style="margin-top:8px">Showing ${Math.min(14,rows.length)} of ${rows.length}. Testers are anonymous IDs — no personal data in this demo.</div>`)}
+ ${card(`<div class="sectionhead"><h2>Recent feedback template</h2><button class="btn secondary small" onclick="editTpl(${fbT})">Edit in Templates →</button></div><div class="preview" style="font-size:12px;max-height:340px">${esc(S.tplList[fbT]?.body||'')}</div><div class="note">Pipeline: Google Form + interviews → anonymise → tag themes → rank by frequency and severity → UX backlog.</div>`)}</div>`}
+function setT(id,v){S.testers.find(t=>t.id===id).fb=v;save();render()}
+function addTester(){const n=S.testers.length+1;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,fb:'None'});save();render()}
+
+/* generic editable tables */
+const setF=(c,i,k,v)=>{S[c][i][k]=v;save();render()};
+const RES=['—','Pending','Accepted','Rejected'];
+function conferences(){const cs=S.confs,C=[...cs.keys()].filter(i=>visible(cs[i],confFilter)).sort(cmp('confs')),vis=cs.filter(c=>!c.hidden),ap=vis.filter(c=>c.applied==='Yes');
+ const cost=c=>c.costText&&c.costText!=='unknown'?esc(c.costText):c.costText==='unknown'?'?':c.cost?'€'+c.cost:'Free';
+ return `<div class="stats">${stat('Tracked conferences',vis.length,vis.filter(c=>c.isNew).length+' new from search')}${stat('Applied',ap.length,vis.filter(c=>c.applied==='Planned').length+' planned')}${stat('Accepted',vis.filter(c=>c.result==='Accepted').length,vis.filter(c=>c.result==='Pending').length+' pending')}${stat('Cost of accepted / planned','€'+fmt(vis.filter(c=>c.result==='Accepted'||c.applied==='Planned').reduce((a,c)=>a+(+c.cost||0),0)),'fees only')}</div>
+ ${card(`<div class="sectionhead"><h2>Upcoming conferences</h2><div class="actions"><select class="mini" onchange="confFilter=this.value;render()">${['All','New','Hidden'].map(x=>`<option ${x===confFilter?'selected':''}>${x}</option>`).join('')}</select><input class="field" id="cn" style="width:220px" placeholder="Conference name"><input class="field" id="cc" style="width:90px" type="number" placeholder="Cost €"><button class="btn small" onclick="addConf()">+ Add</button></div></div>
+ ${C.length?table([th('confs','name','Conference'),th('confs','focus','Focus'),th('confs','date','Date'),th('confs','deadline','Submission deadline'),th('confs','cost','Cost'),th('confs','applied','Did we apply?'),th('confs','result','Outcome')],C.map(i=>{const c=cs[i];return [(c.link&&c.link!=='#'?`<a href="${esc(c.link)}" target="_blank" rel="noopener"><b>${esc(c.name)}</b></a>`:`<b>${esc(c.name)}</b>`)+newTag('confs',i,c)+`<div class="muted">${esc(c.loc)}${c.format&&c.format!=='unknown'?' · '+esc(c.format):''}</div>${c.note?`<div class="muted" style="max-width:260px">${esc(c.note)}</div>`:''}`,esc(c.focus),esc(c.date),esc(c.deadline),cost(c),sel(['No','Planned','Yes'],c.applied,`setF('confs',${i},'applied',this.value)`),sel(RES,c.result,`setF('confs',${i},'result',this.value)`)+' '+badge(c.result)]})):'<div class="mock">No conferences yet. Open <b>Search services</b> and run the Conference search, or add one manually.</div>'}<div class="note">Found by the <b>Conference search</b> service — always verify dates, fees and deadlines on the conference site. The “Conference abstract” template is in <a href="#" style="color:#8bcaff" onclick="editTpl(S.tplList.findIndex(t=>t.type==='Conferences'));return false">Templates</a>.</div>`)}`}
+function addConf(){const n=document.getElementById('cn').value.trim();if(!n)return;S.confs.unshift({name:n,focus:'TBD',date:'2027-01-01',loc:'TBD',cost:+document.getElementById('cc').value||0,deadline:'TBD',applied:'No',result:'—'});save();render()}
+function grants(){const g=S.grants,f=g.map((x,i)=>i).filter(i=>{const x=g[i];if(x.hidden)return grantFilter==='Hidden';return grantFilter==='All'||grantFilter==='New'&&x.isNew||(grantFilter==='To apply'&&x.applied==='No')||(grantFilter==='Applied'&&x.applied==='Yes')||(grantFilter==='Accepted'&&x.result==='Accepted')});
+ return `<div class="stats">${stat('Opportunities',g.filter(x=>!x.hidden).length,g.filter(x=>x.isNew&&!x.hidden).length+' new from search')}${stat('To apply',g.filter(x=>x.applied==='No').length,'not started')}${stat('Applied',g.filter(x=>x.applied==='Yes').length,g.filter(x=>x.result==='Pending').length+' pending')}${stat('Accepted',g.filter(x=>x.result==='Accepted').length,'')}</div>
+ ${card(`<div class="sectionhead"><h2>Funding pipeline</h2><div class="actions"><select class="mini" onchange="grantFilter=this.value;render()">${['All','New','To apply','Applied','Accepted','Hidden'].map(x=>`<option ${x===grantFilter?'selected':''}>${x}</option>`).join('')}</select><label class="btn secondary small">Import bot seen.json<input type="file" accept=".json" class="hide" onchange="importSeen(this)"></label><input class="field" id="gn" style="width:180px" placeholder="Add manually"><button class="btn small" onclick="addGrant()">+ Add</button></div></div>
+ ${table([th('grants','name','Name'),th('grants','deadline','Deadline'),th('grants','sum','Sum'),th('grants','period','Period'),th('grants','oss','Open-source?'),th('grants','articles','Articles?'),'What to apply with',th('grants','applied','Applied?'),th('grants','result','Outcome')],f.sort(cmp('grants')).map(i=>{const x=g[i];return [`<a href="${esc(x.link)}" target="_blank" rel="noopener"><b>${esc(x.name)}</b></a>${newTag('grants',i,x)}<div class="muted">${esc(x.source)}</div>${x.note?`<div class="muted" style="max-width:260px">${esc(x.note)}</div>`:''}`,esc(x.deadline),esc(x.sum),esc(x.period),esc(x.oss),esc(x.articles),`<span class="muted">${esc(x.docs)}</span>`,sel(['No','Yes'],x.applied,`setF('grants',${i},'applied',this.value)`),sel(RES,x.result,`setF('grants',${i},'result',this.value)`)]}))}
+ <div class="note">New opportunities arrive from the <b>Fund search</b> service (Search services page) and are marked <b>NEW</b>: ✓ keeps, ✕ hides. Fields mirror the old Telegram message. “Import bot seen.json” merges entries from the old bot’s file.</div>`)}`}
+function addGrant(){const n=document.getElementById('gn').value.trim();if(!n)return;S.grants.unshift({name:n,source:'manual',link:'#',deadline:'TBD',sum:'TBD',period:'—',oss:'?',articles:'?',docs:'To check',applied:'No',result:'—'});save();render()}
+function importSeen(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);let a=0;Object.values(d).forEach(v=>{if(v.status==='hidden'||!v.name||S.grants.some(g=>g.name===v.name))return;S.grants.push({name:v.name,source:v.source||'bot',link:v.link||'#',deadline:v.deadline||'TBD',sum:v.sum||'TBD',period:v.period||'—',oss:v.open_source||'?',articles:v.articles||'?',docs:v.documents||'To check',applied:v.status==='applied'?'Yes':'No',result:'—'});a++});save();render();alert(a+' new opportunities imported.')}catch(e){alert('Could not read file: '+e.message)}};r.readAsText(f)}
+function academia(){const u=S.unis,st=['Prospect','Contacted','In conversation','Pilot','Declined'],wr=['Not yet','Drafted','Sent','Replied'];
+ return `<div class="stats">${stat('Universities',u.length,'on the list')}${stat('Letters sent',u.filter(x=>x.wrote==='Sent'||x.wrote==='Replied').length,u.filter(x=>x.wrote==='Drafted').length+' drafted')}${stat('Replies',u.filter(x=>x.wrote==='Replied').length,pct(u.filter(x=>x.wrote==='Replied').length,u.filter(x=>x.wrote==='Sent'||x.wrote==='Replied').length)+' reply rate')}${stat('Not contacted',u.filter(x=>x.wrote==='Not yet').length,'next to write',1)}</div>
+ ${card(`<div class="sectionhead"><h2>Universities</h2><div class="actions"><input class="field" id="un" style="width:220px" placeholder="University name"><button class="btn small" onclick="addUni()">+ Add</button></div></div>
+ ${table(['University','Department','Contact person','Email','Did we write?','Status','Last touch',''],u.map((x,i)=>[`<b>${esc(x.name)}</b><div class="muted">${esc(x.country)}</div>`,esc(x.dept),`<input class="inl" placeholder="add name" value="${esc(x.contact)}" onchange="S.unis[${i}].contact=this.value;save()">`,`<input class="inl" placeholder="add email" value="${esc(x.email)}" onchange="S.unis[${i}].email=this.value;save()">`,sel(wr,x.wrote,`setF('unis',${i},'wrote',this.value)`),sel(st,x.status,`setF('unis',${i},'status',this.value)`),x.last||'—',`<button class="btn small" onclick="draftFor(${i})">Draft letter</button>`]))}
+ ${letterCard()}<div class="note">University names and departments are suggestions to research; contact people and emails are intentionally blank — fill them in from official department pages. “Draft letter” opens the editor with the university pre-filled.</div>`)}`}
+function letterCard(kind){const ts=S.tplList.map((t,i)=>[t,i]).filter(([t])=>kind==='comm'?t.type==='Communities':t.name.startsWith('University outreach'));
+ return ts.map(([t,i])=>`<div style="margin-top:18px;border-top:1px solid #2b3950;padding-top:16px"><div class="sectionhead"><h2>Letter template — ${esc(t.name.replace('University outreach — ',''))}</h2><div class="actions"><button class="btn secondary small" onclick="navigator.clipboard?.writeText('Subject: '+S.tplList[${i}].subject+'\\n\\n'+S.tplList[${i}].body)">Copy raw</button><button class="btn secondary small" onclick="editTpl(${i})">Edit &amp; analyse →</button></div></div><div class="muted" style="margin-bottom:6px">Subject: ${esc(t.subject)}</div><div class="preview" style="max-height:300px">${esc(t.body)}</div></div>`).join('')}
+function addUni(){const n=document.getElementById('un').value.trim();if(!n)return;S.unis.unshift({name:n,country:'',dept:'',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''});save();render()}
+function draftFor(i){const x=S.unis[i];S.ctx={kind:'uni',i};S.tplVars={...S.tplVars,university:x.name,department:x.dept,contact_name:x.contact||'Professor'};S.tpl=S.tplList.findIndex(t=>t.name==='University outreach — first letter');page='templates';save();render();window.scrollTo(0,0)}
+function editTpl(i){S.tpl=Math.max(0,i);S.ctx=null;page='templates';save();render();window.scrollTo(0,0)}
+
+
+
+/* Search services */
+let SV=null,runState={},openCfg={};
+async function loadServices(){try{SV=await api('/api/services')}catch(e){if(e.message==='login')return;SV={error:e.message}}if(page==='services')render()}
+const lg=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function services(){
+ if(!SV){loadServices();return '<div class="note">Loading services…</div>'}
+ if(SV.error)return `<div class="note warn">${esc(SV.error)}</div>`;
+ return (SV.llmConfigured?'':'<div class="note warn" style="margin:0 0 14px"><b>OPENAI_API_KEY is not set</b> on the server — searches will fail until you add it in Vercel → Settings → Environment Variables.</div>')+
+ `<div class="note" style="margin:0 0 16px">A daily cron (06:00 UTC) checks the next few sources of each service, so every source is revisited every few days. New finds are added to the tables below marked <b>NEW</b>; duplicates are skipped. You can also run everything now.</div>
+ <div class="grid eq">${SV.services.map(svcCard).join('')}${card(`<div class="sectionhead"><h2>Social network search</h2><span class="status">Coming later</span></div><p>Posts, followers and clicks from Facebook, LinkedIn and the newsletter. This slot is reserved — the page “Analytics → Social” will be fed from here.</p>`)}</div>
+ ${card(`<h2 style="margin-bottom:10px">Recent runs</h2>${table(['When','Service','Task','Trigger','Found','New','Error'],SV.runs.slice(0,15).map(r=>[new Date(r.started_at).toLocaleString(),esc(r.service),esc(r.task||''),esc(r.trigger||''),r.found,r.added,r.error?`<span class="trend warn">${esc(r.error)}</span>`:'']))}`)}`}
+function svcCard(s){const items=S[s.collection]||[],nw=items.filter(x=>x.isNew&&!x.hidden).length,rs=runState[s.id]||{},page_={grants:'grants',conferences:'conferences',communities:'communities'}[s.id];
+ return card(`<div class="sectionhead"><h2>${esc(s.title)}</h2><div class="actions"><button class="btn small" ${rs.running?'disabled':''} onclick="runAll('${s.id}')">${rs.running?'Running…':'▶ Run all ('+s.tasks.length+')'}</button><button class="btn secondary small" onclick="go('${page_}')">Open table →</button></div></div>
+ <p>${esc(s.description)}</p>
+ <div class="muted" style="margin:10px 0">${items.filter(x=>!x.hidden).length} in table · <b style="color:#70e0b7">${nw} new</b> · last run ${s.lastRun?new Date(s.lastRun).toLocaleString():'never'}${s.customized?' · <span class="tag">custom config</span>':''}</div>
+ <div id="prog-${s.id}">${progHtml(s.id)}</div>
+ <details ${openCfg[s.id]?'open':''} ontoggle="openCfg['${s.id}']=this.open"><summary class="muted" style="cursor:pointer">Sources, queries and profile (${s.tasks.length} tasks)</summary>
+  <div style="margin-top:10px">${s.tasks.map((t,i)=>`<div class="barrow" style="grid-template-columns:1fr auto;margin:6px 0"><span>${esc(t)}</span><button class="btn secondary small" onclick="runAll('${s.id}',${i})">Run</button></div>`).join('')}</div>
+  <label class="muted">Profile sent to the model</label><textarea class="field" id="cfg-p-${s.id}" style="min-height:140px;font-size:11.5px">${esc(s.profile)}</textarea>
+  <label class="muted">Free-text queries (one per line)</label><textarea class="field" id="cfg-q-${s.id}" style="min-height:100px;font-size:11.5px">${esc(s.queries.join('\n'))}</textarea>
+  <label class="muted">Sources (JSON: name, check_url, notes)</label><textarea class="field" id="cfg-s-${s.id}" style="min-height:140px;font-size:11.5px">${esc(JSON.stringify(s.sources,null,1))}</textarea>
+  <div class="actions" style="margin-top:8px"><button class="btn small" onclick="saveCfg('${s.id}')">Save config</button><button class="btn secondary small" onclick="resetCfg('${s.id}')">Reset to defaults</button></div></details>`)}
+function progHtml(id){const r=runState[id];if(!r)return '';const pc=r.total?Math.round((r.done||0)/r.total*100):0;
+ return `${r.running?`<div class="progress" style="height:8px;border-radius:8px;background:#2a3951;overflow:hidden"><div style="height:100%;width:${pc}%;background:#63c8a6"></div></div><div class="muted" style="margin:4px 0">Checking: ${lg(r.cur||'')} (${r.done||0}/${r.total})</div>`:''}${(r.log||[]).slice(-8).map(l=>`<div class="muted">${l}</div>`).join('')}`}
+function paint(id){const e=document.getElementById('prog-'+id);if(e)e.innerHTML=progHtml(id)}
+async function runAll(id,only){const s=SV.services.find(x=>x.id===id),idxs=only!=null?[only]:s.tasks.map((_,i)=>i);
+ runState[id]={running:true,log:[],total:idxs.length,done:0};render();
+ for(const i of idxs){runState[id].cur=s.tasks[i];paint(id);
+  try{const r=await api('/api/run',{method:'POST',body:{service:id,task:i}});
+   runState[id].log.push(r.error?`⚠ ${lg(s.tasks[i])} — ${lg(r.error)}`:r.skipped?`↷ ${lg(s.tasks[i])} — skipped (already applied/hidden)`:`✓ ${lg(s.tasks[i])} — ${r.added} new of ${r.found} found${r.names&&r.names.length?': '+lg(r.names.slice(0,3).join('; ')):''}`)}
+  catch(e){if(e.message==='login')return;runState[id].log.push(`⚠ ${lg(s.tasks[i])} — ${lg(e.message)}`)}
+  runState[id].done++;paint(id)}
+ runState[id].running=false;
+ try{await refreshFromServer();SV=await api('/api/services')}catch(e){}
+ render()}
+async function saveCfg(id){try{const sources=JSON.parse(document.getElementById('cfg-s-'+id).value);
+ await api('/api/services',{method:'PUT',body:{service:id,profile:document.getElementById('cfg-p-'+id).value,queries:document.getElementById('cfg-q-'+id).value.split('\n').map(x=>x.trim()).filter(Boolean),sources}});
+ SV=await api('/api/services');render()}catch(e){alert('Could not save: '+e.message)}}
+async function resetCfg(id){if(!confirm('Reset this service to its default sources, queries and profile?'))return;await api('/api/services?service='+id,{method:'DELETE'});SV=await api('/api/services');render()}
+
+/* Communities */
+const CGOAL=['Acquisition','Feedback','Partnership'],CST=['Not started','Joined','Contacted','Posted','Replied','Partnership'],CPR=['Very high','High','Medium'];
+const PLAN=[['r/historyteachers','Publish one classroom-oriented example','5–10 teacher responses'],['r/Maps','Share a map exploration example','Initial traffic and feedback'],['H-Maps','Submit a project introduction','Academic feedback'],['EuroClio','Contact regional coordinators','2–3 potential teaching pilots'],['NCHE Discord','Join discussions; request permission to share','Teacher testers'],['Geovistory','Introduce Map Builder beta','Technical testers'],['UK–Ireland DH list','Share a project introduction','Research contacts']];
+function communities(){const c=S.comms,sum=k=>c.reduce((a,x)=>a+(+x[k]||0),0),idx=[...c.keys()].filter(i=>visible(c[i],commFilter)).sort(cmp('comms')),active=c.filter(x=>x.status!=='Not started').length;
+ const num=(i,k)=>`<input class="inl" type="number" min="0" style="width:62px" value="${c[i][k]}" onchange="S.comms[${i}][k]=+this.value;save();render()">`.replace('[k]',`['${k}']`);
+ return `<div class="stats five">${stat('Communities',c.length,c.filter(x=>x.priority==='Very high').length+' very high priority')}${stat('Started',active,pct(active,c.length)+' of list')}${stat('Responses',sum('responses'),'replies / comments')}${stat('Visits generated',fmt(sum('visits')),'from UTM links')}${stat('Testers recruited',sum('testers'),'Map Builder beta')}</div>
+ ${card(`<div class="sectionhead"><h2>Community tracker</h2><div class="actions"><select class="mini" onchange="commFilter=this.value;render()">${['All','New','Hidden'].map(x=>`<option ${x===commFilter?'selected':''}>${x}</option>`).join('')}</select><input class="field" id="cmn" style="width:200px" placeholder="Community name"><input class="field" id="cmu" style="width:200px" placeholder="URL"><button class="btn small" onclick="addComm()">+ Add</button></div></div>
+ ${table([th('comms','name','Community'),th('comms','audience','Audience'),th('comms','priority','Priority'),th('comms','goal','Goal'),'Best approach','Promotion rules','Contact person',th('comms','status','Status'),th('comms','date','Contacted'),th('comms','responses','Responses'),th('comms','visits','Visits'),th('comms','testers','Testers'),''],idx.map(i=>{const x=c[i];return [`<a href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.name)}</b></a>${newTag('comms',i,x)}<div class="muted">${esc(x.platform)}${x.size&&x.size!=='unknown'?' · '+esc(x.size):''}</div>`,esc(x.audience),sel(CPR,x.priority,`setF('comms',${i},'priority',this.value)`),sel(CGOAL,x.goal,`setF('comms',${i},'goal',this.value)`),`<span class="muted">${esc(x.approach)}</span>`,`<input class="inl" placeholder="add rules" value="${esc(x.rules)}" onchange="S.comms[${i}].rules=this.value;save()">`,`<input class="inl" style="width:120px" placeholder="add contact" value="${esc(x.contact)}" onchange="S.comms[${i}].contact=this.value;save()">`,sel(CST,x.status,`setF('comms',${i},'status',this.value)`),`<input class="inl" type="date" style="width:128px" value="${esc(x.date)}" onchange="S.comms[${i}].date=this.value;save()">`,num(i,'responses'),num(i,'visits'),num(i,'testers'),`<button class="btn small" onclick="draftComm(${i})">Draft post</button>`]}))}
+ <div class="note">Goals: <b>Acquisition</b> — invite people to explore the maps; <b>Feedback</b> — recruit testers (present Map Builder as a beta, not a launched product); <b>Partnership</b> — teachers and researchers who could use Historica in teaching. Reddit and forums: contribute and ask for feedback; avoid repeated promotional posts. Use UTM links per community so “Visits” can be read from analytics.</div>`)}
+ <div class="grid eq" style="margin-top:16px">${card(`<h2 style="margin-bottom:10px">First outreach campaign</h2>${table(['Channel','First action','Target (suggested)'],PLAN.map(r=>r.map(esc)))}<div class="note">Start small and measurable. Top three: r/historyteachers, EuroClio, H-Maps — classroom use, educational partnerships, academic credibility.</div>`)}${card(`<h2 style="margin-bottom:6px">Message templates</h2><p class="muted" style="margin-bottom:4px">Offer a specific use case and ask for a specific kind of feedback. For lecturers: a 15–20 min demo and a small teaching pilot.</p>${letterCard('comm')}`)}</div>`}
+function addComm(){const n=document.getElementById('cmn').value.trim();if(!n)return;S.comms.unshift({name:n,platform:'',audience:'',url:document.getElementById('cmu').value.trim()||'#',priority:'Medium',approach:'',goal:'Acquisition',rules:'',contact:'',date:'',status:'Not started',responses:0,visits:0,testers:0});save();render()}
+function draftComm(i){const x=S.comms[i];S.ctx={kind:'comm',i};S.tplVars={...S.tplVars,community:x.name};S.tpl=S.tplList.findIndex(t=>t.name===(/Reddit|Forum|Discord/i.test(x.platform)?'Community post — explore changing borders':'Community message — educator demo & pilot'));page='templates';save();render();window.scrollTo(0,0)}
+
+/* Templates & letters */
+const DEFVARS={sender_name:'Anna',website:'https://www.historica.org',form_link:'[Google Form link]',tester_count:'40',conference:'',grant_name:'',task_topic:'the Silk Road trade routes in 1200 CE',map_link:'https://map.historica.org/',use_case:'how European borders changed from 1700 to 2000',community:''};
+const vars=t=>[...new Set([...(t.subject+' '+t.body).matchAll(/\{\{(\w+)\}\}/g)].map(m=>m[1]))];
+const val=k=>S.tplVars[k]??DEFVARS[k]??'';
+const merge=(s,mark)=>s.replace(/\{\{(\w+)\}\}/g,(_,k)=>val(k)?esc(val(k)):(mark?`<mark>{{${k}}}</mark>`:`{{${k}}}`));
+const FILLER=[[/I hope this (email|message) finds you well[.,]?\s*/gi,''],[/\bI was wondering if\b/gi,'Would'],[/\bkindly\b\s*/gi,''],[/\bvery\s+/gi,''],[/\breally\s+/gi,''],[/\bjust\s+/gi,''],[/\bI am writing to you because\b/gi,'I am writing because']];
+function analyze(t){const txt=merge(t.body,false).replace(/&#39;/g,"'").replace(/&amp;/g,'&'),words=(txt.match(/\S+/g)||[]).length,sents=txt.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>2),avg=sents.length?words/sents.length:0,unf=vars(t).filter(k=>!val(k)),iss=[];let score=100;
+ const add=(lvl,m,p)=>{iss.push([lvl,m]);score-=p};
+ if(unf.length)add('bad',`${unf.length} placeholder(s) still empty: ${unf.map(k=>'{{'+k+'}}').join(', ')}`,8*unf.length);else iss.push(['ok','All placeholders are filled.']);
+ if(t.type!=='Testers'||t.name.includes('invitation')){if(words>220)add('warn',`Long for a cold message (${words} words). Aim for under 180.`,12);else if(words<60&&t.type==='Academia')add('warn',`Very short (${words} words) — add why this university.`,8);else iss.push(['ok',`Length is fine (${words} words).`])}
+ if(avg>24)add('warn',`Sentences are long on average (${avg.toFixed(0)} words). Split a few.`,8);
+ const long=sents.filter(s=>s.split(/\s+/).length>32);if(long.length)add('warn',`${long.length} very long sentence(s) — e.g. “${long[0].slice(0,70)}…”`,6);
+ const fl=FILLER.filter(([r])=>{r.lastIndex=0;return r.test(txt)});if(fl.length)add('warn','Filler phrases found — use “Apply quick fixes”.',6*fl.length);
+ if(/(Academia|Grants)/.test(t.type)&&!/\?/.test(txt)&&!/would welcome|find attached/i.test(txt))add('bad','No clear ask / call to action (e.g. a question or a request for a call).',12);
+ if(/(Academia|Testers)/.test(t.type)&&!/^(Dear|Hello|Hi)\b/m.test(txt)&&t.name.includes('letter')||/follow-up|invitation/.test(t.name)&&!/^(Dear|Hello|Hi)\b/m.test(txt))add('warn','No greeting line found.',5);
+ if(/\b(was|were|is|are|been|being)\s+\w+ed\b/.test(txt))add('warn','Passive voice detected — consider active phrasing.',3);
+ if(t.subject&&t.subject.length>70)add('warn','Subject line is long (>70 characters).',4);
+ return {words,sents:sents.length,read:Math.max(1,Math.round(words/200)),iss,score:Math.max(0,score),unf}}
+function templates(){const L=S.tplList,t=L[S.tpl]||L[0],cm=S.ctx&&S.ctx.kind==='comm',c=S.ctx&&(cm?S.comms[S.ctx.i]:S.unis[S.ctx.i]);
+ return `${c?`<div class="note" style="margin:0 0 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><span>Drafting for <b>${esc(c.name)}</b> — ${esc(cm?c.audience:c.dept)}</span><span class="actions">${cm?`<button class="btn small" onclick="markUni('Contacted')">Mark contacted</button><button class="btn small" onclick="markUni('Posted')">Mark posted</button>`:`<button class="btn small" onclick="markUni('Drafted')">Mark drafted</button><button class="btn small" onclick="markUni('Sent')">Mark sent</button>`}<button class="btn secondary small" onclick="S.ctx=null;render()">Close</button></span></div>`:''}
+ <div class="grid" style="grid-template-columns:230px 1.3fr 1fr">
+ ${card(`<div class="sectionhead"><h2>Library</h2><button class="btn secondary small" onclick="newTpl()">+ New</button></div><div class="tpls">${L.map((x,i)=>`<button class="tpl ${i===S.tpl?'active':''}" onclick="S.tpl=${i};render()"><b>${esc(x.name)}</b><span>${x.type}</span></button>`).join('')}</div>`)}
+ ${card(`<div class="sectionhead"><h2>Editor</h2><div class="actions"><button class="btn secondary small" onclick="quickFix()">Apply quick fixes</button><button class="btn secondary small" onclick="resetTpl()">Reset template</button></div></div>
+ <label class="muted">Subject / title</label><input class="field" id="tsub" style="margin:4px 0 10px" value="${esc(t.subject)}" oninput="S.tplList[S.tpl].subject=this.value;refreshTpl()">
+ <label class="muted">Body — use {{placeholders}}</label><textarea class="field" id="tbody" style="margin-top:4px" oninput="S.tplList[S.tpl].body=this.value;refreshTpl()">${esc(t.body)}</textarea>`)}
+ <div id="tplSide"></div></div>`}
+function refreshTpl(){save();const t=S.tplList[S.tpl],a=analyze(t),vs=vars(t),col=a.score>=80?'#173c37;color:#70e0b7':a.score>=60?'#47371f;color:#f1c477':'#4a2630;color:#f08a8a';
+ document.getElementById('tplSide').innerHTML=card(`<h3>Variables</h3><div class="vars">${vs.map(k=>`<div><label>${k}</label><input class="field" value="${esc(val(k))}" oninput="S.tplVars['${k}']=this.value;refreshPrev()"></div>`).join('')||'<span class="muted">No placeholders.</span>'}</div>
+ <h3 style="margin-top:16px">Preview</h3><div class="preview" id="tplPrev"></div>
+ <div class="actions" style="margin-top:10px"><button class="btn small" onclick="copyTpl()">Copy text</button>${S.ctx&&S.ctx.kind!=='comm'?`<button class="btn secondary small" onclick="mailTpl()">Open in mail app</button>`:''}</div>
+ <h3 style="margin-top:18px">Analysis</h3><div class="score"><div class="ring" style="background:${col}">${a.score}</div><div class="muted">${a.words} words · ${a.sents} sentences · ~${a.read} min read</div></div><div id="tplIss">${a.iss.map(([l,m])=>`<div class="issue ${l==='ok'?'ok':l==='bad'?'bad':''}">${esc(m)}</div>`).join('')}</div>`);refreshPrev()}
+function refreshPrev(){const t=S.tplList[S.tpl],p=document.getElementById('tplPrev');if(!p)return;p.innerHTML=`<span class="subj">${merge(esc(t.subject).replace(/&#39;/g,"'"),true)}</span>${merge(esc(t.body),true)}`;save()}
+function plain(){const t=S.tplList[S.tpl];return {subject:merge(t.subject,false).replace(/&amp;/g,'&').replace(/&#39;/g,"'"),body:merge(t.body,false).replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')}}
+function copyTpl(){const p=plain();navigator.clipboard?.writeText('Subject: '+p.subject+'\n\n'+p.body).then(()=>alert('Copied to clipboard.'),()=>alert('Copy failed — select the preview text manually.'))}
+function mailTpl(){const p=plain(),x=S.unis[S.ctx.i];location.href=`mailto:${encodeURIComponent(x.email)}?subject=${encodeURIComponent(p.subject)}&body=${encodeURIComponent(p.body)}`}
+function markUni(w){const day=new Date().toISOString().slice(0,10);if(S.ctx.kind==='comm'){const x=S.comms[S.ctx.i];x.status=w;x.date=day}else{const x=S.unis[S.ctx.i];x.wrote=w;if(w==='Sent'){x.status='Contacted';x.last=day}}save();render()}
+function quickFix(){const t=S.tplList[S.tpl];let b=t.body;FILLER.forEach(([r,s])=>b=b.replace(r,s));b=b.replace(/[ \t]{2,}/g,' ').replace(/\n[ \t]+/g,'\n');t.body=b;save();document.getElementById('tbody').value=b;refreshTpl()}
+function resetTpl(){const d=TPL(),i=d.findIndex(x=>x.name===S.tplList[S.tpl].name);if(i<0){alert('Custom templates have no default.');return}if(confirm('Reset this template to the original text?')){S.tplList[S.tpl]=d[i];save();render()}}
+function newTpl(){const n=prompt('Template name:');if(!n)return;S.tplList.push({name:n,type:'Custom',subject:'',body:'Dear {{contact_name}},\n\n\n\nBest regards,\n{{sender_name}}'});S.tpl=S.tplList.length-1;save();render()}
+
+/* ---------- shell ---------- */
+const VIEWS={services,analytics,funnels,testers,conferences,grants,academia,communities,templates};
+function go(p){page=p;render();window.scrollTo(0,0)}
+function render(){const cnt={testers:S.testers.length,conferences:S.confs.length,grants:S.grants.length,academia:S.unis.length,communities:S.comms.length,services:[...S.grants,...S.confs,...S.comms].filter(x=>x.isNew&&!x.hidden).length};
+ document.getElementById('nav').innerHTML=PAGES.map(([id,ic,l])=>`<button class="nav ${page===id?'active':''}" onclick="go('${id}')"><b>${ic}</b><span class="t">${l}</span>${cnt[id]?`<span class="cnt">${cnt[id]}</span>`:''}</button>`).join('');
+ const [e,t,s]=META[page];document.getElementById('eyebrow').textContent=e;document.getElementById('title').textContent=t;document.getElementById('subtitle').textContent=s;
+ document.getElementById('content').innerHTML=VIEWS[page]();if(page==='templates')refreshTpl()}
+boot();
+</script>
+</body>
+</html>
