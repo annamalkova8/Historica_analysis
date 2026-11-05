@@ -53,4 +53,4 @@ Function limit: each `/api/run` call checks one source (typically 10–40 s). `m
 ## Notes
 - One shared password protects the whole app (cookie, 30 days). Add real auth before inviting others.
 - Search results are AI-generated from web search: verify deadlines, sums and fees on the source page before acting.
-- Re-importing the old bot's `data/seen.json` works from the Grants page (“Import bot seen.json”).
+- The old bot's history (`funds/seen-data.js`, a snapshot of `historica-grant-bot/data/seen.json`) is imported automatically by Grants → ↻ Update (idempotent; applied/hidden carried over). If the bot keeps running elsewhere, copy its newer `seen.json` entries into that file and redeploy.

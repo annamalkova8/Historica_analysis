@@ -8,7 +8,7 @@ Everything the hub stores, in one place. Verified against `lib/db.js`, `lib/regi
 |---|---|---|
 | **Postgres (Neon)** | All hub data: 3 tables (`records`, `settings`, `runs`) | Vercel → Storage; `DATABASE_URL` |
 | Browser `localStorage` | Only UI convenience (`historica_hub_ui_v1`: selected template, template variables, letter context). Not data. | each viewer's browser |
-| Old bot `historica-grant-bot/data/seen.json` | Old Telegram bot memory. **Not deployed.** Can be imported once via Grants → "Import bot seen.json". | local file |
+| Old bot `historica-grant-bot/data/seen.json` | Old Telegram bot memory. The bot itself is not deployed (its logic lives in `funds/`). A snapshot of its history is bundled as `funds/seen-data.js` and **imported automatically** (rows get `found: "bot"`) when you press Grants → ↻ Update. | `funds/seen-data.js` → `records` |
 | `social_analysis/` (`fb.py`, `linkedin.py`) | Social service — **no database yet** (to be built; will get its own `kind`s or tables) | — |
 
 There are only **three SQL tables**. Almost all business data is stored in one generic table, `records`, as JSON — one row per table row you see in the UI, told apart by `kind`.
@@ -162,7 +162,7 @@ Jira             ──/api/jira (POST) · daily cron──────▶ recor
 Browser load     ◀──GET /api/state──────────────────── all records + seeded flags
 ```
 
-**↻ Update buttons:** Conferences → Conference search · Grants → Fund search · Communities → Community search · Rivals → Rivals analysis · Project progress / Team performance → Jira sync. Academic Outreach and Map Builder Testers are manual tables (no service).
+**↻ Update buttons:** Conferences → Conference search · Grants → bot-history import (`POST /api/seen`) + Fund search · Communities → Community search · Rivals → Rivals analysis · Project progress / Team performance → Jira sync. Academic Outreach and Map Builder Testers are manual tables (no service).
 
 ## 5. Not in the database (yet)
 

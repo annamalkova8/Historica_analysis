@@ -122,6 +122,15 @@ assert.deepEqual(st.json.data.jira.map((x) => x.key), ['H-2']);
 assert.equal((await call('jira', { headers: auth })).json.last.count, 1);
 setJira(null);
 
+// old bot history import: automatic, idempotent, statuses carried over
+let sn = await call('seen', { method: 'POST', headers: auth });
+assert.equal(sn.json.total, 40); assert.equal(sn.json.added, 40, JSON.stringify(sn.json));
+sn = await call('seen', { method: 'POST', headers: auth });
+assert.equal(sn.json.added, 0); assert.equal(sn.json.updated, 0);
+st = await call('state', { headers: auth });
+assert.equal(st.json.data.grants.filter((x) => x.found === 'bot' && x.applied === 'Yes').length, 7);
+assert.equal(st.json.data.grants.filter((x) => x.found === 'bot' && x.hidden).length, 7);
+assert.equal((await call('seen', { headers: auth })).code, 405);
 // cron: needs secret, rotates cursor
 assert.equal((await call('cron')).code, 401);
 setLlm(async () => '[]');
