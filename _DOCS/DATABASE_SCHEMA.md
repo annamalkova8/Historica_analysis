@@ -112,7 +112,7 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 | `isNew`, `hidden`, `found`, `firstSeen` | flags (see above) |
 
 ### `confs`
-`name`, `focus`, `date` (YYYY-MM-DD or text), `loc`, `format` (`in-person`/`online`/`hybrid`/`unknown`), `deadline` (CFP), `costText` (as stated), `cost` (number, €), `link`, `note`, `source`, `applied` (`No`/`Planned`/`Yes`), `result` (`—`/`Pending`/`Accepted`/`Rejected`), flags.
+`name`, `focus`, `date` (YYYY-MM-DD or text), `loc`, `country` (optional; if empty the UI takes the last part of `loc`), `format` (`in-person`/`online`/`hybrid`/`unknown`), `deadline` (CFP), `costText` (as stated), `cost` (number, €), `link`, `note`, `source`, `applied` (`No`/`Planned`/`Yes`), `result` (`—`/`Pending`/`Accepted`/`Rejected`), flags.
 
 ### `comms`
 `name`, `platform`, `audience`, `url`, `priority` (`Very high`/`High`/`Medium`), `approach`, `goal` (`Acquisition`/`Feedback`/`Partnership`), `rules`, `size`, `note`, `source`, `contact`, `date` (last contacted), `status` (`Not started`/`Joined`/`Contacted`/`Posted`/`Replied`/`Partnership`), `responses`, `visits`, `testers` (numbers), flags.

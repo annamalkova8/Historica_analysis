@@ -41,6 +41,7 @@ For each conference output a JSON object with exactly these fields:
 - "link": direct URL to the conference or its call for papers page
 - "start_date": start date as YYYY-MM-DD if known (else the best text, e.g. "June 2027")
 - "location": city and country, or "online"
+- "country": country name only in English (e.g. "Germany", "United States"), or "Online"
 - "format": "in-person" | "online" | "hybrid" | "unknown"
 - "cfp_deadline": submission/proposal deadline as YYYY-MM-DD, "none" if no call for papers, or "unknown"
 - "cost": registration fee as stated (e.g. "EUR 350", "free") or "unknown"
@@ -77,7 +78,7 @@ Find conferences that fit the profile. Follow the output format exactly.`;
   similar: sameConf,
   toRecord(it, taskName) {
     return {
-      name: str(it.name), focus: str(it.topics, ''), date: str(it.start_date), loc: str(it.location),
+      name: str(it.name), focus: str(it.topics, ''), date: str(it.start_date), loc: str(it.location), country: str(it.country, ''),
       format: str(it.format), deadline: str(it.cfp_deadline), costText: str(it.cost), cost: money(it.cost),
       link: str(it.link, '#'), note: str(it.relevance_note, ''), source: taskName, applied: 'No', result: '—',
     };
