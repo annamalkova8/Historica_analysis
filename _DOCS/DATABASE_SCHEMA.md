@@ -61,12 +61,12 @@ No foreign keys: `runs.service` and `records.kind` are plain text. Indexes: `rec
 |---|---|---|
 | `seeded` | `true` | The first-launch demo data was uploaded (universities, communities, templates, first grants). |
 | `seeded_kinds` | `["rivals","rivalDirs","mapq","roadmap"]` | Collections added later that were already seeded once, so deleted rows do not come back. |
-| `service:<id>` | `{profile?, sources?, queries?}` | Edits made in Search services → "Sources, queries and profile". `{}` = defaults. `<id>` = grants / conferences / communities / rivals. |
+| `service:<id>` | `{profile?, sources?, queries?}` | Overrides saved through `PUT /api/services` (the Search services page that edited them was removed; code defaults apply unless set). `{}` = defaults. `<id>` = grants / conferences / communities / rivals. |
 | `cursor:<id>` | integer | Daily cron position: which source each service checks next. |
 | `jira:last` | `{at, count}` | Time and size of the last Jira sync. |
 
 ### `runs` (log of every search/sync)
-One row per source check or Jira sync. `found` = items returned; `added` = new rows (+ refreshed rows for rivals). `error` is filled when it failed. The UI shows the latest 15 on Search services → Recent runs.
+One row per source check or Jira sync. `found` = items returned; `added` = new rows (+ refreshed rows for rivals). `error` is filled when it failed. Not shown in the UI any more (Search services page removed); query the table directly.
 
 ---
 
@@ -84,8 +84,8 @@ One row per source check or Jira sync. `found` = items returned; `added` = new r
 | `unis` | Academic Outreach | UI only | — | No search service (manual). |
 | `testers` | Map Builder Testers | UI only | — | No search service (manual). |
 | `tplList` | Templates & Letters | UI only | — | Seeded with the built-in templates. |
-| `funnels` | Funnels | UI only | — | Saved funnels. |
-| `jira` | Project progress, Team performance | **Jira sync only** (read-only for the browser) | `key` = issue key | Full re-sync: rows no longer returned by the JQL are deleted. |
+| `funnels` | Analytics → Funnels | UI only | — | Saved funnels. |
+| `jira` | Project progress (Roadmap + Jira analytics tabs) | **Jira sync only** (read-only for the browser) | `key` = issue key | Full re-sync: rows no longer returned by the JQL are deleted. |
 
 *Dedupe keys:* `normName` = lower-case, letters/digits only, single spaces. `normUrl` = lower-case, no `https://www.`, no query/hash, no trailing slash.
 
@@ -157,12 +157,12 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 
 ```
 Browser (edits)  ──POST /api/sync (only changed rows)──▶ records   [kinds in SYNCABLE; not 'jira']
-Search services  ──/api/run, /api/cron (OpenAI + web search)─▶ records (new rows) · runs
+Update buttons    ──/api/run, /api/cron (OpenAI + web search)─▶ records (new rows) · runs
 Jira             ──/api/jira (POST) · daily cron──────▶ records kind 'jira' (full re-sync) · runs · settings jira:last
 Browser load     ◀──GET /api/state──────────────────── all records + seeded flags
 ```
 
-**↻ Update buttons:** Conferences → Conference search · Grants → bot-history import (`POST /api/seen`) + Fund search · Communities → Community search · Rivals → Rivals analysis · Project progress / Team performance → Jira sync. Academic Outreach and Map Builder Testers are manual tables (no service).
+**↻ Update buttons:** Conferences → Conference search · Grants → bot-history import (`POST /api/seen`) + Fund search · Communities → Community search · Rivals → Rivals analysis · Project progress → Jira sync. Academic Outreach and Map Builder Testers are manual tables (no service).
 
 ## 5. Not in the database (yet)
 

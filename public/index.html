@@ -322,15 +322,14 @@ function funnelHTML(res){const t=res[0].c;return res.map((s,i)=>{const prev=i?re
 const miniFunnel=(steps,title)=>card(`<div class="sectionhead"><h2>${title} <span class="tag">needs event tracking</span></h2><button class="btn secondary small" onclick="openFunnel(${JSON.stringify(steps).replace(/"/g,'&quot;')},'${esc(title)}')">Open in Funnel Builder →</button></div>${funnelHTML(computeFunnel(steps,'7d'))}`);
 
 /* ---------- pages ---------- */
-const PAGES=[['analytics','▥','Analytics'],['progress','◔','Project progress'],['team','☷','Team performance'],['services','⌕','Search services'],['funnels','⫶','Funnels'],['testers','♙','Map Builder Testers'],['conferences','▦','Conferences'],['grants','◇','Grants & Funding'],['academia','◎','Academic Outreach'],['communities','◉','Communities'],['rivals','⚔','Rivals analysis'],['templates','✎','Templates & Letters']];
-const META={progress:['Roadmap & delivery','Project progress','Roadmap to the best open maps and the most popular tool among scientists — with live progress from Jira.'],team:['Jira','Team performance','What the team resolves, what is open or overdue, and how fast work moves — from Jira.'],rivals:['Competitive intelligence','Rivals analysis','Who else makes historical maps, what is new, what we can take — and where Historica is better or worse.'],services:['Automation','Search services','AI pipelines that look for funds, conferences and communities — manually or on a daily schedule.'],analytics:['Dashboards','Analytics','What we have today, and what we expect once event tracking is live.'],funnels:['Mixpanel-style, specific to Historica','Funnels','Build funnels from the tracking-spec events and compare segments.'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
+const PAGES=[['analytics','▥','Analytics'],['progress','◔','Project progress'],['testers','♙','Map Builder Testers'],['conferences','▦','Conferences'],['grants','◇','Grants & Funding'],['academia','◎','Academic Outreach'],['communities','◉','Communities'],['rivals','⚔','Rivals analysis'],['templates','✎','Templates & Letters']];
+const META={progress:['Roadmap & Jira','Project progress','Roadmap to the best open maps and the most popular tool among scientists — plus Jira analytics: delivery and team performance.'],rivals:['Competitive intelligence','Rivals analysis','Who else makes historical maps, what is new, what we can take — and where Historica is better or worse.'],analytics:['Dashboards','Analytics','What we have today, and what we expect once event tracking is live.'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
 
 /* Analytics */
-function analytics(){const exp=aMode==='expected';
- const head=`<div class="toolbar" style="margin-top:0"><div class="tabs">${[['website','Website'],['map','Map'],['social','Social & Newsletter'],['publicity','Publicity'],['builder','Map Builder users']].map(([k,l])=>`<button class="tab ${aTab===k?'active':''}" onclick="aTab='${k}';render()">${l}</button>`).join('')}</div>
- <div class="seg"><button class="${!exp?'active':''}" onclick="aMode='now';render()">Right now</button><button class="${exp?'active':''}" onclick="aMode='expected';render()">What we expect</button></div></div>
- <div class="note" style="margin:0 0 14px">${exp?'<b>Expected version</b> — funnels and engagement metrics that become possible after the events from the tracking spec (P0) are implemented. Values are simulated.':'<b>Right now</b> — only what is measured today: visitors, followers, subscribers, content counts. Followers/subscribers/articles/authors follow the brief; other numbers are illustrative.'}</div>`;
- return head+({website,map:mapTab,social,publicity,builder}[aTab])(exp)}
+function analytics(){const exp=aMode==='expected',fn=aTab==='funnels';
+ const tabs=`<div class="tabs">${[['website','Website'],['map','Map'],['social','Social & Newsletter'],['publicity','Publicity'],['builder','Map Builder users'],['funnels','Funnels']].map(([k,l])=>`<button class="tab ${aTab===k?'active':''}" onclick="aTab='${k}';render()">${l}</button>`).join('')}</div>`;
+ const head=`<div class="toolbar" style="margin-top:0">${tabs}${fn?'':`<div class="seg"><button class="${!exp?'active':''}" onclick="aMode='now';render()">Right now</button><button class="${exp?'active':''}" onclick="aMode='expected';render()">What we expect</button></div>`}</div>`+(fn?'':`<div class="note" style="margin:0 0 14px">${exp?'<b>Expected version</b> — funnels and engagement metrics that become possible after the events from the tracking spec (P0) are implemented. Values are simulated.':'<b>Right now</b> — only what is measured today: visitors, followers, subscribers, content counts. Followers/subscribers/articles/authors follow the brief; other numbers are illustrative.'}</div>`);
+ return fn?head+funnels():head+({website,map:mapTab,social,publicity,builder}[aTab])(exp)}
 function website(exp){const v=series(1,12,8200,12840),m=series(2,12,3100,8420);
  let h=`<div class="stats">${stat('Website visitors · 30d','12,840','↑ 14% vs prev 30d')}${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Social followers','20,000+','FB + LinkedIn')}${stat('Newsletter','5,000+','subscribers')}</div>
  <div class="grid">${card(`<div class="sectionhead"><h2>Weekly visitors</h2></div>${line([{name:'Website',d:v},{name:'Map',d:m}])}`)}${card(`<h2 style="margin-bottom:8px">Traffic sources</h2>${bars([['Organic search',38],['Direct',22],['Social',18],['Newsletter',12],['Referral',10]])}`)}</div>`;
@@ -371,7 +370,7 @@ function funnels(){const seg=SEGS[FS.by];
  <div>${card(`<div class="sectionhead"><h2>${esc(FS.name)}</h2><span class="muted">${FS.win} window · by ${FS.unit} · simulated</span></div>${FS.steps.length<2?'<div class="mock">Add at least two steps.</div>':funnelHTML(res)}`)}${breakdown?`<div style="margin-top:16px">${breakdown}</div>`:''}</div></div>
  ${S.funnels.length?card(`<h2 style="margin-bottom:10px">Saved funnels</h2>${table(['Name','Steps','Window',''],S.funnels.map((f,i)=>[`<b>${esc(f.name)}</b>`,f.steps.length+' steps',f.win,`<button class="btn secondary small" onclick="openFunnel(S.funnels[${i}].steps,S.funnels[${i}].name,S.funnels[${i}].win)">Open</button> <button class="ibtn" onclick="S.funnels.splice(${i},1);save();render()">✕</button>`]))}`):''}
  <div class="note">Event names come from <b>historica_tracking_spec.md</b>. Events tagged “proposed” (Map Builder, Social) are not in the spec yet — adding them is a recommendation for the developer.</div>`}
-function openFunnel(steps,name,win){FS={...FS,steps:[...steps],name,win:win||FS.win};page='funnels';fPage='funnel';render();window.scrollTo(0,0)}
+function openFunnel(steps,name,win){FS={...FS,steps:[...steps],name,win:win||FS.win};page='analytics';aTab='funnels';fPage='funnel';render();window.scrollTo(0,0)}
 function addStep(){FS.steps.push(document.getElementById('addEv').value);FS.name='Custom funnel';render()}
 function rmStep(i){FS.steps.splice(i,1);FS.name='Custom funnel';render()}
 function mvStep(i,d){const j=i+d;if(j<0||j>=FS.steps.length)return;[FS.steps[i],FS.steps[j]]=[FS.steps[j],FS.steps[i]];FS.name='Custom funnel';render()}
@@ -579,7 +578,7 @@ const SEED={
 const NEWK=['rivals','rivalDirs','mapq','roadmap'];
 const seedKey=(k,x)=>String(k==='mapq'?x.region+'|'+x.year:(x.name||x.title)).toLowerCase();
 SORT.rivals={k:'name',d:1};
-let rivalFilter='All',tpWin=30,rmFilter='all',rmOpen={},JS=null,svLoading=false,jiraLoading=false;
+let pgTab='roadmap',rivalFilter='All',tpWin=30,rmFilter='all',rmOpen={},JS=null,svLoading=false,jiraLoading=false;
 const TABLE_SVC=['conferences','grants','communities','rivals'];
 
 /* ---- Update buttons ---- */
@@ -597,14 +596,14 @@ async function runUpdate(id){
  if(!SV.llmConfigured){alert('OPENAI_API_KEY is not set on the server. Add it in Vercel → Settings → Environment Variables and redeploy.');return}
  if(!confirm('Update "'+s.title+'": the AI will check '+s.tasks.length+' sources/queries (uses OpenAI credits, can take a few minutes). Continue?'))return;
  return runAll(id)}
-async function loadJira(){try{JS=await api('/api/jira')}catch(e){if(e.message==='login')return;JS={error:e.message}}if(page==='progress'||page==='team')render()}
+async function loadJira(){try{JS=await api('/api/jira')}catch(e){if(e.message==='login')return;JS={error:e.message}}if(page==='progress')render()}
 async function syncJiraNow(){runState.jira={running:true,log:[],total:1,done:0,cur:'Jira issues'};render();
  try{const r=await api('/api/jira',{method:'POST'});runState.jira.log=['✓ '+r.count+' issues synced from Jira']}
  catch(e){if(e.message==='login')return;runState.jira.log=['⚠ '+lg(e.message)]}
  runState.jira.running=false;try{await refreshFromServer();JS=await api('/api/jira')}catch(e){}render()}
 function bgLoad(){
  if(TABLE_SVC.includes(page)&&!SV&&!svLoading){svLoading=true;loadServices().finally(()=>{svLoading=false;paintUpd()})}
- if((page==='progress'||page==='team')&&!JS&&!jiraLoading){jiraLoading=true;loadJira().finally(()=>{jiraLoading=false})}}
+ if(page==='progress'&&!JS&&!jiraLoading){jiraLoading=true;loadJira().finally(()=>{jiraLoading=false})}}
 
 /* ---- date helpers + Jira data ---- */
 const todayS=()=>new Date().toISOString().slice(0,10);
@@ -621,7 +620,9 @@ const jiraBar=()=>JS&&JS.error?`<div class="note warn">Cannot read Jira status: 
 const link=(t,u)=>u?`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`:esc(t);
 
 /* ---- Project progress ---- */
-function progress(){const R=S.roadmap,cnt=s=>R.filter(x=>x.status===s).length,J=JI(),jd=J.filter(i=>i.cat==='done'&&i.resolved>=dAgo(30)).length;
+function progress(){const tabs=`<div class="toolbar" style="margin-top:0"><div class="tabs">${[['roadmap','Roadmap'],['jira','Jira analytics']].map(([k,l])=>`<button class="tab ${pgTab===k?'active':''}" onclick="pgTab='${k}';render()">${l}</button>`).join('')}</div></div>`;
+ return tabs+(pgTab==='jira'?team():roadmapView())}
+function roadmapView(){const R=S.roadmap,cnt=s=>R.filter(x=>x.status===s).length,J=JI(),jd=J.filter(i=>i.cat==='done'&&i.resolved>=dAgo(30)).length;
  const laneRows=LANES.map(l=>{const L=R.filter(x=>x.lane===l.id);const d=L.filter(x=>x.status==='done').length;return [l.name,L.length?Math.round(d/L.length*100):0,d+'/'+L.length+' done']});
  const board=rmBoard();
  const epics={};J.forEach(i=>{if(!i.epic)return;const e=epics[i.epic]||(epics[i.epic]={k:i.epic,n:i.epicName||i.epic,d:0,t:0,p:0,pd:0});e.t++;e.p+=i.points||0;if(i.cat==='done'){e.d++;e.pd+=i.points||0}});
@@ -694,7 +695,7 @@ function importMapq(inp){const files=[...inp.files];let ok=0,bad=[],left=files.l
    if(row){const i=S.mapq.findIndex(x=>x.region.toLowerCase()===row.region.toLowerCase()&&String(x.year)===String(row.year));if(i>=0)S.mapq[i]={...S.mapq[i],...row,note:S.mapq[i].note||row.note};else S.mapq.unshift(row);ok++}else bad.push(f.name)}catch(e){bad.push(f.name)}
   if(--left===0){inp.value='';save();render();alert(ok+' benchmark(s) imported.'+(bad.length?'\nNot recognised: '+bad.join(', '):''))}};r.readAsText(f)})}
 
-const VIEWS={analytics,progress,team,services,funnels,testers,conferences,grants,academia,communities,rivals,templates};
+const VIEWS={analytics,progress,testers,conferences,grants,academia,communities,rivals,templates};
 function go(p){page=p;render();window.scrollTo(0,0)}
 function render(){const cnt={testers:S.testers.length,conferences:S.confs.length,grants:S.grants.length,academia:S.unis.length,communities:S.comms.length,services:[...S.grants,...S.confs,...S.comms,...S.rivals].filter(x=>x.isNew&&!x.hidden).length,rivals:S.rivals.length,progress:S.roadmap.filter(x=>x.status==='progress').length};
  document.getElementById('nav').innerHTML=PAGES.map(([id,ic,l])=>`<button class="nav ${page===id?'active':''}" onclick="go('${id}')"><b>${ic}</b><span class="t">${l}</span>${cnt[id]?`<span class="cnt">${cnt[id]}</span>`:''}</button>`).join('');

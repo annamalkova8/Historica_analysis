@@ -21,8 +21,8 @@ Dashboards, trackers and AI search services for Historica.
 
 | Page | What it is |
 |---|---|
-| Search services | Fund search (ported from `historica-grant-bot`, no Telegram), Conference search, Community search. Run now or on a daily cron. Social search is reserved for later. |
-| Project progress / Team performance | Roadmap (editable board, status pills) with live progress from **Jira**; per-person throughput, overdue, cycle time. Read-only Jira sync (env `JIRA_*`). |
+| Analytics (incl. **Funnels** tab) | Dashboards (demo numbers until tracking is live) and the Mixpanel-style funnel builder. |
+| Project progress | Two tabs: **Roadmap** (editable board, status pills, live progress from Jira) and **Jira analytics** (per-person throughput, overdue, cycle time). Read-only Jira sync (env `JIRA_*`). |
 | Rivals analysis | Rivals table (link, market, what's new, what we can take), Historica better/worse scorecard, map-quality benchmark (import the benchmark HTML reports). Fed by the **Rivals analysis** service. |
 | Conferences / Grants & Funding / Communities | Sortable, editable trackers. New finds from the services are marked **NEW** (✓ keep, ✕ hide). |
 | Academic Outreach, Map Builder Testers, Templates & Letters, Funnels, Analytics | Ported from the demo. Analytics numbers are still demo data until tracking is connected. |
@@ -31,18 +31,18 @@ Dashboards, trackers and AI search services for Historica.
 - `public/index.html` — the hub UI. It syncs every edit to Postgres through `/api/sync` (only changed rows).
 - `api/*.js` — Vercel Functions: `login`, `state`, `sync`, `services`, `run`, `cron`.
 - `funds/`, `conferences/`, `communities/` — the three pipelines: profile + fixed sources + free-text queries → OpenAI (Responses API + `web_search` tool, `gpt-5-nano`, as in the bot) → JSON → filter → de-duplicate → `records` table. Fund search keeps the bot's rules (no consortium calls, no fellowships/fashion/volunteering, one-off programmes skipped once applied).
-- Sources, queries and the profile are editable in the UI (Search services → “Sources, queries and profile”).
+- Sources, queries and the profile of each service live in code (`funds/`, `conferences/`, `communities/`, `rivals/`); the `/api/services` endpoint can still override them, but the UI page for it was removed.
 - Cron (`vercel.json`, daily 06:00 UTC): each service checks its next `CRON_CHUNK` (default 3) sources, then the cursor moves on. Every source is revisited every few days. Vercel Hobby allows daily crons.
 
 ## ↻ Update buttons
-Every table tab that has a service has an **↻ Update** button: Conferences, Grants & Funding, Communities and Rivals run their search service (asks for confirmation first, because it uses OpenAI credits); Project progress and Team performance pull issues from Jira. Academic Outreach and Map Builder Testers are manual tables with no service. Database layout: `_DOCS/DATABASE_SCHEMA.md`.
+Every table tab that has a service has an **↻ Update** button: Conferences, Grants & Funding, Communities and Rivals run their search service (asks for confirmation first, because it uses OpenAI credits); Project progress pulls issues from Jira. Academic Outreach and Map Builder Testers are manual tables with no service. Database layout: `_DOCS/DATABASE_SCHEMA.md`.
 
 ## Deploy
 1. `npm i -g vercel && cd Business_analysis && vercel` (create/link the project).
 2. In the Vercel dashboard → **Storage** → add **Neon Postgres** (it sets `DATABASE_URL`). Tables are created automatically on the first request.
 3. **Settings → Environment Variables**: `APP_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET` (any long random string; Vercel sends it to the cron route), for Jira `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT` (or `JIRA_JQL`), optionally `OPENAI_MODEL`, `CRON_CHUNK`, `SESSION_SECRET`. See `.env.example`.
 4. `vercel --prod`. Open the URL, sign in with `APP_PASSWORD`. The first load seeds the universities, communities, templates and the four grants you already applied to.
-5. Search services → **Run all** to fill the tables.
+5. On each table tab (Conferences, Grants, Communities, Rivals) press **↻ Update** to fill it.
 
 Function limit: each `/api/run` call checks one source (typically 10–40 s). `maxDuration` is set to 300 s in `vercel.json`.
 
