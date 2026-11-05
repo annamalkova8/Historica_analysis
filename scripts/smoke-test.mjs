@@ -45,7 +45,7 @@ assert.equal(st.json.data.comms.length, 0);
 
 // services listing
 const sv = await call('services', { headers: auth });
-assert.equal(sv.json.services.length, 3);
+assert.equal(sv.json.services.length, 4);
 assert.ok(sv.json.services.find((s) => s.id === 'grants').tasks.length >= 20);
 
 // pipeline with mocked LLM
@@ -80,6 +80,47 @@ assert.equal(r.json.added, 0, 'same url (normalised) is a duplicate');
 setLlm(async () => { throw new Error('boom'); });
 r = await call('run', { method: 'POST', headers: auth, body: { service: 'grants', task: 3 } });
 assert.match(r.json.error, /boom/);
+
+// rivals: first run adds, second run REFRESHES (no duplicate), user's other edits survive
+setLlm(async () => JSON.stringify([{ name: 'Geacron', link: 'https://geacron.com', market: 'Education', what_new: 'New app 2026', what_we_can_take: 'Export', historica_better: 'monthly steps', historica_worse: 'mobile' },
+  { name: 'No Link Product', link: 'not-a-url' }]));
+r = await call('run', { method: 'POST', headers: auth, body: { service: 'rivals', task: 0 } });
+assert.equal(r.json.added, 1, JSON.stringify(r.json));
+st = await call('state', { headers: auth });
+const rid = st.json.data.rivals[0]._id;
+await call('sync', { method: 'POST', headers: auth, body: { upserts: [{ kind: 'rivals', id: rid, data: { ...st.json.data.rivals[0], take: 'MY EDIT' } }] } });
+setLlm(async () => JSON.stringify([{ name: 'GEACRON', link: 'https://geacron.com', what_new: 'Android app rebuilt' }]));
+r = await call('run', { method: 'POST', headers: auth, body: { service: 'rivals', task: 0 } });
+assert.equal(r.json.added, 0); assert.equal(r.json.updated, 1);
+st = await call('state', { headers: auth });
+assert.equal(st.json.data.rivals.length, 1);
+assert.equal(st.json.data.rivals[0].whatNew, 'Android app rebuilt');
+assert.equal(st.json.data.rivals[0].take, 'MY EDIT');
+
+// seeded kinds + jira rows are read-only for the browser
+await call('sync', { method: 'POST', headers: auth, body: { upserts: [{ kind: 'jira', id: 'x', data: { key: 'X-1' } }], markSeededKinds: ['rivals', 'bogus'] } });
+st = await call('state', { headers: auth });
+assert.deepEqual(st.json.seededKinds, ['rivals']);
+assert.equal(st.json.data.jira.length, 0, 'browser must not write jira rows');
+
+// Jira sync (mock): upsert, update, delete stale
+const { setJira } = await import('../lib/jira.js');
+const issue = (key, extra = {}) => ({ key, fields: { summary: 'S ' + key, status: { name: 'Done', statusCategory: { key: 'done' } }, assignee: { displayName: 'Ann' }, issuetype: { name: 'Task' }, created: '2026-10-01T10:00:00.000+0000', resolutiondate: '2026-10-05T10:00:00.000+0000', labels: ['maps'], parent: { key: 'H-1', fields: { summary: 'Epic one' } }, customfield_10016: 3, ...extra } });
+assert.equal((await call('jira', { headers: auth })).json.configured, false);
+assert.equal((await call('jira', { method: 'POST', headers: auth })).code, 400);
+setJira(async () => [issue('H-2'), issue('H-3', { assignee: null })]);
+let jr = await call('jira', { method: 'POST', headers: auth });
+assert.equal(jr.json.count, 2, JSON.stringify(jr.json));
+st = await call('state', { headers: auth });
+const j2 = st.json.data.jira.find((x) => x.key === 'H-2');
+assert.ok(j2.cat === 'done' && j2.assignee === 'Ann' && j2.epic === 'H-1' && j2.epicName === 'Epic one' && j2.points === 3 && j2.resolved === '2026-10-05');
+assert.equal(st.json.data.jira.find((x) => x.key === 'H-3').assignee, 'Unassigned');
+setJira(async () => [issue('H-2')]);
+await call('jira', { method: 'POST', headers: auth });
+st = await call('state', { headers: auth });
+assert.deepEqual(st.json.data.jira.map((x) => x.key), ['H-2']);
+assert.equal((await call('jira', { headers: auth })).json.last.count, 1);
+setJira(null);
 
 // cron: needs secret, rotates cursor
 assert.equal((await call('cron')).code, 401);

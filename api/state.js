@@ -11,7 +11,8 @@ export default async function handler(req, res) {
     for (const r of rows) if (data[r.kind]) data[r.kind].push({ ...r.data, _id: r.id });
     const seeded = !!(await getSetting('seeded', false));
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ data, seeded });
+    const seededKinds = (await getSetting('seeded_kinds', [])) || [];
+    return res.status(200).json({ data, seeded, seededKinds });
   } catch (e) {
     return res.status(500).json({ error: String(e.message || e) });
   }
