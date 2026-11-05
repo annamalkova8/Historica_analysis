@@ -1,5 +1,6 @@
 // Conference search: upcoming conferences and calls for papers.
 import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../lib/shared.js';
+import { sameConf } from '../lib/dedupe.js';
 export default {
   id: 'conferences',
   title: 'Conference search',
@@ -73,6 +74,7 @@ Find conferences that fit the profile. Follow the output format exactly.`;
     return true;
   },
   key: (it) => normName(it.name),
+  similar: sameConf,
   toRecord(it, taskName) {
     return {
       name: str(it.name), focus: str(it.topics, ''), date: str(it.start_date), loc: str(it.location),

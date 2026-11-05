@@ -1,5 +1,6 @@
 // Fund search: ported from historica-grant-bot (OpenAI web search, no Telegram).
 import cfg from './config.js';
+import { sameGrant } from '../lib/dedupe.js';
 import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../lib/shared.js';
 export default {
   id: 'grants',
@@ -63,6 +64,7 @@ Find open calls, grants or RFPs CURRENTLY open for applications. Follow the outp
     return !cfg.blocked.some((w) => text.includes(w)) && !!it.name;
   },
   key: (it) => `${normName(it.name)}|${normUrl(it.link)}`,
+  similar: sameGrant,   // fuzzy duplicate check against rows already in the table (incl. hidden ones)
   toRecord(it, taskName) {
     const docs = Array.isArray(it.documents_required) ? it.documents_required.join(', ') : str(it.documents_required);
     return {

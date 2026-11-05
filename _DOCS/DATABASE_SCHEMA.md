@@ -89,7 +89,9 @@ One row per source check or Jira sync. `found` = items returned; `added` = new r
 
 *Dedupe keys:* `normName` = lower-case, letters/digits only, single spaces. `normUrl` = lower-case, no `https://www.`, no query/hash, no trailing slash.
 
-Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM-DD). In the UI ✓ clears `isNew`, ✕ sets `hidden: true` (hidden rows stay in the DB so the service does not re-add them).
+Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM-DD). In the UI ✓ clears `isNew`; ✕ and 🚫 ("never show again") set `hidden: true` + `hiddenAt` — hidden rows stay in the DB, so the service never re-adds them or near-identical copies. ↩ removes the flag. **Find duplicates** hides copies with `hidden: true` and `dupOf` (name of the kept row); nothing is deleted. Duplicate rules: `lib/dedupe.js` (same URL incl. #fragment, or similar names after dropping filler words; different explicit years = different opportunities).
+
+*Fuzzy match is applied to `grants`, `confs`, `comms` — both when a search adds rows and in the Find duplicates button.*
 
 ---
 

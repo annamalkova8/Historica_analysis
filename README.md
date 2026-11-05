@@ -50,6 +50,12 @@ Function limit: each `/api/run` call checks one source (typically 10–40 s). `m
 - `npm test` — full API test on in-memory Postgres with a mocked OpenAI (auth, sync, dedupe, filters, cron cursor).
 - `APP_PASSWORD=demo npm run dev` — local preview at http://localhost:3000 with in-memory data; uses canned search results unless `OPENAI_API_KEY` is set. Data resets on restart.
 
+## Duplicates and "never show again"
+- Every search checks new finds against **all** rows already in the table, hidden ones included, using `lib/dedupe.js`: same URL, or names that are the same after dropping filler words (grant/fund/call/foundation/…), with different years treated as different calls. Near-duplicates are skipped ("N duplicates skipped" in the Update log).
+- **Find duplicates** (Grants, Conferences, Communities) previews groups, then *hides* the copies (filter *Hidden*, ↩ restores); the row with progress (applied/result) or the most filled fields is kept and gets missing fields filled in.
+- **🚫 Never show again** hides a row permanently but keeps it in the database so searches cannot add it back. 🗑 deletes for real (a later search may re-find it).
+- Why not sentence-transformers: it is a Python/local-model stack and does not run in Vercel's Node functions. If rules are not enough, OpenAI embeddings (`text-embedding-3-small`, same API key) can be added to the same hook (`similar` in `funds/index.js`).
+
 ## Notes
 - One shared password protects the whole app (cookie, 30 days). Add real auth before inviting others.
 - Search results are AI-generated from web search: verify deadlines, sums and fees on the source page before acting.

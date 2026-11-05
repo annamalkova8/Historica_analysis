@@ -1,5 +1,6 @@
 // Community search: active communities of history teachers, digital humanists and map enthusiasts.
 import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../lib/shared.js';
+import { sameComm } from '../lib/dedupe.js';
 export default {
   id: 'communities',
   title: 'Community search',
@@ -70,6 +71,7 @@ Follow the output format exactly.`;
   },
   accept: (it) => !!it.name && !!it.url,
   key: (it) => normUrl(it.url) || normName(it.name),
+  similar: sameComm,
   toRecord(it, taskName) {
     const pr = ['Very high', 'High', 'Medium'].includes(it.priority) ? it.priority : 'Medium';
     const goal = ['Acquisition', 'Feedback', 'Partnership'].includes(it.goal) ? it.goal : 'Acquisition';
