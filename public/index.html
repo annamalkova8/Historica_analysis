@@ -439,13 +439,14 @@ const cfNorm=(v,list)=>{const t=String(v||'').trim();if(!t)return 'Unknown';cons
 function cfMap(rows){
  const H=(rows[0]||[]).map(x=>String(x||'').toLowerCase().trim());
  const col=re=>H.findIndex(h=>re.test(h)),role=col(/role|position|occupation|profession|job|who|роль|должност|кто/),src=col(/source|channel|came from|where|откуда|канал|источник/),proj=col(/project|проект/),built=col(/built|maps/);
- const ivCol=col(/interview|интервью/),yes=v=>/\S/.test(String(v||''))&&!/^(no|none|нет|—|-|–|n\/a|false|0|✗|✘|❌)$/i.test(String(v||'').trim()),idCol=col(/^e-?mail|почт/),nameCol=col(/^name|имя|фио/);
- const out=[];let skipped=0;
+ const ivCol=col(/interview|интервью/),yes=v=>{const t=String(v||'').replace(/\u00a0/g,' ').trim();return /^(\+|＋|\+1|yes|y|да|✓|✔|✅|☑|x|true|1)$/i.test(t)||(t!==''&&!/^(no|none|нет|—|-|–|−|n\/a|false|0|✗|✘|❌|✖)$/i.test(t))},idCol=col(/^e-?mail|почт/),nameCol=col(/^name|имя|фио/);
+ const out=[],ivSeen=[];let skipped=0;
  rows.slice(1).forEach(r=>{if(!r.some(c=>String(c||'').trim())){return}
   // fk = fingerprint of e-mail (or name); only its hash is stored, so manual Interview/Feedback survive a re-load
   const raw=String((idCol>=0&&r[idCol])||(nameCol>=0&&r[nameCol])||'').toLowerCase().trim();
+  if(ivCol>=0)ivSeen.push(String(r[ivCol]||'').trim());
   out.push({key:raw?cfHash(raw):'',role:cfNorm(role>=0?r[role]:'',CF_ROLES),src:cfNorm(src>=0?r[src]:'',CF_SRCS),proj:proj>=0?cfOne(r[proj]):'',maps:built>=0?(parseInt(String(r[built]).replace(/[^\d]/g,''),10)||0):0,iv:ivCol>=0?(yes(r[ivCol])?'Yes':'No'):null})});
- return {testers:out,columns:{role:role>=0?rows[0][role]:null,source:src>=0?rows[0][src]:null,project:proj>=0?rows[0][proj]:null,built:built>=0?rows[0][built]:null,key:idCol>=0?rows[0][idCol]:nameCol>=0?rows[0][nameCol]:null,interview:ivCol>=0?rows[0][ivCol]:null},skipped}}
+ return {testers:out,columns:{role:role>=0?rows[0][role]:null,source:src>=0?rows[0][src]:null,project:proj>=0?rows[0][proj]:null,built:built>=0?rows[0][built]:null,key:idCol>=0?rows[0][idCol]:nameCol>=0?rows[0][nameCol]:null,interview:ivCol>=0?rows[0][ivCol]:null,ivSeen},skipped}}
 /** Pick the largest table of the page and turn it into rows. */
 function cfTables(html){const d=new DOMParser().parseFromString(html,'text/html');
  const tabs=[...d.querySelectorAll('table')].map(t=>[...t.querySelectorAll('tr')].map(tr=>[...tr.children].filter(c=>/^t[dh]$/i.test(c.tagName)).map(c=>c.textContent.replace(/\s+/g,' ').trim())).filter(r=>r.length));
@@ -454,7 +455,7 @@ async function loadConfluenceTesters(){
  let page;try{page=await api('/api/confluence')}catch(e){if(e.message!=='login')alert('Could not read the Confluence page: '+e.message);return}
  const rows=cfTables(page.html);if(rows.length<2){alert('No table with testers was found on the page "'+(page.title||'')+'". The importer needs a table with a header row.');return}
  const m=cfMap(rows),n=m.testers.length;if(!n){alert('The table has no rows.');return}
- const c=m.columns,msg='Page: "'+page.title+'" · '+n+' tester rows\nRole column: '+(c.role||'NOT FOUND')+'\nSource column: '+(c.source||'NOT FOUND')+'\nProject column: '+(c.project||'NOT FOUND')+'\nBuilt maps column: '+(c.built||'NOT FOUND')+'\nInterview column (Yes/No): '+(c.interview||'NOT FOUND — Interview stays as set in the hub')+'\nMatch key (e-mail or name; only a fingerprint is kept): '+(c.key||'NOT FOUND — manual Interview/Feedback cannot be kept on re-load')+'\n\nImported: role, source, project (first sentence), built maps, interview (Yes/No). Feedback is NOT imported — fill it in the hub; it is kept when you load again. Nothing is written back to Confluence. Import?';
+ const c=m.columns,msg='Page: "'+page.title+'" · '+n+' tester rows\nRole column: '+(c.role||'NOT FOUND')+'\nSource column: '+(c.source||'NOT FOUND')+'\nProject column: '+(c.project||'NOT FOUND')+'\nBuilt maps column: '+(c.built||'NOT FOUND')+'\nInterview column ("+" = Yes): '+(c.interview?c.interview+' → Yes for '+m.testers.filter(t=>t.iv==='Yes').length+' of '+n+' (cells seen: '+[...new Set(c.ivSeen.map(v=>v||'(empty)'))].slice(0,6).join(' | ')+')':'NOT FOUND — Interview stays as set in the hub')+'\nMatch key (e-mail or name; only a fingerprint is kept): '+(c.key||'NOT FOUND — manual Interview/Feedback cannot be kept on re-load')+'\n\nImported: role, source, project (first sentence), built maps, interview (Yes/No). Feedback is NOT imported — fill it in the hub; it is kept when you load again. Nothing is written back to Confluence. Import?';
  if(!confirm(msg))return;
  const manual=S.testers.filter(t=>t.ext!=='confluence');let drop=false;
  if(manual.length&&confirm('Also remove the '+manual.length+' existing tester rows that did not come from Confluence (demo or manual)?\nOK = remove them, Cancel = keep them.'))drop=true;
