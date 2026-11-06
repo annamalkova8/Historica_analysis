@@ -465,12 +465,12 @@ async function loadConfluenceTesters(){
  S.testers=[...m.testers.map((t,i)=>{const o=t.key&&old.get(t.key);return {id:'C-'+String(i+1).padStart(3,'0'),...t,iv:t.iv||(o?o.iv:0)||'No',fb:o?o.fb||'None':'None',ext:'confluence'}}),...(drop?[]:manual)];
  try{localStorage.setItem('cf_last',new Date().toLocaleString())}catch(e){}
  save();render()}
-function setTF(id,k,v){S.testers.find(t=>t.id===id)[k]=v;save()}
+function setTF(id,k,v){const t=S.testers.find(t=>t.id===id);if(!t)return;t[k]=v;save();render()} // re-render so the summary tiles follow the table
 /** older rows kept the interview inside "fb" (Interview / Both): move it to the separate Interview column */
 function migrateTesters(){let ch=false;S.testers.forEach(t=>{if(t.ext==='confluence'&&!t.fbReset){t.fb='None';t.fbReset=true;ch=true}}); // feedback is filled in by hand now, not taken from Confluence
  S.testers.forEach(t=>{if(t.iv===undefined){t.iv=t.fb==='Interview'||t.fb==='Both'?'Yes':'No';if(t.fb==='Interview')t.fb='None';else if(t.fb==='Both')t.fb='Google Form';ch=true}
  else if(t.fb==='Interview'||t.fb==='Both'){t.iv='Yes';t.fb=t.fb==='Both'?'Google Form':'None';ch=true}});return ch}
-function addTester(){const n=S.testers.length+1;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,iv:'No',fb:'None'});save();render()}
+function addTester(){let n=S.testers.length+1;while(S.testers.some(t=>t.id==='T-'+String(n).padStart(3,'0')))n++;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,iv:'No',fb:'None'});save();render()}
 
 /* generic editable tables */
 const setF=(c,i,k,v)=>{S[c][i][k]=v;save();render()};
