@@ -430,6 +430,8 @@ function testers(){const T=S.testers,n=T.length,by=k=>{const m={};T.forEach(t=>m
 /* ---- Beta testers: load from the Confluence page "Beta testers" (anonymous fields only) ---- */
 const CF_ROLES=[[/teacher|educator|учител|препод/i,'Teacher'],[/phd|doctoral|аспирант/i,'PhD student'],[/professor|prof\.|lecturer|профессор/i,'Professor'],[/museum|archive|музей|архив/i,'Museum / archive'],[/researcher|historian|scientist|scholar|исследов|историк/i,'Researcher'],[/student|студент/i,'Student']];
 const CF_SRCS=[[/linkedin/i,'LinkedIn'],[/facebook|\bfb\b/i,'Facebook'],[/newsletter|рассылк/i,'Newsletter'],[/universit|univ\.|универс/i,'University list'],[/personal|direct|friend|личн/i,'Personal outreach'],[/conference|конферен/i,'Conference']];
+/** short non-reversible-looking fingerprint (cyrb53) used only to match the same tester on the next load */
+const cfHash=t=>{let a=0xdeadbeef,b=0x41c6ce57;for(let i=0;i<t.length;i++){const c=t.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return (4294967296*(2097151&b)+(a>>>0)).toString(36)};
 /** "project" cell -> one short sentence (first sentence, max 140 chars) */
 const cfOne=v=>{const t=String(v||'').replace(/\s+/g,' ').trim();if(!t)return '';const m=t.match(/^(.+?[.!?])(\s|$)/),x=m?m[1]:t;return x.length>140?x.slice(0,137).replace(/\s+\S*$/,'')+'…':x};
 const cfNorm=(v,list)=>{const t=String(v||'').trim();if(!t)return 'Unknown';const m=list.find(([re])=>re.test(t));return m?m[1]:t.slice(0,40)};
@@ -437,18 +439,13 @@ const cfNorm=(v,list)=>{const t=String(v||'').trim();if(!t)return 'Unknown';cons
 function cfMap(rows){
  const H=(rows[0]||[]).map(x=>String(x||'').toLowerCase().trim());
  const col=re=>H.findIndex(h=>re.test(h)),role=col(/role|position|occupation|profession|job|who|роль|должност|кто/),src=col(/source|channel|came from|where|откуда|канал|источник/),proj=col(/project|проект/),built=col(/built|maps/);
- const ivCol=col(/interview|интервью/),fbCols=H.map((h,i)=>/feedback|form|survey|отзыв|форма|опрос/.test(h)&&i!==ivCol?i:-1).filter(i=>i>=0);
+ const idCol=col(/^e-?mail|почт/),nameCol=col(/^name|имя|фио/);
  const out=[];let skipped=0;
- const yes=v=>/\S/.test(String(v||''))&&!/^(no|none|нет|—|-|–|n\/a|false|0|✗|✘|❌)$/i.test(String(v||'').trim());
  rows.slice(1).forEach(r=>{if(!r.some(c=>String(c||'').trim())){return}
-  // feedback channel: Email / Google Form / All (both); text in the cell decides, a filled cell of unknown kind counts as Google Form
-  let em=false,fm=false,all=false;
-  fbCols.forEach(i=>{const v=String(r[i]||'').toLowerCase();if(!yes(v))return;
-   if(/\ball\b|все/.test(v))all=true;if(/e-?mail|mail|почт/.test(v))em=true;if(/form|форма|survey|опрос|google/.test(v))fm=true;
-   if(!/\ball\b|все|mail|почт|form|форма|survey|опрос|google/.test(v))fm=true});
-  out.push({role:cfNorm(role>=0?r[role]:'',CF_ROLES),src:cfNorm(src>=0?r[src]:'',CF_SRCS),proj:proj>=0?cfOne(r[proj]):'',maps:built>=0?(parseInt(String(r[built]).replace(/[^\d]/g,''),10)||0):0,
-   iv:ivCol>=0&&yes(r[ivCol])?'Yes':'No',fb:all||(em&&fm)?'All':em?'Email':fm?'Google Form':'None'})});
- return {testers:out,columns:{role:role>=0?rows[0][role]:null,source:src>=0?rows[0][src]:null,project:proj>=0?rows[0][proj]:null,built:built>=0?rows[0][built]:null,interview:ivCol>=0?rows[0][ivCol]:null,feedback:fbCols.map(i=>rows[0][i])},skipped}}
+  // fk = fingerprint of e-mail (or name); only its hash is stored, so manual Interview/Feedback survive a re-load
+  const raw=String((idCol>=0&&r[idCol])||(nameCol>=0&&r[nameCol])||'').toLowerCase().trim();
+  out.push({key:raw?cfHash(raw):'',role:cfNorm(role>=0?r[role]:'',CF_ROLES),src:cfNorm(src>=0?r[src]:'',CF_SRCS),proj:proj>=0?cfOne(r[proj]):'',maps:built>=0?(parseInt(String(r[built]).replace(/[^\d]/g,''),10)||0):0})});
+ return {testers:out,columns:{role:role>=0?rows[0][role]:null,source:src>=0?rows[0][src]:null,project:proj>=0?rows[0][proj]:null,built:built>=0?rows[0][built]:null,key:idCol>=0?rows[0][idCol]:nameCol>=0?rows[0][nameCol]:null},skipped}}
 /** Pick the largest table of the page and turn it into rows. */
 function cfTables(html){const d=new DOMParser().parseFromString(html,'text/html');
  const tabs=[...d.querySelectorAll('table')].map(t=>[...t.querySelectorAll('tr')].map(tr=>[...tr.children].filter(c=>/^t[dh]$/i.test(c.tagName)).map(c=>c.textContent.replace(/\s+/g,' ').trim())).filter(r=>r.length));
@@ -457,16 +454,18 @@ async function loadConfluenceTesters(){
  let page;try{page=await api('/api/confluence')}catch(e){if(e.message!=='login')alert('Could not read the Confluence page: '+e.message);return}
  const rows=cfTables(page.html);if(rows.length<2){alert('No table with testers was found on the page "'+(page.title||'')+'". The importer needs a table with a header row.');return}
  const m=cfMap(rows),n=m.testers.length;if(!n){alert('The table has no rows.');return}
- const c=m.columns,msg='Page: "'+page.title+'" · '+n+' tester rows\nRole column: '+(c.role||'NOT FOUND')+'\nSource column: '+(c.source||'NOT FOUND')+'\nProject column: '+(c.project||'NOT FOUND')+'\nBuilt maps column: '+(c.built||'NOT FOUND')+'\nInterview column (Yes/No): '+(c.interview||'NOT FOUND')+'\nFeedback column (Email / Google Form / All): '+(c.feedback.join(', ')||'NOT FOUND')+'\n\nImported: role, source, project (first sentence), feedback, built maps — no names or e-mails. Rows imported earlier are replaced, so edits made to them in the hub are overwritten. Nothing is written back to Confluence. Import?';
+ const c=m.columns,msg='Page: "'+page.title+'" · '+n+' tester rows\nRole column: '+(c.role||'NOT FOUND')+'\nSource column: '+(c.source||'NOT FOUND')+'\nProject column: '+(c.project||'NOT FOUND')+'\nBuilt maps column: '+(c.built||'NOT FOUND')+'\nMatch key (e-mail or name; only a fingerprint is kept): '+(c.key||'NOT FOUND — manual Interview/Feedback cannot be kept on re-load')+'\n\nImported: role, source, project (first sentence), built maps. Interview and Feedback are NOT imported — fill them in the hub; they are kept when you load again. Nothing is written back to Confluence. Import?';
  if(!confirm(msg))return;
  const manual=S.testers.filter(t=>t.ext!=='confluence');let drop=false;
  if(manual.length&&confirm('Also remove the '+manual.length+' existing tester rows that did not come from Confluence (demo or manual)?\nOK = remove them, Cancel = keep them.'))drop=true;
- S.testers=[...m.testers.map((t,i)=>({id:'C-'+String(i+1).padStart(3,'0'),...t,ext:'confluence'})),...(drop?[]:manual)];
+ const old=new Map(S.testers.filter(t=>t.ext==='confluence'&&t.key).map(t=>[t.key,t]));
+ S.testers=[...m.testers.map((t,i)=>{const o=t.key&&old.get(t.key);return {id:'C-'+String(i+1).padStart(3,'0'),...t,iv:o?o.iv||'No':'No',fb:o?o.fb||'None':'None',ext:'confluence'}}),...(drop?[]:manual)];
  try{localStorage.setItem('cf_last',new Date().toLocaleString())}catch(e){}
  save();render()}
 function setTF(id,k,v){S.testers.find(t=>t.id===id)[k]=v;save()}
 /** older rows kept the interview inside "fb" (Interview / Both): move it to the separate Interview column */
-function migrateTesters(){let ch=false;S.testers.forEach(t=>{if(t.iv===undefined){t.iv=t.fb==='Interview'||t.fb==='Both'?'Yes':'No';if(t.fb==='Interview')t.fb='None';else if(t.fb==='Both')t.fb='Google Form';ch=true}
+function migrateTesters(){let ch=false;S.testers.forEach(t=>{if(t.ext==='confluence'&&!t.fbReset){t.iv='No';t.fb='None';t.fbReset=true;ch=true}}); // feedback is filled in by hand now, not taken from Confluence
+ S.testers.forEach(t=>{if(t.iv===undefined){t.iv=t.fb==='Interview'||t.fb==='Both'?'Yes':'No';if(t.fb==='Interview')t.fb='None';else if(t.fb==='Both')t.fb='Google Form';ch=true}
  else if(t.fb==='Interview'||t.fb==='Both'){t.iv='Yes';t.fb=t.fb==='Both'?'Google Form':'None';ch=true}});return ch}
 function addTester(){const n=S.testers.length+1;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,iv:'No',fb:'None'});save();render()}
 
