@@ -25,7 +25,7 @@ h1{font-size:28px;margin:6px 0 5px;letter-spacing:-.6px}h2{font-size:16px;margin
 p{color:var(--mut2);margin:0;line-height:1.55}
 .pill{border:1px solid #35547a;background:#142741;border-radius:30px;color:#8bcaff;padding:8px 13px;font-size:12px;white-space:nowrap}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
-.stats.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.stats.five{grid-template-columns:repeat(5,minmax(0,1fr))}.stats.six{grid-template-columns:repeat(6,minmax(0,1fr))}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
 .metric{color:#93a5bf;font-size:12px}.number{font-size:27px;font-weight:750;margin:8px 0 3px}
 .trend{color:#61d4a4;font-size:12px}.trend.warn{color:var(--amber)}.muted{color:var(--mut);font-size:12px}
@@ -35,6 +35,7 @@ p{color:var(--mut2);margin:0;line-height:1.55}
 .barrow{display:grid;grid-template-columns:130px 1fr 54px;gap:12px;align-items:center;margin:11px 0;font-size:12px;color:#b6c5d9}
 .track{background:#24324a;height:9px;border-radius:12px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#4e8af0,#65d5c0);border-radius:12px}
 .tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:12.5px}
+th[data-ts]{cursor:pointer;user-select:none}th[data-ts]:hover{color:#c9d6e8}.tsi{color:#5f728c;margin-left:4px;font-size:11px}
 th{color:#8598b2;font-weight:600;padding:11px 9px;border-bottom:1px solid #2b3950;white-space:nowrap}
 td{padding:11px 9px;border-bottom:1px solid #25334a;color:#d7e0ee;vertical-align:middle}tr:last-child td{border:0}
 td a{color:#8bcaff;text-decoration:none}td a:hover{text-decoration:underline}
@@ -91,7 +92,7 @@ iframe.dash{width:100%;height:420px;border:1px solid #30425e;border-radius:10px;
 .rmi{background:#0f1b30;border:1px solid #2c405d;border-left:3px solid var(--c);border-radius:9px;padding:9px 10px;font-size:12.5px}
 .status.idea{opacity:.75}
 code{background:#0d182b;border-radius:4px;padding:1px 5px;font-size:11.5px}
-@media(max-width:1100px){.stats,.stats.five{grid-template-columns:repeat(2,1fr)}.grid,.grid.eq{grid-template-columns:1fr}.main{padding:22px}}
+@media(max-width:1100px){.stats,.stats.five,.stats.six{grid-template-columns:repeat(2,1fr)}.grid,.grid.eq{grid-template-columns:1fr}.main{padding:22px}}
 @media(max-width:720px){.side{width:60px;padding:14px 5px}.brand{font-size:13px;padding:6px}.brand span,.sub,.nav .t,.nav .cnt,.foot{display:none}.nav{justify-content:center;padding:12px 6px}.main{padding:16px}.pill{display:none}.fn{grid-template-columns:1fr}.barrow{grid-template-columns:96px 1fr 44px}.vars{grid-template-columns:1fr}}
 </style>
 </head>
@@ -275,6 +276,7 @@ function applyState(st){
  // collections added after first launch: seed once (skipping rows the services may already have created)
  NEWK.filter(k=>!(st.seededKinds||[]).includes(k)).forEach(k=>{const have=new Set(S[k].map(x=>seedKey(k,x)));S[k]=[...S[k],...D[k].filter(x=>!have.has(seedKey(k,x)))];if(!pendingKinds.includes(k))pendingKinds.push(k)});
  if(pendingKinds.length)flush();
+ if(migrateTesters())save();
  let added=false;TPL().forEach(t=>{if(!S.tplList.some(x=>x.name===t.name)){S.tplList.push(t);added=true}});if(added)save()}
 async function refreshFromServer(){for(let i=0;i<50&&(syncing||dirty);i++)await sleep(200);applyState(await api('/api/state'));render()}
 async function boot(){S=DEFAULTS();S.tplList=TPL();loadUi();
@@ -330,6 +332,22 @@ function computeFunnel(steps,win,mult=1,share=1,unit='visitors'){let c=(START[st
  for(let i=1;i<steps.length;i++){c=c*Math.min(.97,rate(steps[i-1],steps[i],win)*mult);out.push({n:steps[i],c})}return out}
 function funnelHTML(res){const t=res[0].c;return res.map((s,i)=>{const prev=i?res[i-1].c:s.c;return `<div class="fn"><code>${esc(s.n)}</code><div class="bar"><div style="width:${(s.c/t*100).toFixed(1)}%"></div></div><div><b>${fmt(s.c)}</b> <span class="muted">${i?pct(s.c,prev)+' of prev':'entered'}</span>${i?`<div class="drop">−${fmt(prev-s.c)} dropped</div>`:''}</div></div>`}).join('')+`<div class="muted" style="margin-top:6px">Overall conversion: <b style="color:#e8eef9">${pct(res.at(-1).c,t)}</b></div>`}
 
+/* ---------- click-to-sort for every table (client side; the choice survives re-renders) ---------- */
+const TSORT={};
+const tsText=td=>{if(!td)return '';const f=td.querySelector('input,select,textarea');return (f?f.value:td.textContent).replace(/\s+/g,' ').trim()};
+const tsNum=t=>{const m=t.replace(/\u2212/g,'-').match(/^[+-]?\d[\d,]*\.?\d*/);return m?parseFloat(m[0].replace(/,/g,'')):NaN};
+const tsEmpty=t=>!t||/^(—|-|–|n\/a|none)$/i.test(t);
+const tsCmp=(a,b)=>{const ea=tsEmpty(a),eb=tsEmpty(b);if(ea||eb)return ea&&eb?0:ea?1:-1;const x=tsNum(a),y=tsNum(b);return !isNaN(x)&&!isNaN(y)&&x!==y?x-y:a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'})};
+function tsApply(t,col,dir){const body=t.tBodies[0];if(!body)return;const rows=[...body.rows];rows.forEach((r,i)=>{if(r.dataset.o===undefined)r.dataset.o=i});
+ rows.sort((r1,r2)=>{if(!dir)return r1.dataset.o-r2.dataset.o;const a=tsText(r1.cells[col]),b=tsText(r2.cells[col]),ea=tsEmpty(a),eb=tsEmpty(b);if(ea||eb)return ea&&eb?0:ea?1:-1;return dir*tsCmp(a,b)});
+ rows.forEach(r=>body.appendChild(r));
+ [...t.tHead.rows[0].cells].forEach((h,i)=>{const m=h.querySelector('.tsi');if(m)m.textContent=i===col&&dir?(dir>0?'▲':'▼'):'↕'})}
+function enableSort(){document.querySelectorAll('#content table').forEach(t=>{const hr=t.tHead&&t.tHead.rows[0];if(!hr||t.tHead.rows.length>1||!t.tBodies[0])return;
+ const hs=[...hr.cells];if(hs.some(h=>h.colSpan>1||h.rowSpan>1||h.querySelector('[onclick*="sortBy"]')))return; // tables with their own column sort keep it
+ const key=page+'|'+hs.map(h=>h.textContent.trim()).join('|');
+ hs.forEach((h,i)=>{if(!h.textContent.trim())return;h.dataset.ts='1';h.insertAdjacentHTML('beforeend','<span class="tsi">↕</span>');
+  h.onclick=()=>{const c=TSORT[key]&&TSORT[key].col===i?TSORT[key]:{col:i,dir:0};c.dir=c.dir===1?-1:c.dir===-1?0:1;TSORT[key]=c;tsApply(t,i,c.dir)}});
+ const c=TSORT[key];if(c&&c.dir)tsApply(t,c.col,c.dir)})}
 /* ---------- pages ---------- */
 const PAGES=[['analytics','▥','Analytics'],['progress','◔','Project progress'],['testers','♙','Map Builder Testers'],['conferences','▦','Conferences'],['grants','◇','Grants & Funding'],['academia','◎','Academic Outreach'],['communities','◉','Communities'],['rivals','⚔','Rivals analysis'],['templates','✎','Templates & Letters']];
 const META={progress:['Roadmap & Jira','Project progress','Roadmap to the best open maps and the most popular tool among scientists — plus Jira analytics: delivery and team performance.'],rivals:['Competitive intelligence','Rivals analysis','Who else makes historical maps, what is new, what we can take — and where Historica is better or worse.'],analytics:['Dashboards','Analytics','Public view (what the website shows) and Analytics (what we expect to measure — “Data not enough to show” where it is not collected yet).'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
@@ -348,7 +366,7 @@ function analytics(){const exp=aView==='expected',fn=exp&&aTab==='funnels';
   :`<div class="note" style="margin:14px 0"><b>Public view</b> — the figures shown on the website. Numbers that are not yet measured are illustrative.</div>`;
  const body=!exp?websitePublic():fn?funnels():({website:siteX,map:mapX,social:socialX,publicity:pubX,builder:builderX}[aTab])();
  return `<div class="toolbar" style="margin-top:0">${views}</div>${subs}${note}${body}`}
-function websitePublic(){const v=series(1,12,8200,12840),m=series(2,12,3100,8420),T=S.testers,fb=T.filter(t=>t.fb&&t.fb!=='None').length,iv=T.filter(t=>t.fb==='Interview'||t.fb==='Both').length;
+function websitePublic(){const v=series(1,12,8200,12840),m=series(2,12,3100,8420),T=S.testers,fb=T.filter(t=>(t.fb&&t.fb!=='None')||t.iv==='Yes').length,iv=T.filter(t=>t.iv==='Yes').length;
  return `<div class="stats">${stat('Beta testers',T.length,'Map Builder')}${stat('Gave feedback',fb,pct(fb,T.length)+' of testers')}${stat('Interviewed',iv,pct(iv,T.length)+' of testers')}</div>
  <div class="stats">${stat('Website visitors · 30d','12,840','↑ 14% vs prev 30d')}${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Social followers','20,000+','FB + LinkedIn')}${stat('Newsletter','5,000+','subscribers')}</div>
  <div class="grid">${card(`<div class="sectionhead"><h2>Weekly visitors</h2></div>${line([{name:'Website',d:v},{name:'Map',d:m}])}`)}${card(`<h2 style="margin-bottom:8px">Traffic sources</h2>${bars([['Organic search',38],['Direct',22],['Social',18],['Newsletter',12],['Referral',10]])}`)}</div>`}
@@ -400,14 +418,14 @@ function mvStep(i,d){const j=i+d;if(j<0||j>=FS.steps.length)return;[FS.steps[i],
 function saveFunnel(){const n=prompt('Funnel name:',FS.name==='Custom funnel'?'':FS.name);if(!n)return;S.funnels.push({name:n,steps:[...FS.steps],win:FS.win});FS.name=n;save();render()}
 /* Testers */
 function testers(){const T=S.testers,n=T.length,by=k=>{const m={};T.forEach(t=>m[t[k]]=(m[t[k]]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1])};
- const form=T.filter(t=>t.fb==='Google Form'||t.fb==='Both').length,iv=T.filter(t=>t.fb==='Interview'||t.fb==='Both').length,any=T.filter(t=>t.fb!=='None').length;
+ const form=T.filter(t=>t.fb==='Google Form'||t.fb==='All').length,mail=T.filter(t=>t.fb==='Email'||t.fb==='All').length,iv=T.filter(t=>t.iv==='Yes').length,any=T.filter(t=>(t.fb&&t.fb!=='None')||t.iv==='Yes').length;
  const rows=T.filter(t=>roleFilter==='All'||t.role===roleFilter);const roles=['Teacher','PhD student','Professor','Researcher','Museum / archive','Student'],srcs=['LinkedIn','Facebook','Newsletter','University list','Personal outreach','Conference'];
  const fbT=S.tplList.findIndex(t=>t.name.includes('Google Form'));
- return `<div class="stats five">${stat('Testers','<b>'+n+'</b>','invited & active')}${stat('Gave any feedback',any,pct(any,n)+' of testers')}${stat('Google Form',form,pct(form,n))}${stat('Interviews',iv,pct(iv,n))}${stat('No feedback yet',n-any,pct(n-any,n),1)}</div>
+ return `<div class="stats six">${stat('Testers','<b>'+n+'</b>','invited & active')}${stat('Gave any feedback',any,pct(any,n)+' of testers')}${stat('By email',mail,pct(mail,n))}${stat('Google Form',form,pct(form,n))}${stat('Interviews',iv,pct(iv,n))}${stat('No feedback yet',n-any,pct(n-any,n),1)}</div>
  <div class="grid eq">${card(`<h2 style="margin-bottom:8px">Where testers came from</h2>${bars(by('src').map(([k,v])=>[k,Math.round(v/n*100),v]))}`)}${card(`<h2 style="margin-bottom:8px">Who the testers are</h2>${bars(by('role').map(([k,v])=>[k,Math.round(v/n*100),v]))}`)}</div>
  <div class="grid">${card(`<div class="sectionhead"><h2>Tester list</h2><div class="actions"><button class="btn small" onclick="loadConfluenceTesters()" title="Reads the table on the Confluence page Beta testers">↻ Load from Confluence</button><select class="mini" onchange="roleFilter=this.value;render()">${['All',...roles].map(r=>`<option ${r===roleFilter?'selected':''}>${r}</option>`).join('')}</select></div></div>
  <div class="actions" style="margin-bottom:12px"><select class="mini" id="nr">${roles.map(r=>`<option>${r}</option>`).join('')}</select><select class="mini" id="ns">${srcs.map(r=>`<option>${r}</option>`).join('')}</select><button class="btn small" onclick="addTester()">+ Add tester</button></div>
- ${table(['ID','Role','Source','Project (1 sentence)','Feedback','Built maps',''],rows.slice(0,14).map(t=>[t.id,t.role,t.src,`<input class="inl" style="width:260px" placeholder="add 1 sentence" value="${esc(t.proj||'')}" onchange="setTF('${t.id}','proj',this.value)">`,sel(['None','Google Form','Interview','Both'],t.fb,`setT('${t.id}',this.value)`),`<input class="inl" type="number" min="0" style="width:60px" value="${t.maps||0}" onchange="setTF('${t.id}','maps',+this.value)">`,`<button class="ibtn" title="Delete row" onclick="delTester('${t.id}')">🗑</button>`]))}<div class="muted" style="margin-top:8px">Showing ${Math.min(14,rows.length)} of ${rows.length}. Testers are anonymous IDs — no personal data in this demo.</div>`)}
+ ${table(['ID','Role','Source','Project (1 sentence)','Interview','Feedback','Built maps',''],rows.map(t=>[t.id,t.role,t.src,`<input class="inl" style="width:260px" placeholder="add 1 sentence" value="${esc(t.proj||'')}" onchange="setTF('${t.id}','proj',this.value)">`,sel(['No','Yes'],t.iv||'No',`setTF('${t.id}','iv',this.value)`),sel(['None','Email','Google Form','All'],t.fb||'None',`setTF('${t.id}','fb',this.value)`),`<input class="inl" type="number" min="0" style="width:60px" value="${t.maps||0}" onchange="setTF('${t.id}','maps',+this.value)">`,`<button class="ibtn" title="Delete row" onclick="delTester('${t.id}')">🗑</button>`]))}<div class="muted" style="margin-top:8px">${rows.length} testers · click a column header to sort. Testers are anonymous IDs — no personal data in this demo.</div>`)}
  ${card(`<div class="sectionhead"><h2>Recent feedback template</h2><button class="btn secondary small" onclick="editTpl(${fbT})">Edit in Templates →</button></div><div class="preview" style="font-size:12px;max-height:340px">${esc(S.tplList[fbT]?.body||'')}</div><div class="note">Pipeline: Google Form + interviews → anonymise → tag themes → rank by frequency and severity → UX backlog.</div>`)}</div>`}
 /* ---- Beta testers: load from the Confluence page "Beta testers" (anonymous fields only) ---- */
 const CF_ROLES=[[/teacher|educator|учител|препод/i,'Teacher'],[/phd|doctoral|аспирант/i,'PhD student'],[/professor|prof\.|lecturer|профессор/i,'Professor'],[/museum|archive|музей|архив/i,'Museum / archive'],[/researcher|historian|scientist|scholar|исследов|историк/i,'Researcher'],[/student|студент/i,'Student']];
@@ -419,16 +437,18 @@ const cfNorm=(v,list)=>{const t=String(v||'').trim();if(!t)return 'Unknown';cons
 function cfMap(rows){
  const H=(rows[0]||[]).map(x=>String(x||'').toLowerCase().trim());
  const col=re=>H.findIndex(h=>re.test(h)),role=col(/role|position|occupation|profession|job|who|роль|должност|кто/),src=col(/source|channel|came from|where|откуда|канал|источник/),proj=col(/project|проект/),built=col(/built|maps/);
- const fbCols=H.map((h,i)=>/feedback|form|interview|survey|отзыв|форма|интервью|опрос/.test(h)?i:-1).filter(i=>i>=0);
+ const ivCol=col(/interview|интервью/),fbCols=H.map((h,i)=>/feedback|form|survey|отзыв|форма|опрос/.test(h)&&i!==ivCol?i:-1).filter(i=>i>=0);
  const out=[];let skipped=0;
+ const yes=v=>/\S/.test(String(v||''))&&!/^(no|none|нет|—|-|–|n\/a|false|0|✗|✘|❌)$/i.test(String(v||'').trim());
  rows.slice(1).forEach(r=>{if(!r.some(c=>String(c||'').trim())){return}
-  const fbText=fbCols.map(i=>H[i]+' '+String(r[i]||'')).join(' ').toLowerCase(),filled=i=>/\S/.test(String(r[i]||''))&&!/^(no|none|нет|—|-|n\/a|false|✗|✘|❌)$/i.test(String(r[i]||'').trim());
-  let form=false,iv=false;
-  fbCols.forEach(i=>{const h=H[i],ok=filled(i);if(!ok)return;const v=String(r[i]).toLowerCase();
-   if(/interview|интервью/.test(h)||/interview|интервью/.test(v))iv=true;if(/form|форма|survey|опрос/.test(h)||/form|форма|survey|опрос/.test(v))form=true;
-   if(!/interview|интервью|form|форма|survey|опрос/.test(h+v))form=true}); // a plain "feedback: yes" counts as a form answer
-  out.push({role:cfNorm(role>=0?r[role]:'',CF_ROLES),src:cfNorm(src>=0?r[src]:'',CF_SRCS),proj:proj>=0?cfOne(r[proj]):'',maps:built>=0?(parseInt(String(r[built]).replace(/[^\d]/g,''),10)||0):0,fb:form&&iv?'Both':iv?'Interview':form?'Google Form':'None'})});
- return {testers:out,columns:{role:role>=0?rows[0][role]:null,source:src>=0?rows[0][src]:null,project:proj>=0?rows[0][proj]:null,built:built>=0?rows[0][built]:null,feedback:fbCols.map(i=>rows[0][i])},skipped}}
+  // feedback channel: Email / Google Form / All (both); text in the cell decides, a filled cell of unknown kind counts as Google Form
+  let em=false,fm=false,all=false;
+  fbCols.forEach(i=>{const v=String(r[i]||'').toLowerCase();if(!yes(v))return;
+   if(/\ball\b|все/.test(v))all=true;if(/e-?mail|mail|почт/.test(v))em=true;if(/form|форма|survey|опрос|google/.test(v))fm=true;
+   if(!/\ball\b|все|mail|почт|form|форма|survey|опрос|google/.test(v))fm=true});
+  out.push({role:cfNorm(role>=0?r[role]:'',CF_ROLES),src:cfNorm(src>=0?r[src]:'',CF_SRCS),proj:proj>=0?cfOne(r[proj]):'',maps:built>=0?(parseInt(String(r[built]).replace(/[^\d]/g,''),10)||0):0,
+   iv:ivCol>=0&&yes(r[ivCol])?'Yes':'No',fb:all||(em&&fm)?'All':em?'Email':fm?'Google Form':'None'})});
+ return {testers:out,columns:{role:role>=0?rows[0][role]:null,source:src>=0?rows[0][src]:null,project:proj>=0?rows[0][proj]:null,built:built>=0?rows[0][built]:null,interview:ivCol>=0?rows[0][ivCol]:null,feedback:fbCols.map(i=>rows[0][i])},skipped}}
 /** Pick the largest table of the page and turn it into rows. */
 function cfTables(html){const d=new DOMParser().parseFromString(html,'text/html');
  const tabs=[...d.querySelectorAll('table')].map(t=>[...t.querySelectorAll('tr')].map(tr=>[...tr.children].filter(c=>/^t[dh]$/i.test(c.tagName)).map(c=>c.textContent.replace(/\s+/g,' ').trim())).filter(r=>r.length));
@@ -437,7 +457,7 @@ async function loadConfluenceTesters(){
  let page;try{page=await api('/api/confluence')}catch(e){if(e.message!=='login')alert('Could not read the Confluence page: '+e.message);return}
  const rows=cfTables(page.html);if(rows.length<2){alert('No table with testers was found on the page "'+(page.title||'')+'". The importer needs a table with a header row.');return}
  const m=cfMap(rows),n=m.testers.length;if(!n){alert('The table has no rows.');return}
- const c=m.columns,msg='Page: "'+page.title+'" · '+n+' tester rows\nRole column: '+(c.role||'NOT FOUND')+'\nSource column: '+(c.source||'NOT FOUND')+'\nProject column: '+(c.project||'NOT FOUND')+'\nBuilt maps column: '+(c.built||'NOT FOUND')+'\nFeedback columns: '+(c.feedback.join(', ')||'NOT FOUND')+'\n\nImported: role, source, project (first sentence), feedback, built maps — no names or e-mails. Rows imported earlier are replaced, so edits made to them in the hub are overwritten. Nothing is written back to Confluence. Import?';
+ const c=m.columns,msg='Page: "'+page.title+'" · '+n+' tester rows\nRole column: '+(c.role||'NOT FOUND')+'\nSource column: '+(c.source||'NOT FOUND')+'\nProject column: '+(c.project||'NOT FOUND')+'\nBuilt maps column: '+(c.built||'NOT FOUND')+'\nInterview column (Yes/No): '+(c.interview||'NOT FOUND')+'\nFeedback column (Email / Google Form / All): '+(c.feedback.join(', ')||'NOT FOUND')+'\n\nImported: role, source, project (first sentence), feedback, built maps — no names or e-mails. Rows imported earlier are replaced, so edits made to them in the hub are overwritten. Nothing is written back to Confluence. Import?';
  if(!confirm(msg))return;
  const manual=S.testers.filter(t=>t.ext!=='confluence');let drop=false;
  if(manual.length&&confirm('Also remove the '+manual.length+' existing tester rows that did not come from Confluence (demo or manual)?\nOK = remove them, Cancel = keep them.'))drop=true;
@@ -445,8 +465,10 @@ async function loadConfluenceTesters(){
  try{localStorage.setItem('cf_last',new Date().toLocaleString())}catch(e){}
  save();render()}
 function setTF(id,k,v){S.testers.find(t=>t.id===id)[k]=v;save()}
-function setT(id,v){S.testers.find(t=>t.id===id).fb=v;save();render()}
-function addTester(){const n=S.testers.length+1;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,fb:'None'});save();render()}
+/** older rows kept the interview inside "fb" (Interview / Both): move it to the separate Interview column */
+function migrateTesters(){let ch=false;S.testers.forEach(t=>{if(t.iv===undefined){t.iv=t.fb==='Interview'||t.fb==='Both'?'Yes':'No';if(t.fb==='Interview')t.fb='None';else if(t.fb==='Both')t.fb='Google Form';ch=true}
+ else if(t.fb==='Interview'||t.fb==='Both'){t.iv='Yes';t.fb=t.fb==='Both'?'Google Form':'None';ch=true}});return ch}
+function addTester(){const n=S.testers.length+1;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,iv:'No',fb:'None'});save();render()}
 
 /* generic editable tables */
 const setF=(c,i,k,v)=>{S[c][i][k]=v;save();render()};
@@ -854,7 +876,7 @@ function go(p){page=p;render();window.scrollTo(0,0)}
 function render(){const cnt={testers:S.testers.length,conferences:S.confs.length,grants:S.grants.length,academia:S.unis.length,communities:S.comms.length,services:[...S.grants,...S.confs,...S.comms,...S.rivals].filter(x=>x.isNew&&!x.hidden).length,rivals:S.rivals.length,progress:S.roadmap.filter(x=>x.status==='progress').length};
  document.getElementById('nav').innerHTML=PAGES.map(([id,ic,l])=>`<button class="nav ${page===id?'active':''}" onclick="go('${id}')"><b>${ic}</b><span class="t">${l}</span>${cnt[id]?`<span class="cnt">${cnt[id]}</span>`:''}</button>`).join('');
  const [e,t,s]=META[page];document.getElementById('eyebrow').textContent=e;document.getElementById('title').textContent=t;document.getElementById('subtitle').textContent=s;
- document.getElementById('content').innerHTML=VIEWS[page]();if(page==='templates')refreshTpl();bgLoad()}
+ document.getElementById('content').innerHTML=VIEWS[page]();if(page==='templates')refreshTpl();enableSort();bgLoad()}
 boot();
 </script>
 </body>
