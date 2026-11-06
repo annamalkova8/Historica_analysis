@@ -80,6 +80,7 @@ One row per source check or Jira sync. `found` = items returned; `added` = new r
 | `rivals` | Rivals analysis → Rivals | UI + Rivals analysis | `normName(name)` | Service **refreshes** existing rows (`whatNew`, `lastChecked`) instead of skipping them. |
 | `rivalDirs` | Rivals → Directions & claims | UI only | — | Seeded from the Oct 2026 report. |
 | `mapq` | Rivals → Map quality analysis | UI only (manual or imported benchmark report) | — | Matched on region + year when importing. |
+| `mapqIn` | Project progress → Map quality → before/after | UI only (filled by the tab's ↻ Update, which reads `<zone>_<period>/<zone>_report.json` files from the map_score_service `out` folder in the browser) | — | One row per zone + period; re-reading a report refreshes the row. |
 | `roadmap` | Project progress | UI only | — | Seeded from `historica_roadmap.html`. |
 | `unis` | Academic Outreach | UI only | — | No search service (manual). |
 | `testers` | Map Builder Testers | UI only | — | No search service (manual). |
@@ -134,6 +135,9 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 
 ### `mapq` (map-quality benchmark, one row = one region + year)
 `region`, `year`, `ours`, `rivals` (overall "common score", 0–100; rivals = mean of 5 maps), `countryOurs`, `countryRivals`, `borderOurs`, `borderRivals`, `best` (best rival map), `wrong` (e.g. `"7 of 41"` wrong borders on our map), `date`, `note`. Δ is computed in the UI (`ours − rivals`).
+
+### `mapqIn` (before/after map comparison, one row = one zone + period)
+`zone`, `period`, `beforeCommon`/`afterCommon`, `beforeCountry`/`afterCountry`, `beforeBorder`/`afterBorder` (0–100), `afterRecall`, `afterPrecision`, `afterWrong`, `afterBorders`, `afterExpected` (inputs of the worked example), `verdict`, `summary`, `improved[]`, `worsened[]` (item titles), `unchanged` (count), `beforeMap`, `afterMap` (file names), `llm`, `date` (report file date), `src`. The `mapq` rows may also carry `rivalScores` (`{rival: common score}`) and `src` when filled by the Map quality tab.
 
 ### `roadmap`
 `lane` (`maps`/`builder`/`community`/`analytics`/`funding`), `q` (quarter index 0–4 = Q4 2026 … Q4 2027+), `title`, `status` (`idea`/`planned`/`progress`/`done`), `goal` (`q` = quality, `a` = adoption), `why`, `metric`, `jira` (Jira epic key or label that drives the progress bar; empty = none).

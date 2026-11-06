@@ -34,6 +34,9 @@ Dashboards, trackers and AI search services for Historica.
 - Sources, queries and the profile of each service live in code (`funds/`, `conferences/`, `communities/`, `rivals/`); the `/api/services` endpoint can still override them, but the UI page for it was removed.
 - Cron (`vercel.json`, daily 06:00 UTC): each service checks its next `CRON_CHUNK` (default 3) sources, then the cursor moves on. Every source is revisited every few days. Vercel Hobby allows daily crons.
 
+## Map quality (Project progress → Map quality)
+Shows the quality-score formula, the before/after comparison of our maps (table per 100-year period: mean common score, best improved zone, worsened zone) and our comparison with rivals. The two **↻ Update** buttons read report files from your local folders **in the browser** (the deployed server cannot see your disk): pick `…/map_score_service/out` for before/after and `…/rivals_comparison` for rivals once (Chrome/Edge remember it; other browsers ask for the folder each time). New reports are added, changed ones refreshed. Where nothing is loaded yet the tab says "Data not enough to show".
+
 ## ↻ Update buttons
 Every table tab that has a service has an **↻ Update** button: Conferences, Grants & Funding, Communities and Rivals run their search service (asks for confirmation first, because it uses OpenAI credits); Project progress pulls issues from Jira. Academic Outreach and Map Builder Testers are manual tables with no service. Database layout: `_DOCS/DATABASE_SCHEMA.md`.
 

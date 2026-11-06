@@ -149,7 +149,7 @@ const DEFAULTS=()=>({
  testers:[],
  comms:[{"name": "r/historyteachers", "platform": "Reddit", "audience": "School history teachers", "url": "https://www.reddit.com/r/historyteachers/", "priority": "Very high", "approach": "Share a classroom activity using Historica", "goal": "Feedback", "rules": "Contribute first; avoid repeated promo", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "AHA Teaching and Learning History", "platform": "Community platform", "audience": "Teachers, university lecturers, museum educators", "url": "https://communities.historians.org/communities/community-home?communitykey=4ea04032-7b21-44fd-835a-5a8a558b8c52", "priority": "Very high", "approach": "Request educational feedback or propose a teaching resource", "goal": "Partnership", "rules": "Membership needed to start topics", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "NCHE History Hangouts", "platform": "Discord", "audience": "History educators", "url": "https://ncheteach.org/historyhangouts/", "priority": "Very high", "approach": "Introduce Historica; ask teachers to test a classroom activity", "goal": "Feedback", "rules": "Ask permission before sharing", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "EuroClio Hubs", "platform": "Association hubs", "audience": "European history teacher associations", "url": "https://euroclio.eu/euroclio-hubs/", "priority": "Very high", "approach": "Contact regional coordinators about sharing with educators / pilots", "goal": "Partnership", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "Geovistory Community", "platform": "Community + Discord", "audience": "Digital historians, developers, humanities researchers", "url": "https://www.geovistory.org/community", "priority": "High", "approach": "Technical feedback; introduce Map Builder beta", "goal": "Feedback", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "UK–Ireland Digital Humanities Association", "platform": "Mailing list", "audience": "Digital humanities researchers", "url": "https://digitalhumanities-uk-ie.org/join/", "priority": "High", "approach": "Share the project via its open mailing list", "goal": "Partnership", "rules": "Mailing list allows project announcements", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "Digital Medievalist", "platform": "Website / list", "audience": "Medieval historians, DH specialists", "url": "https://digitalmedievalist.org/", "priority": "High", "approach": "Introduce medieval coverage; ask for scholarly feedback", "goal": "Feedback", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "The Education Forum", "platform": "Forum", "audience": "History and geography teachers", "url": "https://educationforum.ipbhost.com/", "priority": "Medium", "approach": "Post a teaching-resource discussion in a relevant section", "goal": "Acquisition", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "r/Maps", "platform": "Reddit", "audience": "Map enthusiasts", "url": "https://www.reddit.com/r/Maps/", "priority": "High", "approach": "Show a concrete map feature and ask for feedback", "goal": "Acquisition", "rules": "Check subreddit rules", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "r/MapPorn", "platform": "Reddit", "audience": "Large audience, cartographic visuals", "url": "https://www.reddit.com/r/MapPorn/", "priority": "Medium", "approach": "Share a compelling historical map with context", "goal": "Acquisition", "rules": "Check promotion rules", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "r/HistoricalMaps", "platform": "Reddit", "audience": "Historical cartography audience", "url": "https://www.reddit.com/r/HistoricalMaps/", "priority": "Medium", "approach": "Share a historical map comparison", "goal": "Acquisition", "rules": "Check subreddit rules", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "H-Maps / H-Net", "platform": "Academic network", "audience": "Historical cartography researchers", "url": "https://networks.h-net.org/h-maps", "priority": "High", "approach": "Introduce Historica as a research and teaching tool", "goal": "Partnership", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}, {"name": "ProFantasy Historical Maps Forum", "platform": "Forum", "audience": "Cartography hobbyists, map creators", "url": "https://forum.profantasy.com/discussion/10430/historical-maps", "priority": "Medium", "approach": "Share Historica as a resource for historical geography", "goal": "Acquisition", "rules": "", "contact": "", "date": "", "status": "Not started", "responses": 0, "visits": 0, "testers": 0}],
  funnels:[],
- rivals:SEED.rivals(),rivalDirs:SEED.rivalDirs(),mapq:SEED.mapq(),roadmap:SEED.roadmap(),
+ rivals:SEED.rivals(),rivalDirs:SEED.rivalDirs(),mapq:SEED.mapq(),mapqIn:[],roadmap:SEED.roadmap(),
  tpl:0,tplVars:{},ctx:null,dashUrl:''
 });
 const TPL=()=>[
@@ -242,7 +242,7 @@ We would welcome the opportunity to discuss the project further.
 Kind regards,
 {{sender_name}}`}];
 let S,SNAP={},syncT=null,syncing=false,dirty=false;
-const COLLS=['grants','confs','comms','unis','testers','tplList','funnels','rivals','rivalDirs','mapq','roadmap'];
+const COLLS=['grants','confs','comms','unis','testers','tplList','funnels','rivals','rivalDirs','mapq','mapqIn','roadmap'];
 let pendingKinds=[];
 const UIKEY='historica_hub_ui_v1';
 const uid=()=>'c_'+(window.crypto&&crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36));
@@ -305,7 +305,7 @@ function sortBy(c,k){const s=SORT[c];s.d=s.k===k?-s.d:1;s.k=k;render()}
 const th=(c,k,l)=>`<span style="cursor:pointer;user-select:none" onclick="sortBy('${c}','${k}')">${l}${SORT[c].k===k?(SORT[c].d>0?' ▲':' ▼'):' ↕'}</span>`;
 const confCountry=c=>{if(c.country)return c.country;const l=String(c.loc||'').trim();if(!l||/^(tbd|unknown)$/i.test(l))return '';if(/^(online|virtual|remote)/i.test(l))return 'Online';const p=l.split(/[,;\/]/).map(x=>x.trim()).filter(Boolean);return p[p.length-1]||''};
 const cmp=c=>(a,b)=>{const k=SORT[c].k,x=k==='country'?confCountry(S[c][a]):S[c][a][k],y=k==='country'?confCountry(S[c][b]):S[c][b][k];const PR={'Very high':0,'High':1,'Medium':2};return (['cost','responses','visits','testers'].includes(k)?(+x-+y):k==='priority'?(PR[x]-PR[y]):String(x).localeCompare(String(y)))*SORT[c].d};
-let confFilter='All',commFilter='All',page='analytics',aTab='website',aMode='now',fPage='funnel',flowAnchor='map_opened',grantFilter='All',roleFilter='All';
+let confFilter='All',commFilter='All',page='analytics',aView='public',aTab='website',fPage='funnel',flowAnchor='map_opened',grantFilter='All',roleFilter='All';
 
 /* ---------- event catalogue (from historica_tracking_spec.md) ---------- */
 const EVENTS={
@@ -329,46 +329,57 @@ const rate=(a,b,w)=>{let r=PAIR[a+'>'+b]??(.3+(hash(a+b)%45)/100);return Math.mi
 function computeFunnel(steps,win,mult=1,share=1,unit='visitors'){let c=(START[steps[0]]??5000)*share*(unit==='sessions'?1.35:1);const out=[{n:steps[0],c}];
  for(let i=1;i<steps.length;i++){c=c*Math.min(.97,rate(steps[i-1],steps[i],win)*mult);out.push({n:steps[i],c})}return out}
 function funnelHTML(res){const t=res[0].c;return res.map((s,i)=>{const prev=i?res[i-1].c:s.c;return `<div class="fn"><code>${esc(s.n)}</code><div class="bar"><div style="width:${(s.c/t*100).toFixed(1)}%"></div></div><div><b>${fmt(s.c)}</b> <span class="muted">${i?pct(s.c,prev)+' of prev':'entered'}</span>${i?`<div class="drop">−${fmt(prev-s.c)} dropped</div>`:''}</div></div>`}).join('')+`<div class="muted" style="margin-top:6px">Overall conversion: <b style="color:#e8eef9">${pct(res.at(-1).c,t)}</b></div>`}
-const miniFunnel=(steps,title)=>card(`<div class="sectionhead"><h2>${title} <span class="tag">needs event tracking</span></h2><button class="btn secondary small" onclick="openFunnel(${JSON.stringify(steps).replace(/"/g,'&quot;')},'${esc(title)}')">Open in Funnel Builder →</button></div>${funnelHTML(computeFunnel(steps,'7d'))}`);
 
 /* ---------- pages ---------- */
 const PAGES=[['analytics','▥','Analytics'],['progress','◔','Project progress'],['testers','♙','Map Builder Testers'],['conferences','▦','Conferences'],['grants','◇','Grants & Funding'],['academia','◎','Academic Outreach'],['communities','◉','Communities'],['rivals','⚔','Rivals analysis'],['templates','✎','Templates & Letters']];
-const META={progress:['Roadmap & Jira','Project progress','Roadmap to the best open maps and the most popular tool among scientists — plus Jira analytics: delivery and team performance.'],rivals:['Competitive intelligence','Rivals analysis','Who else makes historical maps, what is new, what we can take — and where Historica is better or worse.'],analytics:['Dashboards','Analytics','What we have today, and what we expect once event tracking is live.'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
+const META={progress:['Roadmap & Jira','Project progress','Roadmap to the best open maps and the most popular tool among scientists — plus Jira analytics: delivery and team performance.'],rivals:['Competitive intelligence','Rivals analysis','Who else makes historical maps, what is new, what we can take — and where Historica is better or worse.'],analytics:['Dashboards','Analytics','Public view (what the website shows) and Analytics (what we expect to measure — “Data not enough to show” where it is not collected yet).'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
 
-/* Analytics */
-function analytics(){const exp=aMode==='expected',fn=aTab==='funnels';
- const tabs=`<div class="tabs">${[['website','Website'],['map','Map'],['social','Social & Newsletter'],['publicity','Publicity'],['builder','Map Builder users'],['funnels','Funnels']].map(([k,l])=>`<button class="tab ${aTab===k?'active':''}" onclick="aTab='${k}';render()">${l}</button>`).join('')}</div>`;
- const head=`<div class="toolbar" style="margin-top:0">${tabs}${fn?'':`<div class="seg"><button class="${!exp?'active':''}" onclick="aMode='now';render()">Right now</button><button class="${exp?'active':''}" onclick="aMode='expected';render()">What we expect</button></div>`}</div>`+(fn?'':`<div class="note" style="margin:0 0 14px">${exp?'<b>Expected version</b> — funnels and engagement metrics that become possible after the events from the tracking spec (P0) are implemented. Values are simulated.':'<b>Right now</b> — only what is measured today: visitors, followers, subscribers, content counts. Followers/subscribers/articles/authors follow the brief; other numbers are illustrative.'}</div>`);
- return fn?head+funnels():head+({website,map:mapTab,social,publicity,builder}[aTab])(exp)}
-function website(exp){const v=series(1,12,8200,12840),m=series(2,12,3100,8420);
- let h=`<div class="stats">${stat('Website visitors · 30d','12,840','↑ 14% vs prev 30d')}${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Social followers','20,000+','FB + LinkedIn')}${stat('Newsletter','5,000+','subscribers')}</div>
- <div class="grid">${card(`<div class="sectionhead"><h2>Weekly visitors</h2></div>${line([{name:'Website',d:v},{name:'Map',d:m}])}`)}${card(`<h2 style="margin-bottom:8px">Traffic sources</h2>${bars([['Organic search',38],['Direct',22],['Social',18],['Newsletter',12],['Referral',10]])}`)}</div>`;
- if(exp)h+=`<div class="stats">${stat('CTR website → map','27%','needs map_cta_clicked')}${stat('Donation conversion','0.4%','needs donation_completed')}${stat('Avg active time','1m 48s','needs section_engagement')}${stat('Avg donation','€18','needs webhook')}</div><div class="grid eq">${miniFunnel(PRESETS[0][1],'Website → Map')}${miniFunnel(PRESETS[3][1],'Website → Donation')}</div>`;
- return h}
-function mapTab(exp){let h=`<div class="stats">${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Returning visitors','31%','illustrative')}${stat('Avg session','3m 12s','illustrative')}${stat('Mobile share','38%','illustrative')}</div>
- <div class="grid">${card(`<h2 style="margin-bottom:8px">Map visitors, weekly</h2>${line([{d:series(2,12,3100,8420)}])}`)}${card(`<h2 style="margin-bottom:8px">Where map visitors come from</h2>${bars([['Website button',44],['Social',27],['Direct / bookmark',17],['Search',12]])}`)}</div>`;
- if(exp)h+=`<div class="grid eq">${card(`<h2 style="margin-bottom:8px">Most explored periods <span class="tag">needs year_selected</span></h2>${bars([['1700–1800',82],['1900–2000',71],['1800–1900',64],['Ancient (BCE)',53],['Medieval',46]])}`)}${card(`<h2 style="margin-bottom:8px">Tool usage <span class="tag">needs top-bar events</span></h2>${bars([['Layers',58],['Search',41],['Map view',33],['Screenshot',19],['Feedback',6]])}`)}</div><div class="grid eq">${miniFunnel(PRESETS[4][1],'Map engagement')}${miniFunnel(PRESETS[6][1],'Feedback')}</div>`;
- return h}
-function social(exp){const ch=[['Facebook',11400,312,1840,720],['LinkedIn',8700,148,960,310],['Newsletter',5120,27,1310,690]];
- let h=`<div class="stats five">${stat('Social followers','20,000+','Facebook + LinkedIn')}${stat('Newsletter subscribers','5,000+','↑ 2.1% / month')}${stat('Comments · 30d','487','FB + LinkedIn')}${stat('Clicks → website','4,110','all channels')}${stat('Clicks → map','1,720','all channels')}</div>
- <div class="grid">${card(`<h2 style="margin-bottom:8px">Followers growth</h2>${line([{name:'Facebook',d:series(4,12,9800,11400,.01)},{name:'LinkedIn',d:series(5,12,7100,8700,.01)},{name:'Newsletter',d:series(6,12,4300,5120,.01)}])}`)}${card(`<h2 style="margin-bottom:8px">Clicks to map, share by channel</h2>${bars(ch.map(c=>[c[0],Math.round(c[4]/1720*100)]))}<div class="muted">Click counts come from UTM links (utm_source / utm_medium).</div>`)}</div>
- ${card(`<h2 style="margin-bottom:10px">Channels · last 30 days</h2>${table(['Channel','Audience','Comments','→ Website','→ Map','Map click rate'],ch.map(c=>[`<b>${c[0]}</b>`,fmt(c[1])+(c[0]==='Newsletter'?' subscribers':''),fmt(c[2]),fmt(c[3]),fmt(c[4]),pct(c[4],c[3])]))}`)}`;
- if(exp)h+=`<div class="grid eq" style="margin-top:16px">${miniFunnel(PRESETS[1][1],'Social → Map')}${card(`<h2 style="margin-bottom:8px">Best posts <span class="tag">needs UTM per post</span></h2>${table(['Post','Channel','→ Map'],[['Borders of Europe, 1815','Facebook','212'],['Map Builder beta call','LinkedIn','148'],['Newsletter #42 · Silk Roads','Newsletter','167']])}`)}</div>`;
- return h}
-function publicity(exp){let h=`<div class="stats">${stat('Published articles','70+','since launch')}${stat('Contributing authors','45+','guest + core')}${stat('Articles · last 90d','9','illustrative')}${stat('Avg reads / article','640','illustrative')}</div>
- <div class="grid">${card(`<h2 style="margin-bottom:8px">Articles published per month</h2>${line([{d:series(8,12,3,9,.25)}])}`)}${card(`<h2 style="margin-bottom:8px">Authors by background</h2>${bars([['University / PhD',48],['Independent historians',27],['Teachers',15],['Museum / archive',10]])}`)}</div>
- ${card(`<h2 style="margin-bottom:10px">Top articles <span class="tag now">illustrative titles</span></h2>${table(['Article','Reads','→ Map clicks','Conv.'],[['How the borders of Europe changed after 1815','3,240','412','13%'],['The Silk Roads, mapped','2,870','356','12%'],['Lost cities of the Bronze Age','2,115','198','9%'],['Teaching with historical maps','1,480','211','14%']])}`)}`;
- if(exp)h+=`<div style="margin-top:16px">${miniFunnel(['article_viewed','map_cta_clicked','map_opened','year_selected'],'Article → Map')}</div>`;return h}
-function builder(exp){const users=S.testers.length;let h=`<div class="stats">${stat('Map Builder users','412','↑ 18% · illustrative')}${stat('Maps built','1,036','illustrative')}${stat('Maps / user','2.5','illustrative')}${stat('Beta testers','<b>'+users+'</b>','see Testers page')}</div>
- <div class="grid">${card(`<h2 style="margin-bottom:8px">Users and maps built, weekly</h2>${line([{name:'Users (cumulative)',d:series(9,12,60,412,.02)},{name:'Maps built (cumulative)',d:series(10,12,120,1036,.02)}])}`)}${card(`<h2 style="margin-bottom:8px">Who builds maps</h2>${bars([['Teachers',34],['PhD students',26],['Professors',16],['Students',14],['Other',10]])}`)}</div>`;
- if(exp)h+=`<div class="grid eq">${miniFunnel(PRESETS[2][1],'Map Builder → published map')}${card(`<h2 style="margin-bottom:8px">Where users drop <span class="tag">needs builder events</span></h2>${bars([['Import data',38],['Add objects',24],['Timeline setup',19],['Publish step',11]])}<div class="muted">Share of drop-offs by step — feeds the UX backlog.</div>`)}</div>`;
- return h}
+/* Analytics — two views: Public (what the website shows) and Expected (what we plan to measure) */
+const NO='Data not enough to show';
+const TRACKING_LIVE=false; // flip to true once the P0 events from the tracking spec are flowing
+const nodata=(title,need,h=110)=>card(`<h2 style="margin-bottom:8px">${title}${need?` <span class="tag">needs ${need}</span>`:''}</h2><div class="mock" style="height:${h}px">${NO}</div>`);
+const nostat=(label,need)=>stat(label,`<span style="font-size:15px;font-weight:600">${NO}</span>`,need?'needs '+need:'');
+const funnelNo=i=>nodata(PRESETS[i][0]+' (funnel)',PRESETS[i][1].join(' → '),90);
+const noCell=`<span class="muted">${NO}</span>`;
+function analytics(){const exp=aView==='expected',fn=exp&&aTab==='funnels';
+ const views=`<div class="tabs">${[['public','Public · shown on website'],['expected','Analytics · what we expect']].map(([k,l])=>`<button class="tab ${aView===k?'active':''}" onclick="aView='${k}';render()">${l}</button>`).join('')}</div>`;
+ const subs=exp?`<div class="tabs" style="margin-top:12px">${[['website','Website'],['map','Map'],['social','Social & Newsletter'],['publicity','Publicity'],['builder','Map Builder users'],['funnels','Funnels']].map(([k,l])=>`<button class="tab ${aTab===k?'active':''}" onclick="aTab='${k}';render()">${l}</button>`).join('')}</div>`:'';
+ const note=exp?(fn?'':`<div class="note" style="margin:14px 0">Everything we plan to measure. Where the number is not collected yet, the card says <b>${NO}</b> and names what is needed (tracking events from the spec, UTM links, or the Facebook / LinkedIn collectors).</div>`)
+  :`<div class="note" style="margin:14px 0"><b>Public view</b> — the figures shown on the website. Numbers that are not yet measured are illustrative.</div>`;
+ const body=!exp?websitePublic():fn?funnels():({website:siteX,map:mapX,social:socialX,publicity:pubX,builder:builderX}[aTab])();
+ return `<div class="toolbar" style="margin-top:0">${views}</div>${subs}${note}${body}`}
+function websitePublic(){const v=series(1,12,8200,12840),m=series(2,12,3100,8420),T=S.testers,fb=T.filter(t=>t.fb&&t.fb!=='None').length,iv=T.filter(t=>t.fb==='Interview'||t.fb==='Both').length;
+ return `<div class="stats">${stat('Beta testers',T.length,'Map Builder')}${stat('Gave feedback',fb,pct(fb,T.length)+' of testers')}${stat('Interviewed',iv,pct(iv,T.length)+' of testers')}</div>
+ <div class="stats">${stat('Website visitors · 30d','12,840','↑ 14% vs prev 30d')}${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Social followers','20,000+','FB + LinkedIn')}${stat('Newsletter','5,000+','subscribers')}</div>
+ <div class="grid">${card(`<div class="sectionhead"><h2>Weekly visitors</h2></div>${line([{name:'Website',d:v},{name:'Map',d:m}])}`)}${card(`<h2 style="margin-bottom:8px">Traffic sources</h2>${bars([['Organic search',38],['Direct',22],['Social',18],['Newsletter',12],['Referral',10]])}`)}</div>`}
+function siteX(){return `<div class="stats">${nostat('Website visitors · 30d','page_viewed')}${nostat('Map visitors · 30d','map_opened')}${stat('Social followers','20,000+','FB + LinkedIn')}${stat('Newsletter','5,000+','subscribers')}</div>
+ <div class="grid">${nodata('Weekly visitors','page_viewed',170)}${nodata('Traffic sources','UTM / referrer',170)}</div>
+ <div class="stats">${nostat('CTR website → map','map_cta_clicked')}${nostat('Donation conversion','donation_completed')}${nostat('Avg active time','section_engagement')}${nostat('Avg donation','payment webhook')}</div>
+ <div class="grid eq">${funnelNo(0)}${funnelNo(3)}</div>`}
+function mapX(){return `<div class="stats">${nostat('Map visitors · 30d','map_opened')}${nostat('Returning visitors','visitor id')}${nostat('Avg session','engaged_map_session')}${nostat('Mobile share','device')}</div>
+ <div class="grid">${nodata('Map visitors, weekly','map_opened',170)}${nodata('Where map visitors come from','map_cta_clicked, UTM',170)}</div>
+ <div class="grid eq">${nodata('Most explored periods','year_selected')}${nodata('Tool usage','tool_used')}</div>
+ <div class="grid eq">${funnelNo(4)}${funnelNo(6)}</div>`}
+function socialX(){const ch=['Facebook','LinkedIn','Newsletter'];
+ return `<div class="stats five">${stat('Social followers','20,000+','Facebook + LinkedIn')}${stat('Newsletter subscribers','5,000+','')}${nostat('Comments · 30d','fb.py / linkedin.py')}${nostat('Clicks → website','UTM links')}${nostat('Clicks → map','UTM links')}</div>
+ <div class="grid">${nodata('Followers growth','follower history (fb.py / linkedin.py)',170)}${nodata('Clicks to map, share by channel','UTM links',170)}</div>
+ ${card(`<h2 style="margin-bottom:10px">Channels · last 30 days</h2>${table(['Channel','Audience','Comments','→ Website','→ Map','Map click rate'],ch.map(c=>[`<b>${c}</b>`,noCell,noCell,noCell,noCell,noCell]))}`)}
+ <div class="grid eq" style="margin-top:16px">${nodata('Followers · median age','Facebook insights (fb.py)')}${nodata('Followers · country','Facebook / LinkedIn (fb.py, linkedin.py)')}</div>
+ <div class="grid eq">${nodata('Followers · occupation (job function, seniority)','LinkedIn (linkedin.py)')}${nodata('Comments under posts','fb.py / linkedin.py')}</div>
+ <div class="grid eq">${funnelNo(1)}${nodata('Best posts','UTM per post')}</div>`}
+function pubX(){return `<div class="stats">${stat('Published articles','70+','since launch')}${stat('Contributing authors','45+','guest + core')}${nostat('Articles · last 90d','publication dates')}${nostat('Avg reads / article','article_viewed')}</div>
+ <div class="grid">${nodata('Articles published per month','publication dates',170)}${nodata('Authors by background','author records',170)}</div>
+ ${nodata('Top articles','article_viewed, map_cta_clicked',120)}
+ <div style="margin-top:16px">${nodata('Article → Map (funnel)','article_viewed → map_cta_clicked → map_opened → year_selected',90)}</div>`}
+function builderX(){return `<div class="stats">${nostat('Map Builder users','mapbuilder_signup')}${nostat('Maps built','map_created')}${nostat('Maps / user','map_created')}${stat('Beta testers','<b>'+S.testers.length+'</b>','see Testers page')}</div>
+ <div class="grid">${nodata('Users and maps built, weekly','mapbuilder_signup, map_created',170)}${nodata('Who builds maps','signup form (role)',170)}</div>
+ <div class="grid eq">${funnelNo(2)}${nodata('Where users drop','builder events')}</div>`}
 /* Funnels */
 function funnels(){const seg=SEGS[FS.by];
  const evOpts=Object.entries(EVENTS).map(([g,e])=>`<optgroup label="${g}">${e.map(x=>`<option>${x}</option>`).join('')}</optgroup>`).join('');
  const res=computeFunnel(FS.steps,FS.win,1,1,FS.unit);
  let breakdown='';
- if(FS.by!=='none')breakdown=card(`<h2 style="margin-bottom:10px">Breakdown by ${FS.by}</h2>${table(['Segment','Entered','Completed','Conversion','vs average'],seg.map(([n,sh,m])=>{const r=computeFunnel(FS.steps,FS.win,m,sh,FS.unit),c=r.at(-1).c/r[0].c,avg=res.at(-1).c/res[0].c;return [`<b>${n}</b>`,fmt(r[0].c),fmt(r.at(-1).c),pct(r.at(-1).c,r[0].c),`<span class="trend ${c<avg?'warn':''}">${c>=avg?'▲':'▼'} ${Math.abs((c/avg-1)*100).toFixed(0)}%</span>`]}))}`);
+ if(TRACKING_LIVE&&FS.by!=='none')breakdown=card(`<h2 style="margin-bottom:10px">Breakdown by ${FS.by}</h2>${table(['Segment','Entered','Completed','Conversion','vs average'],seg.map(([n,sh,m])=>{const r=computeFunnel(FS.steps,FS.win,m,sh,FS.unit),c=r.at(-1).c/r[0].c,avg=res.at(-1).c/res[0].c;return [`<b>${n}</b>`,fmt(r[0].c),fmt(r.at(-1).c),pct(r.at(-1).c,r[0].c),`<span class="trend ${c<avg?'warn':''}">${c>=avg?'▲':'▼'} ${Math.abs((c/avg-1)*100).toFixed(0)}%</span>`]}))}`);
  return `<div class="toolbar" style="margin-top:0"><div class="actions"><span class="muted">Presets:</span>${PRESETS.map((p,i)=>`<button class="tab ${FS.name===p[0]?'active':''}" onclick="openFunnel(PRESETS[${i}][1],PRESETS[${i}][0])">${p[0]}</button>`).join('')}</div></div>
  <div class="grid" style="grid-template-columns:minmax(280px,.8fr) 1.7fr">
  ${card(`<div class="sectionhead"><h2>Steps</h2><span class="muted">${esc(FS.name)}</span></div><div class="steps">${FS.steps.map((s,i)=>`<div class="step"><span class="n">${i+1}</span><span class="ev">${s}</span><button class="ibtn" title="Up" onclick="mvStep(${i},-1)">↑</button><button class="ibtn" title="Down" onclick="mvStep(${i},1)">↓</button><button class="ibtn" title="Remove" onclick="rmStep(${i})">✕</button></div>`).join('')}</div>
@@ -377,10 +388,10 @@ function funnels(){const seg=SEGS[FS.by];
  <div class="vars"><div><label>Conversion window</label>${sel(['1d','7d','30d'],FS.win,`FS.win=this.value;render()`).replace('class="mini"','class="field"')}</div><div><label>Count by</label>${sel(['visitors','sessions'],FS.unit,`FS.unit=this.value;render()`).replace('class="mini"','class="field"')}</div></div>
  <div style="margin-top:8px"><label class="muted">Break down by</label><div class="seg" style="display:flex;margin-top:4px">${['none','source','device'].map(b=>`<button style="flex:1" class="${FS.by===b?'active':''}" onclick="FS.by='${b}';render()">${b==='none'?'None':b[0].toUpperCase()+b.slice(1)}</button>`).join('')}</div></div>
  <div class="actions" style="margin-top:14px"><button class="btn" onclick="saveFunnel()">Save funnel</button></div>`)}
- <div>${card(`<div class="sectionhead"><h2>${esc(FS.name)}</h2><span class="muted">${FS.win} window · by ${FS.unit} · simulated</span></div>${FS.steps.length<2?'<div class="mock">Add at least two steps.</div>':funnelHTML(res)}`)}${breakdown?`<div style="margin-top:16px">${breakdown}</div>`:''}</div></div>
+ <div>${card(`<div class="sectionhead"><h2>${esc(FS.name)}</h2><span class="muted">${FS.win} window · by ${FS.unit}</span></div>${FS.steps.length<2?'<div class="mock">Add at least two steps.</div>':TRACKING_LIVE?funnelHTML(res):`<div class="mock">${NO}<br><span class="muted">needs: ${FS.steps[0]} … ${FS.steps.at(-1)}</span></div>`}`)}${breakdown?`<div style="margin-top:16px">${breakdown}</div>`:''}</div></div>
  ${S.funnels.length?card(`<h2 style="margin-bottom:10px">Saved funnels</h2>${table(['Name','Steps','Window',''],S.funnels.map((f,i)=>[`<b>${esc(f.name)}</b>`,f.steps.length+' steps',f.win,`<button class="btn secondary small" onclick="openFunnel(S.funnels[${i}].steps,S.funnels[${i}].name,S.funnels[${i}].win)">Open</button> <button class="ibtn" onclick="S.funnels.splice(${i},1);save();render()">✕</button>`]))}`):''}
  <div class="note">Event names come from <b>historica_tracking_spec.md</b>. Events tagged “proposed” (Map Builder, Social) are not in the spec yet — adding them is a recommendation for the developer.</div>`}
-function openFunnel(steps,name,win){FS={...FS,steps:[...steps],name,win:win||FS.win};page='analytics';aTab='funnels';fPage='funnel';render();window.scrollTo(0,0)}
+function openFunnel(steps,name,win){FS={...FS,steps:[...steps],name,win:win||FS.win};page='analytics';aView='expected';aTab='funnels';fPage='funnel';render();window.scrollTo(0,0)}
 function addStep(){FS.steps.push(document.getElementById('addEv').value);FS.name='Custom funnel';render()}
 function rmStep(i){FS.steps.splice(i,1);FS.name='Custom funnel';render()}
 function mvStep(i,d){const j=i+d;if(j<0||j>=FS.steps.length)return;[FS.steps[i],FS.steps[j]]=[FS.steps[j],FS.steps[i]];FS.name='Custom funnel';render()}
@@ -600,6 +611,7 @@ function paintUpd(){document.querySelectorAll('[data-upd]').forEach(e=>e.textCon
 async function runUpdate(id){
  if(runState[id]&&runState[id].running)return;
  if(id==='jira')return syncJiraNow();
+ if(MQ[id])return mqUpdate(id);
  if(!SV||SV.error)await loadServices();
  if(!SV||SV.error){alert('Cannot reach the search services: '+((SV&&SV.error)||'unknown error'));return}
  const s=SV.services.find(x=>x.id===id);if(!s){alert('Unknown service '+id);return}
@@ -630,8 +642,102 @@ const jiraBar=()=>JS&&JS.error?`<div class="note warn">Cannot read Jira status: 
 const link=(t,u)=>u?`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`:esc(t);
 
 /* ---- Project progress ---- */
-function progress(){const tabs=`<div class="toolbar" style="margin-top:0"><div class="tabs">${[['roadmap','Roadmap'],['jira','Jira analytics']].map(([k,l])=>`<button class="tab ${pgTab===k?'active':''}" onclick="pgTab='${k}';render()">${l}</button>`).join('')}</div></div>`;
- return tabs+(pgTab==='jira'?team():roadmapView())}
+
+/* ===== Project progress · Map quality (score formula, before/after, vs rivals) =====
+   Update buttons read report files from local folders IN THE BROWSER (a deployed server cannot see your disk):
+   - "mqin"  : <folder>/<zone>_<period>/<zone>_report.json   (map_score_service/out)  -> collection mapqIn
+   - "mqriv" : <folder>/<zone>_<year>.json                    (rivals_comparison)      -> collection mapq (shared with the Rivals page) */
+const MQ={mqin:{label:'Before / after reports',hint:'…/map_score_service/out'},mqriv:{label:'Rivals comparison reports',hint:'…/rivals_comparison'}};
+const mqZone=z=>String(z||'').replace(/_/g,' ').replace(/(^|\s)\S/g,x=>x.toUpperCase());
+const mqNum=v=>Number.isFinite(+v)?+v:0,mqR1=v=>Math.round(v*10)/10,mqBase=p=>String(p||'').split('/').pop();
+const mqD=(n,d=1)=>{n=Math.round(n*10**d)/10**d||0;return `<b style="color:${n>=0?'#70e0b7':'#f08a8a'}">${n>=0?'+':''}${n.toFixed(d)}</b>`};
+const mqIdb=()=>new Promise((ok,no)=>{const r=indexedDB.open('historica_hub',1);r.onupgradeneeded=()=>r.result.createObjectStore('h');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+const mqGet=async k=>{try{const d=await mqIdb();return await new Promise(ok=>{const q=d.transaction('h').objectStore('h').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)})}catch(e){return null}};
+const mqSet=async(k,v)=>{try{const d=await mqIdb();await new Promise(ok=>{const t=d.transaction('h','readwrite');t.objectStore('h').put(v,k);t.oncomplete=ok;t.onerror=ok})}catch(e){}};
+const mqLast=id=>{try{return localStorage.getItem('mq_last_'+id)||''}catch(e){return ''}};
+/** Collect .json files (path + reader) from a directory handle, 3 levels deep, skipping hidden/cache folders. */
+async function mqWalk(h,base='',depth=0,out=[]){for await(const [name,e] of h.entries()){if(name.startsWith('.')||/^(cache|__pycache__|shots|node_modules)$/i.test(name))continue;
+  if(e.kind==='file'){if(/\.json$/i.test(name))out.push({path:base+name,read:async()=>{const f=await e.getFile();return {text:await f.text(),mtime:f.lastModified}}})}
+  else if(depth<2)await mqWalk(e,base+name+'/',depth+1,out)}return out}
+function mqFromInput(files){return [...files].filter(f=>/\.json$/i.test(f.name)&&!f.name.startsWith('.')&&!/\/(cache|__pycache__|shots)\//.test(f.webkitRelativePath||'')).map(f=>({path:(f.webkitRelativePath||f.name).split('/').slice(1).join('/')||f.name,read:async()=>({text:await f.text(),mtime:f.lastModified})}))}
+/** Ask for the folder (remembered after the first time in Chrome/Edge); other browsers get a folder-upload dialog. */
+async function mqFiles(id,change){
+ if(window.showDirectoryPicker){let h=change?null:await mqGet('dir_'+id);
+  if(h){try{if(await h.queryPermission({mode:'read'})!=='granted'&&await h.requestPermission({mode:'read'})!=='granted')h=null}catch(e){h=null}}
+  if(!h){h=await window.showDirectoryPicker({id,mode:'read'});await mqSet('dir_'+id,h)}
+  return {name:h.name,files:await mqWalk(h)}}
+ return new Promise(ok=>{const i=document.createElement('input');i.type='file';i.webkitdirectory=true;i.multiple=true;i.onchange=()=>ok(i.files.length?{name:(i.files[0].webkitRelativePath||'').split('/')[0],files:mqFromInput(i.files)}:null);i.click()})}
+/** map_score_service report.json -> one before/after row (zone + period) */
+function mqParseInside(j,path,mtime){if(!j||!j.before||!j.after||!j.before.score||!j.after.score)return null;
+ const m=path.match(/(?:^|\/)([^\/]+)_(-?\d{3,4})\//),b=j.before.score,a=j.after.score,c=j.comparison||{},it=x=>(x||[]).map(y=>String(y&&y.item||y)).filter(Boolean).slice(0,6);
+ const zone=j.zone||(m&&m[1]),period=+(j.period||(m&&m[2]));if(!zone||!period)return null;
+ return {zone,period,beforeCommon:mqNum(b.common_score),afterCommon:mqNum(a.common_score),beforeCountry:mqNum(b.country_score),afterCountry:mqNum(a.country_score),beforeBorder:mqNum(b.border_score),afterBorder:mqNum(a.border_score),
+  afterRecall:mqNum(a.recall),afterPrecision:mqNum(a.precision),afterWrong:mqNum(a.wrong_borders),afterBorders:mqNum(a.borders_on_map),afterExpected:mqNum(a.expected_countries),
+  verdict:c.verdict||'',summary:c.summary||'',improved:it(c.improvements),worsened:it(c.regressions),unchanged:(c.unchanged_problems||[]).length,
+  beforeMap:mqBase(j.before.map_path),afterMap:mqBase(j.after.map_path),llm:j.llm?[j.llm.text_model,j.llm.vision_model].filter(Boolean).join(' + '):'',date:new Date(mtime).toISOString().slice(0,10),src:path}}
+/** rivals_comparison <zone>_<year>.json -> mapq row (ours vs mean of rival maps) */
+function mqParseRivals(j,path,mtime){if(!j||!j.ours||!j.ours.score||!Array.isArray(j.rivals)||!j.rivals.length)return null;
+ const m=path.match(/([^\/]+)_(-?\d{3,4})\.json$/),zone=j.zone||(m&&m[1]),year=j.year||(m&&m[2]);if(!zone||!year)return null;
+ const mean=k=>mqR1(j.rivals.reduce((s,r)=>s+mqNum(r.score&&r.score[k]),0)/j.rivals.length),o=j.ours.score,best=[...j.rivals].sort((x,y)=>mqNum(y.score.common_score)-mqNum(x.score.common_score))[0];
+ const rs={};j.rivals.forEach(r=>rs[r.label]=mqNum(r.score&&r.score.common_score));
+ return {region:mqZone(zone),year:String(year),ours:mqNum(o.common_score),rivals:mean('common_score'),countryOurs:mqNum(o.country_score),countryRivals:mean('country_score'),borderOurs:mqNum(o.border_score),borderRivals:mean('border_score'),
+  best:best.label,wrong:o.wrong_borders+' of '+o.borders_on_map,rivalScores:rs,date:new Date(mtime).toISOString().slice(0,10),src:mqBase(path)}}
+async function mqUpdate(id,change){
+ if(runState[id]&&runState[id].running)return;
+ let pick;try{pick=await mqFiles(id,change)}catch(e){if(e&&e.name!=='AbortError')alert('Could not open the folder: '+e.message);return}
+ if(!pick)return;
+ const R=runState[id]={running:true,log:[],total:pick.files.length,done:0,cur:pick.name};render();
+ const isIn=id==='mqin',coll=isIn?'mapqIn':'mapq',parse=isIn?mqParseInside:mqParseRivals,seen=new Set();let add=0,upd=0,same=0,skip=0;
+ const files=pick.files.sort((a,b)=>a.path.split('/').length-b.path.split('/').length);
+ for(const f of files){R.cur=f.path;R.done++;
+  if(isIn?!/(^|\/)[^\/]+_-?\d{3,4}\/[^\/]+_report\.json$/.test(f.path):/\/(out|cache)\//.test('/'+f.path)){continue}
+  let row=null;try{const r=await f.read();row=parse(JSON.parse(r.text),f.path,r.mtime)}catch(e){row=null}
+  if(!row){skip++;continue}
+  const key=isIn?row.zone+'|'+row.period:row.region.toLowerCase()+'|'+row.year;if(seen.has(key))continue;seen.add(key);
+  const i=S[coll].findIndex(x=>isIn?x.zone===row.zone&&String(x.period)===String(row.period):String(x.region).toLowerCase()===row.region.toLowerCase()&&String(x.year)===String(row.year));
+  if(i<0){S[coll].unshift(row);add++;R.log.push('＋ '+(isIn?mqZone(row.zone)+' '+row.period:row.region+' '+row.year)+' added')}
+  else{const old=S[coll][i],{date,...a}=row,{date:_d,...b}=old,keep=!isIn&&old.note?{note:old.note}:{};
+   if(JSON.stringify({...b,...a})===JSON.stringify(b)){same++}else{S[coll][i]={...old,...row,...keep};upd++;R.log.push('↻ '+(isIn?mqZone(row.zone)+' '+row.period:row.region+' '+row.year)+' updated')}}
+  if(R.done%5===0)paint(id)}
+ R.running=false;R.log.push(`✓ ${add} new, ${upd} updated, ${same} unchanged`+(skip?`, ${skip} file(s) not recognised`:'')+(add+upd+same===0?' — no report files found in "'+pick.name+'"':''));
+ try{localStorage.setItem('mq_last_'+id,new Date().toLocaleString()+' · folder "'+pick.name+'"')}catch(e){}
+ save();render()}
+const mqUpdBtn=id=>{const r=runState[id]||{};return `<button class="btn small" ${r.running?'disabled':''} onclick="mqUpdate('${id}')" title="Reads the report files in the folder and adds new ones / refreshes changed ones">${r.running?'Updating…':'↻ Update'}</button><button class="btn secondary small" ${r.running?'disabled':''} onclick="mqUpdate('${id}',true)" title="Pick a different folder">Change folder</button>`};
+const mqInfo=id=>`<div id="prog-${id}">${progHtml(id)}</div><div class="muted" style="margin:6px 0 10px">Source folder: <code>${MQ[id].hint}</code>${mqLast(id)?' · last update: '+esc(mqLast(id)):' · never updated'}</div>`;
+const mqEmpty=(t)=>`<div class="mock" style="height:120px">${NO}<br><span class="muted">${t}</span></div>`;
+function mapQuality(){const I=S.mapqIn,M=S.mapq,ex=[...I].sort((a,b)=>String(b.date).localeCompare(a.date)||b.period-a.period)[0];
+ /* 1 — formula */
+ const fx=ex?`<div class="note" style="margin:12px 0 0"><b>Worked example — ${esc(mqZone(ex.zone))} ${ex.period}, new map:</b> recall ${ex.afterRecall} and precision ${ex.afterPrecision} give Country = ${ex.afterCountry}; ${ex.afterWrong} wrong of ${ex.afterBorders} borders give Border = ${ex.afterBorder}; Common = 0.7 × ${ex.afterCountry} + 0.3 × ${ex.afterBorder} = <b>${ex.afterCommon}</b>.</div>`:`<div class="mock" style="height:70px;margin-top:12px">${NO}<br><span class="muted">worked example appears after the first before/after report is loaded</span></div>`;
+ const formula=card(`<div class="sectionhead"><h2>1 · How the quality score works</h2></div>
+ <div class="grid eq">${card(`<div class="metric">Common score</div><div class="number" style="font-size:20px">0.7 × Country + 0.3 × Border</div><div class="muted" style="margin-top:8px">0–100, 100 = ideal map, higher is better. Computed for one zone of the map in one year.</div>`)}
+ ${card(`<div class="metric">Country score</div><div class="number" style="font-size:20px">F1 of recall and precision</div><div class="muted" style="margin-top:8px"><b>Recall</b> = share of the countries that existed there (expected list) that are on the map. <b>Precision</b> = share of the countries on the map that are right. Showing extra or too few countries both lower it; countries historians dispute are not counted.</div>`)}
+ ${card(`<div class="metric">Border score</div><div class="number" style="font-size:20px">100 × (1 − wrong ÷ borders)</div><div class="muted" style="margin-top:8px">Share of the borders drawn on the map (neighbouring country pairs) that are historically right. Each wrong pair counts once.</div>`)}</div>${fx}
+ <div class="note">An AI model lists the countries expected in the zone and year and judges the map image; ${ex&&ex.llm?'currently <b>'+esc(ex.llm)+'</b>. ':''}Scores are indicative, not a human audit. Formula source: <code>map_score_service/scoring.py</code>.</div>`);
+ /* 2 — before / after */
+ const per={};I.forEach(x=>(per[x.period]||(per[x.period]=[])).push(x));
+ const avg=(a,k)=>a.reduce((s,x)=>s+x[k],0)/a.length,periods=Object.keys(per).map(Number).sort((a,b)=>a-b);
+ const prow=periods.map(p=>{const z=per[p],bc=avg(z,'beforeCommon'),ac=avg(z,'afterCommon'),d=x=>x.afterCommon-x.beforeCommon,best=[...z].sort((a,b)=>d(b)-d(a))[0],worst=[...z].sort((a,b)=>d(a)-d(b))[0];
+  return [`<b>${p}</b>`,`${bc.toFixed(1)} → <b>${ac.toFixed(1)}</b> ${mqD(ac-bc)}<div class="muted">mean of ${z.length} zone${z.length>1?'s':''}</div>`,
+   d(best)>0?`<b>${esc(mqZone(best.zone))}</b> ${mqD(d(best))}`:'<span class="muted">none improved</span>',d(worst)<0?`<b>${esc(mqZone(worst.zone))}</b> ${mqD(d(worst))}`:'<span class="muted">none worsened</span>']});
+ const zrow=[...I].sort((a,b)=>a.period-b.period||String(a.zone).localeCompare(b.zone)).map(x=>[`<b>${esc(mqZone(x.zone))}</b> <span class="muted">${x.period}</span>`,`${x.beforeCommon} → <b>${x.afterCommon}</b> ${mqD(x.afterCommon-x.beforeCommon)}`,`${x.beforeCountry} → ${x.afterCountry}`,`${x.beforeBorder} → ${x.afterBorder}`,esc(x.verdict||'—'),
+  `<div class="muted" style="max-width:300px">${x.improved.length?'<span style="color:#70e0b7">＋</span> '+x.improved.slice(0,2).map(esc).join('; '):'—'}</div><div class="muted" style="max-width:300px">${x.worsened.length?'<span style="color:#f08a8a">－</span> '+x.worsened.slice(0,2).map(esc).join('; '):''}</div>`,`<button class="ibtn" title="Delete row (comes back on the next Update)" onclick="delRow('mapqIn',${S.mapqIn.indexOf(x)})">🗑</button>`]);
+ const mb=I.length?avg(I,'beforeCommon'):0,ma=I.length?avg(I,'afterCommon'):0;
+ const inside=card(`<div class="sectionhead"><h2>2 · Our maps: before and after</h2><div class="actions">${mqUpdBtn('mqin')}</div></div>${mqInfo('mqin')}
+ ${I.length?`<div class="stats">${stat('Map pairs compared',I.length,periods.length+' period'+(periods.length>1?'s':''))}${stat('Mean common score · before',mb.toFixed(1),'')}${stat('Mean common score · after',ma.toFixed(1),'')}${stat('Change',(ma-mb>=0?'+':'')+(ma-mb).toFixed(1),'after − before',ma-mb<0)}</div>
+ ${table(['Period','Common score (before → after)','Best improved zone','Worsened zone'],prow)}
+ <h3 style="margin:18px 0 8px;font-size:14px">By zone</h3>${table(['Zone','Common','Country','Border','Verdict','What changed',''],zrow)}
+ <div class="note">${ex&&ex.beforeMap?'Before: <code>'+esc(ex.beforeMap)+'</code> · after: <code>'+esc(ex.afterMap)+'</code>. ':''}Each period fills in as new <code>&lt;zone&gt;_&lt;period&gt;/&lt;zone&gt;_report.json</code> files appear in the folder; press <b>↻ Update</b> after a new run.</div>`:mqEmpty('press ↻ Update and choose the map_score_service/out folder')}`);
+ /* 3 — rivals */
+ const rrow=[...M].sort((a,b)=>String(a.region).localeCompare(b.region)||a.year-b.year).map(x=>{const dl=mqNum(x.ours)-mqNum(x.rivals),rs=x.rivalScores?Object.entries(x.rivalScores).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+' '+v).join(' · '):'';
+  return [`<b>${esc(x.region)}</b> <span class="muted">${esc(x.year)}</span><div class="muted">${esc(x.date||'')}</div>`,`<b>${x.ours}</b>`,x.rivals,mqD(dl),`${x.countryOurs} / ${x.countryRivals}`,`${x.borderOurs} / ${x.borderRivals}`,esc(x.best||'—'),esc(x.wrong||'—'),`<span class="muted" style="display:block;max-width:260px">${esc(rs)}</span>`]});
+ const rm=k=>M.reduce((s,x)=>s+mqNum(x[k]),0)/(M.length||1);
+ const riv=card(`<div class="sectionhead"><h2>3 · Our maps vs rivals</h2><div class="actions">${mqUpdBtn('mqriv')}</div></div>${mqInfo('mqriv')}
+ ${M.length?`<div class="stats">${stat('Zones compared',M.length,'zone + year')}${stat('Ours · mean common score',rm('ours').toFixed(1),'')}${stat('Rivals · mean common score',rm('rivals').toFixed(1),'mean of the rival maps')}${stat('Difference',(rm('ours')-rm('rivals')>=0?'+':'')+(rm('ours')-rm('rivals')).toFixed(1),'ours − rivals',rm('ours')<rm('rivals'))}</div>
+ ${table(['Zone · year','Ours','Rivals mean','Δ','Countries ours / rivals','Borders ours / rivals','Best rival','Our wrong borders','Each rival (common)'],rrow)}
+ <div class="note">Same data as <b>Rivals analysis → Map quality analysis</b> (you can edit notes there). Each <code>&lt;zone&gt;_&lt;year&gt;.json</code> from the rivals_comparison folder adds a row; rivals are the maps compared in that run.</div>`:mqEmpty('press ↻ Update and choose the rivals_comparison folder')}`);
+ return formula+`<div style="margin-top:16px">${inside}</div><div style="margin-top:16px">${riv}</div>`}
+function progress(){const tabs=`<div class="toolbar" style="margin-top:0"><div class="tabs">${[['roadmap','Roadmap'],['jira','Jira analytics'],['mapquality','Map quality']].map(([k,l])=>`<button class="tab ${pgTab===k?'active':''}" onclick="pgTab='${k}';render()">${l}</button>`).join('')}</div></div>`;
+ return tabs+(pgTab==='jira'?team():pgTab==='mapquality'?mapQuality():roadmapView())}
 function roadmapView(){const R=S.roadmap,cnt=s=>R.filter(x=>x.status===s).length,J=JI(),jd=J.filter(i=>i.cat==='done'&&i.resolved>=dAgo(30)).length;
  const laneRows=LANES.map(l=>{const L=R.filter(x=>x.lane===l.id);const d=L.filter(x=>x.status==='done').length;return [l.name,L.length?Math.round(d/L.length*100):0,d+'/'+L.length+' done']});
  const board=rmBoard();
