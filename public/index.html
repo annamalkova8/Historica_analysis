@@ -389,10 +389,12 @@ function pubX(){return `<div class="stats">${stat('Published articles','70+','si
  <div class="grid">${nodata('Articles published per month','publication dates',170)}${nodata('Authors by background','author records',170)}</div>
  ${nodata('Top articles','article_viewed, map_cta_clicked',120)}
  <div style="margin-top:16px">${nodata('Article → Map (funnel)','article_viewed → map_cta_clicked → map_opened → year_selected',90)}</div>`}
-function builderX(){const T=S.testers,real=T.some(t=>t.ext==='confluence'),maps=T.reduce((n,t)=>n+(+t.maps||0),0),builders=T.filter(t=>+t.maps>0),by={};
+function builderX(){const T=S.testers,n=T.length,maps=T.reduce((x,t)=>x+(+t.maps||0),0),real=T.some(t=>t.ext==='confluence'||+t.maps>0),builders=T.filter(t=>+t.maps>0),by={};
+ const iv=T.filter(t=>t.iv==='Yes').length,fbN=T.filter(t=>(t.fb&&t.fb!=='None')||t.iv==='Yes').length,ch={Email:0,'Google Form':0,Interview:iv};T.forEach(t=>{if(t.fb==='Email'||t.fb==='All')ch.Email++;if(t.fb==='Google Form'||t.fb==='All')ch['Google Form']++});
  builders.forEach(t=>by[t.role]=(by[t.role]||0)+(+t.maps||0));const roles=Object.entries(by).sort((x,y)=>y[1]-x[1]);
- return `<div class="stats">${T.length?stat('Map Builder users',T.length,'beta testers · from Testers tab'):nostat('Map Builder users','mapbuilder_signup')}${real?stat('Maps built',maps,'sum of testers · Confluence'):nostat('Maps built','Confluence load or map_created')}${real&&T.length?stat('Maps / tester',(maps/T.length).toFixed(1),'average'):nostat('Maps / user','map_created')}${real?stat('Built at least one map',builders.length,pct(builders.length,T.length)+' of testers'):nostat('Built at least one map','Confluence load')}</div>
- <div class="grid">${nodata('Users and maps built, weekly','mapbuilder_signup, map_created (dates)',170)}${real&&roles.length?card(`<h2 style="margin-bottom:8px">Who builds maps <span class="tag now">beta testers</span></h2>${bars(roles.map(([k,v])=>[k,Math.round(v/maps*100),v+' maps']))}<div class="muted">Maps built by role, from the Beta testers table.</div>`):nodata('Who builds maps','Testers tab: ↻ Load from Confluence',170)}</div>
+ return `<div class="stats">${n?stat('Map Builder users',n,'beta testers · live from Testers tab'):nostat('Map Builder users','mapbuilder_signup')}${real?stat('Maps built',maps,'sum over testers'):nostat('Maps built','Testers tab: built maps, or map_created')}${real&&n?stat('Maps / tester',(maps/n).toFixed(1),'average'):nostat('Maps / user','map_created')}${real?stat('Built at least one map',builders.length,pct(builders.length,n)+' of testers'):nostat('Built at least one map','Testers tab: built maps')}</div>
+ ${n?`<div class="stats">${stat('Gave feedback',fbN,pct(fbN,n)+' of testers')}${stat('Interviewed',iv,pct(iv,n)+' of testers')}${stat('Feedback by email',ch.Email,pct(ch.Email,n))}${stat('Feedback by Google Form',ch['Google Form'],pct(ch['Google Form'],n))}</div>`:''}
+ <div class="grid">${nodata('Users and maps built, weekly','mapbuilder_signup, map_created (dates)',170)}${real&&roles.length?card(`<h2 style="margin-bottom:8px">Who builds maps <span class="tag now">beta testers</span></h2>${bars(roles.map(([k,v])=>[k,Math.round(v/maps*100),v+' maps']))}<div class="muted">Maps built by role, from the Testers tab.</div>`):nodata('Who builds maps','Testers tab: built maps per tester',170)}</div>
  <div class="grid eq">${funnelNo(2)}${nodata('Where users drop','builder events')}</div>`}
 /* Funnels */
 function funnels(){const seg=SEGS[FS.by];
@@ -872,7 +874,7 @@ function importMapq(inp){const files=[...inp.files];let ok=0,bad=[],left=files.l
   if(--left===0){inp.value='';save();render();alert(ok+' benchmark(s) imported.'+(bad.length?'\nNot recognised: '+bad.join(', '):''))}};r.readAsText(f)})}
 
 const VIEWS={analytics,progress,testers,conferences,grants,academia,communities,rivals,templates};
-function go(p){page=p;render();window.scrollTo(0,0)}
+function go(p){page=p;render();window.scrollTo(0,0);if(p==='analytics')refreshFromServer().catch(()=>{})} // opening Analytics re-reads the saved data (testers edited elsewhere show up)
 function render(){const cnt={testers:S.testers.length,conferences:S.confs.length,grants:S.grants.length,academia:S.unis.length,communities:S.comms.length,services:[...S.grants,...S.confs,...S.comms,...S.rivals].filter(x=>x.isNew&&!x.hidden).length,rivals:S.rivals.length,progress:S.roadmap.filter(x=>x.status==='progress').length};
  document.getElementById('nav').innerHTML=PAGES.map(([id,ic,l])=>`<button class="nav ${page===id?'active':''}" onclick="go('${id}')"><b>${ic}</b><span class="t">${l}</span>${cnt[id]?`<span class="cnt">${cnt[id]}</span>`:''}</button>`).join('');
  const [e,t,s]=META[page];document.getElementById('eyebrow').textContent=e;document.getElementById('title').textContent=t;document.getElementById('subtitle').textContent=s;
