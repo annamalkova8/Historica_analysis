@@ -366,7 +366,7 @@ function analytics(){const exp=aView==='expected',fn=exp&&aTab==='funnels';
   :`<div class="note" style="margin:14px 0"><b>Public view</b> — the figures shown on the website. Numbers that are not yet measured are illustrative.</div>`;
  const body=!exp?websitePublic():fn?funnels():({website:siteX,map:mapX,social:socialX,publicity:pubX,builder:builderX}[aTab])();
  return `<div class="toolbar" style="margin-top:0">${views}</div>${subs}${note}${body}`}
-function websitePublic(){const v=series(1,12,8200,12840),m=series(2,12,3100,8420),T=S.testers,fb=T.filter(t=>(t.fb&&t.fb!=='None')||t.iv==='Yes').length,iv=T.filter(t=>t.iv==='Yes').length;
+function websitePublic(){const v=series(1,12,8200,12840),m=series(2,12,3100,8420),T=S.testers,fb=T.filter(t=>t.fb&&t.fb!=='None').length,iv=T.filter(t=>t.iv==='Yes').length;
  return `<div class="stats">${stat('Beta testers',T.length,'Map Builder')}${stat('Gave feedback',fb,pct(fb,T.length)+' of testers')}${stat('Interviewed',iv,pct(iv,T.length)+' of testers')}</div>
  <div class="stats">${stat('Website visitors · 30d','12,840','↑ 14% vs prev 30d')}${stat('Map visitors · 30d','8,420','↑ 9%')}${stat('Social followers','20,000+','FB + LinkedIn')}${stat('Newsletter','5,000+','subscribers')}</div>
  <div class="grid">${card(`<div class="sectionhead"><h2>Weekly visitors</h2></div>${line([{name:'Website',d:v},{name:'Map',d:m}])}`)}${card(`<h2 style="margin-bottom:8px">Traffic sources</h2>${bars([['Organic search',38],['Direct',22],['Social',18],['Newsletter',12],['Referral',10]])}`)}</div>`}
@@ -390,7 +390,7 @@ function pubX(){return `<div class="stats">${stat('Published articles','70+','si
  ${nodata('Top articles','article_viewed, map_cta_clicked',120)}
  <div style="margin-top:16px">${nodata('Article → Map (funnel)','article_viewed → map_cta_clicked → map_opened → year_selected',90)}</div>`}
 function builderX(){const T=S.testers,n=T.length,maps=T.reduce((x,t)=>x+(+t.maps||0),0),real=T.some(t=>t.ext==='confluence'||+t.maps>0),builders=T.filter(t=>+t.maps>0),by={};
- const iv=T.filter(t=>t.iv==='Yes').length,fbN=T.filter(t=>(t.fb&&t.fb!=='None')||t.iv==='Yes').length,ch={Email:0,'Google Form':0,Interview:iv};T.forEach(t=>{if(t.fb==='Email'||t.fb==='All')ch.Email++;if(t.fb==='Google Form'||t.fb==='All')ch['Google Form']++});
+ const iv=T.filter(t=>t.iv==='Yes').length,fbN=T.filter(t=>t.fb&&t.fb!=='None').length,ch={Email:0,'Google Form':0,Interview:iv};T.forEach(t=>{if(t.fb==='Email'||t.fb==='All')ch.Email++;if(t.fb==='Google Form'||t.fb==='All')ch['Google Form']++});
  builders.forEach(t=>by[t.role]=(by[t.role]||0)+(+t.maps||0));const roles=Object.entries(by).sort((x,y)=>y[1]-x[1]);
  return `<div class="stats">${n?stat('Map Builder users',n,'beta testers · live from Testers tab'):nostat('Map Builder users','mapbuilder_signup')}${real?stat('Maps built',maps,'sum over testers'):nostat('Maps built','Testers tab: built maps, or map_created')}${real&&n?stat('Maps / tester',(maps/n).toFixed(1),'average'):nostat('Maps / user','map_created')}${real?stat('Built at least one map',builders.length,pct(builders.length,n)+' of testers'):nostat('Built at least one map','Testers tab: built maps')}</div>
  ${n?`<div class="stats">${stat('Gave feedback',fbN,pct(fbN,n)+' of testers')}${stat('Interviewed',iv,pct(iv,n)+' of testers')}${stat('Feedback by email',ch.Email,pct(ch.Email,n))}${stat('Feedback by Google Form',ch['Google Form'],pct(ch['Google Form'],n))}</div>`:''}
@@ -420,7 +420,7 @@ function mvStep(i,d){const j=i+d;if(j<0||j>=FS.steps.length)return;[FS.steps[i],
 function saveFunnel(){const n=prompt('Funnel name:',FS.name==='Custom funnel'?'':FS.name);if(!n)return;S.funnels.push({name:n,steps:[...FS.steps],win:FS.win});FS.name=n;save();render()}
 /* Testers */
 function testers(){const T=S.testers,n=T.length,by=k=>{const m={};T.forEach(t=>m[t[k]]=(m[t[k]]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1])};
- const form=T.filter(t=>t.fb==='Google Form'||t.fb==='All').length,mail=T.filter(t=>t.fb==='Email'||t.fb==='All').length,iv=T.filter(t=>t.iv==='Yes').length,any=T.filter(t=>(t.fb&&t.fb!=='None')||t.iv==='Yes').length;
+ const form=T.filter(t=>t.fb==='Google Form'||t.fb==='All').length,mail=T.filter(t=>t.fb==='Email'||t.fb==='All').length,iv=T.filter(t=>t.iv==='Yes').length,any=T.filter(t=>t.fb&&t.fb!=='None').length;
  const rows=T.filter(t=>roleFilter==='All'||t.role===roleFilter);const roles=['Teacher','PhD student','Professor','Researcher','Museum / archive','Student'],srcs=['LinkedIn','Facebook','Newsletter','University list','Personal outreach','Conference'];
  const fbT=S.tplList.findIndex(t=>t.name.includes('Google Form'));
  return `<div class="stats six">${stat('Testers','<b>'+n+'</b>','invited & active')}${stat('Gave any feedback',any,pct(any,n)+' of testers')}${stat('By email',mail,pct(mail,n))}${stat('Google Form',form,pct(form,n))}${stat('Interviews',iv,pct(iv,n))}${stat('No feedback yet',n-any,pct(n-any,n),1)}</div>
