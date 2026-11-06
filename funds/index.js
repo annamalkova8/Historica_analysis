@@ -1,7 +1,7 @@
 // Fund search: ported from historica-grant-bot (OpenAI web search, no Telegram).
 import cfg from './config.js';
-import { sameGrant } from '../lib/dedupe.js';
-import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../lib/shared.js';
+import { sameGrant } from '../_lib/dedupe.js';
+import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
 export default {
   id: 'grants',
   title: 'Fund search',

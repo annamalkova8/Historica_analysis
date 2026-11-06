@@ -1,6 +1,6 @@
 // Rivals analysis: competing / adjacent historical-map products. Existing rows are REFRESHED
 // (what's new, last checked) instead of skipped, so the table keeps tracking changes.
-import { today, str, normName, HISTORICA, JSON_ONLY } from '../lib/shared.js';
+import { today, str, normName, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
 export default {
   id: 'rivals',
   title: 'Rivals analysis',

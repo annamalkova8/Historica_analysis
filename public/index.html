@@ -371,8 +371,10 @@ function pubX(){return `<div class="stats">${stat('Published articles','70+','si
  <div class="grid">${nodata('Articles published per month','publication dates',170)}${nodata('Authors by background','author records',170)}</div>
  ${nodata('Top articles','article_viewed, map_cta_clicked',120)}
  <div style="margin-top:16px">${nodata('Article → Map (funnel)','article_viewed → map_cta_clicked → map_opened → year_selected',90)}</div>`}
-function builderX(){return `<div class="stats">${nostat('Map Builder users','mapbuilder_signup')}${nostat('Maps built','map_created')}${nostat('Maps / user','map_created')}${stat('Beta testers','<b>'+S.testers.length+'</b>','see Testers page')}</div>
- <div class="grid">${nodata('Users and maps built, weekly','mapbuilder_signup, map_created',170)}${nodata('Who builds maps','signup form (role)',170)}</div>
+function builderX(){const T=S.testers,real=T.some(t=>t.ext==='confluence'),maps=T.reduce((n,t)=>n+(+t.maps||0),0),builders=T.filter(t=>+t.maps>0),by={};
+ builders.forEach(t=>by[t.role]=(by[t.role]||0)+(+t.maps||0));const roles=Object.entries(by).sort((x,y)=>y[1]-x[1]);
+ return `<div class="stats">${T.length?stat('Map Builder users',T.length,'beta testers · from Testers tab'):nostat('Map Builder users','mapbuilder_signup')}${real?stat('Maps built',maps,'sum of testers · Confluence'):nostat('Maps built','Confluence load or map_created')}${real&&T.length?stat('Maps / tester',(maps/T.length).toFixed(1),'average'):nostat('Maps / user','map_created')}${real?stat('Built at least one map',builders.length,pct(builders.length,T.length)+' of testers'):nostat('Built at least one map','Confluence load')}</div>
+ <div class="grid">${nodata('Users and maps built, weekly','mapbuilder_signup, map_created (dates)',170)}${real&&roles.length?card(`<h2 style="margin-bottom:8px">Who builds maps <span class="tag now">beta testers</span></h2>${bars(roles.map(([k,v])=>[k,Math.round(v/maps*100),v+' maps']))}<div class="muted">Maps built by role, from the Beta testers table.</div>`):nodata('Who builds maps','Testers tab: ↻ Load from Confluence',170)}</div>
  <div class="grid eq">${funnelNo(2)}${nodata('Where users drop','builder events')}</div>`}
 /* Funnels */
 function funnels(){const seg=SEGS[FS.by];
@@ -403,10 +405,46 @@ function testers(){const T=S.testers,n=T.length,by=k=>{const m={};T.forEach(t=>m
  const fbT=S.tplList.findIndex(t=>t.name.includes('Google Form'));
  return `<div class="stats five">${stat('Testers','<b>'+n+'</b>','invited & active')}${stat('Gave any feedback',any,pct(any,n)+' of testers')}${stat('Google Form',form,pct(form,n))}${stat('Interviews',iv,pct(iv,n))}${stat('No feedback yet',n-any,pct(n-any,n),1)}</div>
  <div class="grid eq">${card(`<h2 style="margin-bottom:8px">Where testers came from</h2>${bars(by('src').map(([k,v])=>[k,Math.round(v/n*100),v]))}`)}${card(`<h2 style="margin-bottom:8px">Who the testers are</h2>${bars(by('role').map(([k,v])=>[k,Math.round(v/n*100),v]))}`)}</div>
- <div class="grid">${card(`<div class="sectionhead"><h2>Tester list</h2><div class="actions"><select class="mini" onchange="roleFilter=this.value;render()">${['All',...roles].map(r=>`<option ${r===roleFilter?'selected':''}>${r}</option>`).join('')}</select></div></div>
+ <div class="grid">${card(`<div class="sectionhead"><h2>Tester list</h2><div class="actions"><button class="btn small" onclick="loadConfluenceTesters()" title="Reads the table on the Confluence page Beta testers">↻ Load from Confluence</button><select class="mini" onchange="roleFilter=this.value;render()">${['All',...roles].map(r=>`<option ${r===roleFilter?'selected':''}>${r}</option>`).join('')}</select></div></div>
  <div class="actions" style="margin-bottom:12px"><select class="mini" id="nr">${roles.map(r=>`<option>${r}</option>`).join('')}</select><select class="mini" id="ns">${srcs.map(r=>`<option>${r}</option>`).join('')}</select><button class="btn small" onclick="addTester()">+ Add tester</button></div>
- ${table(['ID','Role','Source','Feedback',''],rows.slice(0,14).map(t=>[t.id,t.role,t.src,sel(['None','Google Form','Interview','Both'],t.fb,`setT('${t.id}',this.value)`),`<button class="ibtn" title="Delete row" onclick="delTester('${t.id}')">🗑</button>`]))}<div class="muted" style="margin-top:8px">Showing ${Math.min(14,rows.length)} of ${rows.length}. Testers are anonymous IDs — no personal data in this demo.</div>`)}
+ ${table(['ID','Role','Source','Project (1 sentence)','Feedback','Built maps',''],rows.slice(0,14).map(t=>[t.id,t.role,t.src,`<input class="inl" style="width:260px" placeholder="add 1 sentence" value="${esc(t.proj||'')}" onchange="setTF('${t.id}','proj',this.value)">`,sel(['None','Google Form','Interview','Both'],t.fb,`setT('${t.id}',this.value)`),`<input class="inl" type="number" min="0" style="width:60px" value="${t.maps||0}" onchange="setTF('${t.id}','maps',+this.value)">`,`<button class="ibtn" title="Delete row" onclick="delTester('${t.id}')">🗑</button>`]))}<div class="muted" style="margin-top:8px">Showing ${Math.min(14,rows.length)} of ${rows.length}. Testers are anonymous IDs — no personal data in this demo.</div>`)}
  ${card(`<div class="sectionhead"><h2>Recent feedback template</h2><button class="btn secondary small" onclick="editTpl(${fbT})">Edit in Templates →</button></div><div class="preview" style="font-size:12px;max-height:340px">${esc(S.tplList[fbT]?.body||'')}</div><div class="note">Pipeline: Google Form + interviews → anonymise → tag themes → rank by frequency and severity → UX backlog.</div>`)}</div>`}
+/* ---- Beta testers: load from the Confluence page "Beta testers" (anonymous fields only) ---- */
+const CF_ROLES=[[/teacher|educator|учител|препод/i,'Teacher'],[/phd|doctoral|аспирант/i,'PhD student'],[/professor|prof\.|lecturer|профессор/i,'Professor'],[/museum|archive|музей|архив/i,'Museum / archive'],[/researcher|historian|scientist|scholar|исследов|историк/i,'Researcher'],[/student|студент/i,'Student']];
+const CF_SRCS=[[/linkedin/i,'LinkedIn'],[/facebook|\bfb\b/i,'Facebook'],[/newsletter|рассылк/i,'Newsletter'],[/universit|univ\.|универс/i,'University list'],[/personal|direct|friend|личн/i,'Personal outreach'],[/conference|конферен/i,'Conference']];
+/** "project" cell -> one short sentence (first sentence, max 140 chars) */
+const cfOne=v=>{const t=String(v||'').replace(/\s+/g,' ').trim();if(!t)return '';const m=t.match(/^(.+?[.!?])(\s|$)/),x=m?m[1]:t;return x.length>140?x.slice(0,137).replace(/\s+\S*$/,'')+'…':x};
+const cfNorm=(v,list)=>{const t=String(v||'').trim();if(!t)return 'Unknown';const m=list.find(([re])=>re.test(t));return m?m[1]:t.slice(0,40)};
+/** rows = array of arrays (first = header). Returns {testers, columns, skipped}. Name/e-mail columns are never read into the result. */
+function cfMap(rows){
+ const H=(rows[0]||[]).map(x=>String(x||'').toLowerCase().trim());
+ const col=re=>H.findIndex(h=>re.test(h)),role=col(/role|position|occupation|profession|job|who|роль|должност|кто/),src=col(/source|channel|came from|where|откуда|канал|источник/),proj=col(/project|проект/),built=col(/built|maps/);
+ const fbCols=H.map((h,i)=>/feedback|form|interview|survey|отзыв|форма|интервью|опрос/.test(h)?i:-1).filter(i=>i>=0);
+ const out=[];let skipped=0;
+ rows.slice(1).forEach(r=>{if(!r.some(c=>String(c||'').trim())){return}
+  const fbText=fbCols.map(i=>H[i]+' '+String(r[i]||'')).join(' ').toLowerCase(),filled=i=>/\S/.test(String(r[i]||''))&&!/^(no|none|нет|—|-|n\/a|false|✗|✘|❌)$/i.test(String(r[i]||'').trim());
+  let form=false,iv=false;
+  fbCols.forEach(i=>{const h=H[i],ok=filled(i);if(!ok)return;const v=String(r[i]).toLowerCase();
+   if(/interview|интервью/.test(h)||/interview|интервью/.test(v))iv=true;if(/form|форма|survey|опрос/.test(h)||/form|форма|survey|опрос/.test(v))form=true;
+   if(!/interview|интервью|form|форма|survey|опрос/.test(h+v))form=true}); // a plain "feedback: yes" counts as a form answer
+  out.push({role:cfNorm(role>=0?r[role]:'',CF_ROLES),src:cfNorm(src>=0?r[src]:'',CF_SRCS),proj:proj>=0?cfOne(r[proj]):'',maps:built>=0?(parseInt(String(r[built]).replace(/[^\d]/g,''),10)||0):0,fb:form&&iv?'Both':iv?'Interview':form?'Google Form':'None'})});
+ return {testers:out,columns:{role:role>=0?rows[0][role]:null,source:src>=0?rows[0][src]:null,project:proj>=0?rows[0][proj]:null,built:built>=0?rows[0][built]:null,feedback:fbCols.map(i=>rows[0][i])},skipped}}
+/** Pick the largest table of the page and turn it into rows. */
+function cfTables(html){const d=new DOMParser().parseFromString(html,'text/html');
+ const tabs=[...d.querySelectorAll('table')].map(t=>[...t.querySelectorAll('tr')].map(tr=>[...tr.children].filter(c=>/^t[dh]$/i.test(c.tagName)).map(c=>c.textContent.replace(/\s+/g,' ').trim())).filter(r=>r.length));
+ return tabs.sort((a,b)=>b.length-a.length)[0]||[]}
+async function loadConfluenceTesters(){
+ let page;try{page=await api('/api/confluence')}catch(e){if(e.message!=='login')alert('Could not read the Confluence page: '+e.message);return}
+ const rows=cfTables(page.html);if(rows.length<2){alert('No table with testers was found on the page "'+(page.title||'')+'". The importer needs a table with a header row.');return}
+ const m=cfMap(rows),n=m.testers.length;if(!n){alert('The table has no rows.');return}
+ const c=m.columns,msg='Page: "'+page.title+'" · '+n+' tester rows\nRole column: '+(c.role||'NOT FOUND')+'\nSource column: '+(c.source||'NOT FOUND')+'\nProject column: '+(c.project||'NOT FOUND')+'\nBuilt maps column: '+(c.built||'NOT FOUND')+'\nFeedback columns: '+(c.feedback.join(', ')||'NOT FOUND')+'\n\nImported: role, source, project (first sentence), feedback, built maps — no names or e-mails. Rows imported earlier are replaced, so edits made to them in the hub are overwritten. Nothing is written back to Confluence. Import?';
+ if(!confirm(msg))return;
+ const manual=S.testers.filter(t=>t.ext!=='confluence');let drop=false;
+ if(manual.length&&confirm('Also remove the '+manual.length+' existing tester rows that did not come from Confluence (demo or manual)?\nOK = remove them, Cancel = keep them.'))drop=true;
+ S.testers=[...m.testers.map((t,i)=>({id:'C-'+String(i+1).padStart(3,'0'),...t,ext:'confluence'})),...(drop?[]:manual)];
+ try{localStorage.setItem('cf_last',new Date().toLocaleString())}catch(e){}
+ save();render()}
+function setTF(id,k,v){S.testers.find(t=>t.id===id)[k]=v;save()}
 function setT(id,v){S.testers.find(t=>t.id===id).fb=v;save();render()}
 function addTester(){const n=S.testers.length+1;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,fb:'None'});save();render()}
 

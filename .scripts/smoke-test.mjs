@@ -3,8 +3,8 @@ import { PGlite } from '@electric-sql/pglite';
 import assert from 'node:assert/strict';
 process.env.APP_PASSWORD = 'pw'; process.env.CRON_SECRET = 'cs';
 
-const { setDb, ready, q } = await import('../lib/db.js');
-const { setLlm } = await import('../lib/llm.js');
+const { setDb, ready, q } = await import('../_lib/db.js');
+const { setLlm } = await import('../_lib/llm.js');
 const pg = new PGlite();
 setDb({ query: async (text, params) => (await pg.query(text, params)).rows });
 
@@ -104,7 +104,7 @@ assert.deepEqual(st.json.seededKinds, ['rivals']);
 assert.equal(st.json.data.jira.length, 0, 'browser must not write jira rows');
 
 // Jira sync (mock): upsert, update, delete stale
-const { setJira } = await import('../lib/jira.js');
+const { setJira } = await import('../_lib/jira.js');
 const issue = (key, extra = {}) => ({ key, fields: { summary: 'S ' + key, status: { name: 'Done', statusCategory: { key: 'done' } }, assignee: { displayName: 'Ann' }, issuetype: { name: 'Task' }, created: '2026-10-01T10:00:00.000+0000', resolutiondate: '2026-10-05T10:00:00.000+0000', labels: ['maps'], parent: { key: 'H-1', fields: { summary: 'Epic one' } }, customfield_10016: 3, ...extra } });
 assert.equal((await call('jira', { headers: auth })).json.configured, false);
 assert.equal((await call('jira', { method: 'POST', headers: auth })).code, 400);
@@ -123,7 +123,7 @@ assert.equal((await call('jira', { headers: auth })).json.last.count, 1);
 setJira(null);
 
 // Jira config tolerance: board URL as base, project name or key, helpful errors (mocked fetch, no network)
-const J = await import('../lib/jira.js');
+const J = await import('../_lib/jira.js');
 Object.assign(process.env, { JIRA_BASE_URL: 'https://historica.atlassian.net/jira/software/projects/DEV/boards/2?filter=&groupBy=assignee', JIRA_EMAIL: 'a@b.c', JIRA_API_TOKEN: 'tok', JIRA_PROJECT: 'Historica tech' });
 assert.equal(J.jiraConfigured(), true);
 assert.equal(J.jql(), 'project = "Historica tech" ORDER BY updated DESC');

@@ -1,6 +1,6 @@
-import { ready } from '../lib/db.js';
-import { requireAuth } from '../lib/auth.js';
-import { syncJira, jiraStatus, jiraConfigured } from '../lib/jira.js';
+import { ready } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
+import { syncJira, jiraStatus, jiraConfigured } from '../_lib/jira.js';
 
 /** GET -> {configured, last, base}.  POST -> pull issues from Jira now. */
 export default async function handler(req, res) {

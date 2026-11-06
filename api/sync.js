@@ -1,6 +1,6 @@
-import { q, ready, getSetting, setSetting } from '../lib/db.js';
-import { requireAuth } from '../lib/auth.js';
-import { SYNCABLE, keyForRecord } from '../lib/registry.js';
+import { q, ready, getSetting, setSetting } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
+import { SYNCABLE, keyForRecord } from '../_lib/registry.js';
 
 const MAX = 500;
 

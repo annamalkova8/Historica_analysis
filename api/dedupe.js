@@ -1,6 +1,6 @@
-import { q, ready } from '../lib/db.js';
-import { requireAuth } from '../lib/auth.js';
-import { findDuplicates, mergePatch, sameGrant, sameConf, sameComm } from '../lib/dedupe.js';
+import { q, ready } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
+import { findDuplicates, mergePatch, sameGrant, sameConf, sameComm } from '../_lib/dedupe.js';
 
 const SAME = { grants: sameGrant, confs: sameConf, comms: sameComm };
 

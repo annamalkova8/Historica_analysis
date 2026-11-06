@@ -14,7 +14,7 @@
     "@electric-sql/pglite": "^0.3.0"
   },
   "scripts": {
-    "test": "node scripts/smoke-test.mjs",
-    "dev": "node scripts/dev-server.mjs"
+    "test": "node .scripts/smoke-test.mjs",
+    "dev": "node .scripts/dev-server.mjs"
   }
 }

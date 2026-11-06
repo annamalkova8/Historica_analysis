@@ -1,6 +1,6 @@
-import { ready } from '../lib/db.js';
-import { requireAuth } from '../lib/auth.js';
-import { importSeen } from '../lib/seen.js';
+import { ready } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
+import { importSeen } from '../_lib/seen.js';
 
 /** POST -> import the old bot's history into the grants table (idempotent). Called automatically by the Grants "Update" button. */
 export default async function handler(req, res) {

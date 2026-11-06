@@ -1,7 +1,7 @@
-import { ready } from '../lib/db.js';
-import { requireAuth } from '../lib/auth.js';
-import { SERVICES } from '../lib/registry.js';
-import { runTask } from '../lib/pipeline.js';
+import { ready } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
+import { SERVICES } from '../_lib/registry.js';
+import { runTask } from '../_lib/pipeline.js';
 
 /** POST {service, task} -> runs one source/query task (the UI loops over tasks to show progress). */
 export default async function handler(req, res) {

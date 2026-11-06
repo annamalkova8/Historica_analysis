@@ -1,6 +1,6 @@
 // Community search: active communities of history teachers, digital humanists and map enthusiasts.
-import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../lib/shared.js';
-import { sameComm } from '../lib/dedupe.js';
+import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
+import { sameComm } from '../_lib/dedupe.js';
 export default {
   id: 'communities',
   title: 'Community search',

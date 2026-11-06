@@ -1,6 +1,6 @@
-import { q, ready, getSetting } from '../lib/db.js';
-import { requireAuth } from '../lib/auth.js';
-import { COLLECTIONS } from '../lib/registry.js';
+import { q, ready, getSetting } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
+import { COLLECTIONS } from '../_lib/registry.js';
 
 export default async function handler(req, res) {
   if (!requireAuth(req, res)) return;

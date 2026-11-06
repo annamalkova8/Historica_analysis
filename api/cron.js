@@ -1,7 +1,7 @@
-import { ready } from '../lib/db.js';
-import { isCron } from '../lib/auth.js';
-import { serviceIds, runChunk } from '../lib/pipeline.js';
-import { syncJira, jiraConfigured } from '../lib/jira.js';
+import { ready } from '../_lib/db.js';
+import { isCron } from '../_lib/auth.js';
+import { serviceIds, runChunk } from '../_lib/pipeline.js';
+import { syncJira, jiraConfigured } from '../_lib/jira.js';
 
 /** Daily Vercel Cron: every service checks its next CRON_CHUNK tasks (cursor-based rotation). */
 export default async function handler(req, res) {

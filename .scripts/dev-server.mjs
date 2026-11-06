@@ -10,8 +10,8 @@ import { PGlite } from '@electric-sql/pglite';
 process.env.APP_PASSWORD ||= 'demo';
 process.env.CRON_SECRET ||= 'local-cron';
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { setDb } = await import('../lib/db.js');
-const { setLlm } = await import('../lib/llm.js');
+const { setDb } = await import('../_lib/db.js');
+const { setLlm } = await import('../_lib/llm.js');
 const pg = new PGlite();
 setDb({ query: async (t, p) => (await pg.query(t, p)).rows });
 
@@ -28,7 +28,7 @@ if (!process.env.OPENAI_API_KEY) {
 
 // Local preview of Jira: fake issues so the Project progress / Team performance pages have data.
 if (!process.env.JIRA_BASE_URL) {
-  const { setJira } = await import('../lib/jira.js');
+  const { setJira } = await import('../_lib/jira.js');
   setJira(async () => {
     const day = (n) => new Date(Date.now() - n * 864e5).toISOString();
     const people = ['Anna', 'Max', 'Ira'], out = [];

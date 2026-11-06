@@ -1,6 +1,6 @@
 // Conference search: upcoming conferences and calls for papers.
-import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../lib/shared.js';
-import { sameConf } from '../lib/dedupe.js';
+import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
+import { sameConf } from '../_lib/dedupe.js';
 export default {
   id: 'conferences',
   title: 'Conference search',

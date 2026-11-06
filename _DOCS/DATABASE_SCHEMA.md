@@ -1,6 +1,6 @@
 # Historica Analyst Hub — database schemes
 
-Everything the hub stores, in one place. Verified against `lib/db.js`, `lib/registry.js`, `lib/jira.js`, `lib/pipeline.js`, the service folders and `public/index.html` (state at 5 Nov 2026).
+Everything the hub stores, in one place. Verified against `_lib/db.js`, `_lib/registry.js`, `_lib/jira.js`, `_lib/pipeline.js`, the service folders and `public/index.html` (state at 5 Nov 2026).
 
 **Where data lives**
 
@@ -90,7 +90,7 @@ One row per source check or Jira sync. `found` = items returned; `added` = new r
 
 *Dedupe keys:* `normName` = lower-case, letters/digits only, single spaces. `normUrl` = lower-case, no `https://www.`, no query/hash, no trailing slash.
 
-Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM-DD). In the UI ✓ clears `isNew`; ✕ and 🚫 ("never show again") set `hidden: true` + `hiddenAt` — hidden rows stay in the DB, so the service never re-adds them or near-identical copies. ↩ removes the flag. **Find duplicates** hides copies with `hidden: true` and `dupOf` (name of the kept row); nothing is deleted. Duplicate rules: `lib/dedupe.js` (same URL incl. #fragment, or similar names after dropping filler words; different explicit years = different opportunities).
+Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM-DD). In the UI ✓ clears `isNew`; ✕ and 🚫 ("never show again") set `hidden: true` + `hiddenAt` — hidden rows stay in the DB, so the service never re-adds them or near-identical copies. ↩ removes the flag. **Find duplicates** hides copies with `hidden: true` and `dupOf` (name of the kept row); nothing is deleted. Duplicate rules: `_lib/dedupe.js` (same URL incl. #fragment, or similar names after dropping filler words; different explicit years = different opportunities).
 
 *Fuzzy match is applied to `grants`, `confs`, `comms` — both when a search adds rows and in the Find duplicates button.*
 
@@ -149,7 +149,7 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 `name`, `country`, `dept`, `contact`, `email`, `wrote` (`Not yet`/`Drafted`/`Sent`/`Replied`), `status` (`Prospect`/`Contacted`/`In conversation`/`Pilot`/`Declined`), `last` (date of last touch). **Contains personal data (names, emails of university staff).**
 
 ### `testers`
-`id` (`T-001`…), `role`, `src` (where they came from), `fb` (feedback channel: `None`/`Form`/`Interview`/`Both`). Personal data is not collected here beyond role/source.
+`id` (`T-001`…), `role`, `src` (where they came from), `fb` (feedback channel: `None`/`Form`/`Interview`/`Both`), `proj` (one-sentence project description), `maps` (number of maps built). Personal data is not collected here beyond role/source. Rows loaded by **↻ Load from Confluence** have ids `C-001`… and `ext: 'confluence'` (replaced on every load; names/e-mails from the page are never stored). The page id is in `api/confluence.js` (override with env `BETA_TESTERS_PAGE`); it uses the same `JIRA_BASE_URL`/`JIRA_EMAIL`/`JIRA_API_TOKEN`.
 
 ### `tplList`
 `name`, `type` (`Communities`/`Conferences`/`Custom`/…), `subject`, `body` (with `{{variables}}`).

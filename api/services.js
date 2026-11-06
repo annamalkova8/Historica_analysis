@@ -1,7 +1,7 @@
-import { q, ready, setSetting } from '../lib/db.js';
-import { requireAuth } from '../lib/auth.js';
-import { SERVICES } from '../lib/registry.js';
-import { getConfig, tasksOf, serviceIds } from '../lib/pipeline.js';
+import { q, ready, setSetting } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
+import { SERVICES } from '../_lib/registry.js';
+import { getConfig, tasksOf, serviceIds } from '../_lib/pipeline.js';
 
 /** GET -> services with tasks, last runs.  PUT {service, profile?, sources?, queries?} -> save edits.  DELETE ?service= -> reset to defaults. */
 export default async function handler(req, res) {
