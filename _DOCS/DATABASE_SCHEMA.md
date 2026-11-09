@@ -141,7 +141,7 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 `zone`, `period`, `beforeCommon`/`afterCommon`, `beforeCountry`/`afterCountry`, `beforeBorder`/`afterBorder` (0–100), `afterRecall`, `afterPrecision`, `afterWrong`, `afterBorders`, `afterExpected` (inputs of the worked example), `verdict`, `summary`, `improved[]`, `worsened[]` (item titles), `unchanged` (count), `beforeMap`, `afterMap` (file names), `llm`, `date` (report file date), `src`. The `mapq` rows may also carry `rivalScores` (`{rival: common score}`) and `src` when filled by the Map quality tab.
 
 ### `roadmap`
-`lane` (`maps`/`builder`/`community`/`analytics`/`funding`), `q` (quarter index 0–4 = Q4 2026 … Q4 2027+), `title`, `status` (`idea`/`planned`/`progress`/`done`), `goal` (`q` = quality, `a` = adoption), `why`, `metric`, `jira` (Jira epic key or label that drives the progress bar; empty = none).
+`lane` (`maps`/`builder`/`academics`), `q` (quarter index 0–5 = Q4 2026, Q1–Q4 2027, 2028), `title`, `status` (`idea`/`planned`/`progress`/`done`), `owner` (`BA/LLM`, `FE`, `BE`, `UX`, `BA`, `All`, or free text), `why`, `metric`, `jira` (Jira epic key or label that drives the progress bar; empty = none), `rv` (`2` = Nov 2026 re-plan; on load the hub replaces older seeded cards once and moves hand-added cards onto the new lanes; the old `goal` field was dropped).
 
 ### `jira` (read-only mirror of issues)
 `key`, `summary`, `status`, `cat` (Jira status category: `new`/`indeterminate`/`done`), `type`, `assignee` (`Unassigned` if none), `priority`, `labels[]`, `created`, `updated`, `resolved`, `due` (YYYY-MM-DD or empty), `epic` (parent key), `epicName`, `points` (story points, 0 if the field is empty), `url`.

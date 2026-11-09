@@ -12,10 +12,10 @@
 h1{font-size:34px;margin:6px 0 8px;letter-spacing:-.8px}h2{font-size:18px;margin:0 0 4px}h3{font-size:14px;margin:0}
 p{margin:0;color:#9aaac2}.lead{font-size:16px;max-width:820px;color:#c3d1e6}
 .note{background:#17283e;border:1px solid #2e4d6e;border-radius:11px;padding:11px 14px;color:#b3cce5;font-size:12.5px;margin:18px 0 0}
-.goals{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:26px 0}
-.goal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;border-top:3px solid var(--blue)}
-.goal.two{border-top-color:var(--teal)}.goal .n{font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--blue)}.goal.two .n{color:var(--teal)}
-.goal h2{font-size:21px;margin:6px 0 8px}
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0}
+.goal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;border-top:3px solid var(--c)}
+.goal .n{font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--c)}
+.goal h2{font-size:19px;margin:6px 0 8px}
 .kpis{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.kpi{font-size:11.5px;background:#0f1b30;border:1px solid #2c405d;border-radius:20px;padding:4px 10px;color:#bcd0ea}
 .phases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 28px}
 .phase{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:linear-gradient(180deg,#14233b,#101b2f)}
@@ -27,7 +27,7 @@ p{margin:0;color:#9aaac2}.lead{font-size:16px;max-width:820px;color:#c3d1e6}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--mut);flex-wrap:wrap}.legend span{display:flex;gap:6px;align-items:center}
 .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
 .scroll{overflow-x:auto;padding-bottom:6px}
-.board{min-width:1180px;display:grid;grid-template-columns:150px repeat(5,minmax(0,1fr));gap:10px}
+.board{min-width:1320px;display:grid;grid-template-columns:150px repeat(6,minmax(0,1fr));gap:10px}
 .qh{font-size:12px;font-weight:700;color:#cfe0f7;padding:8px 10px;background:#162540;border-radius:9px;text-align:center}
 .qh small{display:block;color:var(--mut);font-weight:500;font-size:10.5px}
 .lane{padding:12px 10px;font-size:13px;font-weight:700;border-left:3px solid var(--c);background:#101b2f;border-radius:0 9px 9px 0;display:flex;flex-direction:column;justify-content:center}
@@ -38,7 +38,7 @@ p{margin:0;color:#9aaac2}.lead{font-size:16px;max-width:820px;color:#c3d1e6}
 .item .row{display:flex;justify-content:space-between;gap:6px;align-items:flex-start}
 .item b{font-weight:600;line-height:1.35}
 .tag{font-size:10px;padding:1px 6px;border-radius:5px;background:#243652;color:#a8c9ff;white-space:nowrap}
-.tag.q{background:#1a3350;color:#8bcaff}.tag.a{background:#173c37;color:#70e0b7}.tag.b{background:#2b2147;color:#cdb0ff}
+
 .st{font-size:10px;border:0;border-radius:10px;padding:2px 8px;cursor:pointer;color:#111;font-weight:700;white-space:nowrap}
 .st.progress{background:var(--teal)}.st.planned{background:var(--blue)}.st.idea{background:#8a9bb4}.st.done{background:var(--amber)}
 .det{display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #36496a;color:#b4c4da;font-size:12px}
@@ -52,24 +52,27 @@ table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}th{te
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow">Historica · Roadmap Nov 2026 → 2027</div>
-  <h1>From the best historical maps to the standard tool for scientists</h1>
-  <p class="lead">Two goals, in order: first earn trust with the highest-quality, most convenient open maps; then become the most popular instrument among researchers — through the maps and the Map Builder.</p>
-  <div class="note">Draft for discussion. Dates, targets and scope are <b>proposals</b>, not commitments — click any card for the why and the metric, and click a status pill to change it (saved in this browser).</div>
+  <div class="eyebrow">Historica · Roadmap Nov 2026 → 2028</div>
+  <h1>Maps at 80+, a Map Builder people pay for, and a place in the university toolkit</h1>
+  <p class="lead">Three directions, sized for the team we have: 1 frontend, 1 backend, 1 business analyst + LLM engineer, and a freelance UX/UI designer. Funding is run separately and is not on this roadmap.</p>
+  <div class="note">Draft for discussion. Dates and targets are <b>proposals</b>. Items marked <b>assumption</b> need a number from the team. Click a card for the why and the metric; click a status pill to change it (saved in this browser).</div>
 
   <div class="goals">
-    <div class="goal"><div class="n">Goal 1 · Quality first</div><h2>The best maps — highest quality, most convenient for scientists</h2>
-      <p>Our open maps are updated constantly. Make every border, date and feature verifiable and easy to use in research.</p>
-      <div class="kpis"><span class="kpi">% features with a cited source</span><span class="kpi">errors reported → fixed (days)</span><span class="kpi">expert reviewers</span><span class="kpi">period / region coverage</span></div></div>
-    <div class="goal two"><div class="n">Goal 2 · Adoption</div><h2>The most popular instrument among scientists</h2>
-      <p>Researchers and teachers use our maps and build their own with Map Builder, publish them, and cite Historica.</p>
-      <div class="kpis"><span class="kpi">monthly active scientists</span><span class="kpi">maps built → published</span><span class="kpi">universities piloting</span><span class="kpi">citations / mentions</span></div></div>
+    <div class="goal" style="--c:#4e9bff"><div class="n">1 · Maps</div><h2>Every zone, every period (−4000 → 2000) scores ≈ 80</h2>
+      <p>One snapshot per 400–500 years (~13 periods). Updating one period takes about a week, so all 13 fit in two batches.</p>
+      <div class="kpis"><span class="kpi">periods at score ≥ 80</span><span class="kpi">weakest zone score</span><span class="kpi">weeks per period (now ≈ 1)</span></div></div>
+    <div class="goal" style="--c:#c08bff"><div class="n">2 · Map Builder</div><h2>From beta to a paid product</h2>
+      <p>Listen (10 interviews, 8 feedback sessions), build, re-test, build again, then launch with a paid subscription.</p>
+      <div class="kpis"><span class="kpi">interviews / feedback done</span><span class="kpi">first-map completion</span><span class="kpi">paying users</span></div></div>
+    <div class="goal" style="--c:#5fd6b8"><div class="n">3 · Academics</div><h2>Credibility, then a university package</h2>
+      <p>Talks, a paper, community membership and one university collaboration, leading to maps + Builder inside a student package.</p>
+      <div class="kpis"><span class="kpi">2 accepted conferences / yr</span><span class="kpi">1 published paper / yr</span><span class="kpi">1 university collab</span></div></div>
   </div>
 
   <div class="phases">
-    <div class="phase"><div class="t">Phase 1 · Q4 2026 – Q1 2027</div><h3>Trust</h3><p>Audit quality, finish Map Builder beta, switch on measurement, first university contacts.</p><div class="gate">Gate → top beta UX issues fixed; sources shown on the map; P0 tracking live.</div></div>
-    <div class="phase"><div class="t">Phase 2 · Q2 – Q3 2027</div><h3>Adoption</h3><p>Public Map Builder, expert review, pilot courses, conferences, citable data.</p><div class="gate">Gate → ≥3 universities piloting; maps being published weekly.</div></div>
-    <div class="phase"><div class="t">Phase 3 · Q4 2027 +</div><h3>Standard tool</h3><p>API, collaboration, ambassadors, publications that cite Historica.</p><div class="gate">Gate → growth driven by word of mouth among researchers.</div></div>
+    <div class="phase"><div class="t">Phase 1 · Q4 2026 – Q1 2027</div><h3>Baseline & listen</h3><p>Score every period, finish interviews and feedback, join communities, first conference submission, first map batch.</p><div class="gate">Gate → baseline score map exists; batch 1 (6 periods) at ≥ 80; 10 interviews + 8 feedback done; backlog prioritised.</div></div>
+    <div class="phase"><div class="t">Phase 2 · Q2 – Q3 2027</div><h3>Build & prove</h3><p>Map batch 2 and a full re-score, Builder dev cycles with a re-test in between, paper submitted, university collaboration signed.</p><div class="gate">Gate → 13 of 13 periods ≥ 80; round-2 testing passed; 1 university signed.</div></div>
+    <div class="phase"><div class="t">Phase 3 · Q4 2027 – 2028</div><h3>Charge & package</h3><p>Maps stay at ≥ 80, Builder live with paid subscription, second conference, university package for students.</p><div class="gate">Gate → paying users; package pilot with the partner university.</div></div>
   </div>
 
   <div class="bar">
@@ -79,64 +82,62 @@ table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}th{te
   <div class="scroll"><div class="board" id="board"></div></div>
 
   <div class="metrics">
-    <div class="card"><h2>Success metrics (proposed targets)</h2><p>To be agreed with the team once tracking gives us a baseline.</p>
-      <table><thead><tr><th>Metric</th><th>Baseline</th><th>End 2027</th></tr></thead><tbody>
-      <tr><td>Features with cited source</td><td>to audit</td><td>≥ 90%</td></tr>
-      <tr><td>Median time to fix a reported error</td><td>unknown</td><td>≤ 7 days</td></tr>
-      <tr><td>Universities piloting</td><td>0–1</td><td>≥ 10</td></tr>
-      <tr><td>Monthly active Map Builder users</td><td>beta testers</td><td>to set after beta</td></tr>
-      <tr><td>Maps published by researchers</td><td>tracking pending</td><td>to set after beta</td></tr>
-      <tr><td>Mentions / citations in papers & courses</td><td>unknown</td><td>≥ 25</td></tr></tbody></table></div>
-    <div class="card"><h2>Risks to watch</h2><p>Three people, no incorporated entity — focus matters.</p>
-      <ul class="risks"><li><b>Scope vs. capacity:</b> two products and outreach with a team of 3 — keep each quarter to one headline per track.</li><li><b>Data trust:</b> one visible error in a famous border can cost credibility; sources and review come before coverage.</li><li><b>Beta stall:</b> without publish-step fixes, builder users don't become publishers.</li><li><b>Funding gap:</b> grant decisions arrive late; legal form (nonprofit vs. startup) blocks some programmes.</li></ul></div>
+    <div class="card"><h2>Success metrics (proposed targets)</h2><p>Baselines get filled in during Phase 1.</p>
+      <table><thead><tr><th>Metric</th><th>Now</th><th>End 2027</th></tr></thead><tbody>
+      <tr><td>Periods with every zone ≈ 80+</td><td>to measure (Q4 2026)</td><td>13 of 13 (by end Q2 2027)</td></tr>
+      <tr><td>Update of one period (400–500 yrs)</td><td>≈ 1 week</td><td>≈ 1 week, kept as maps grow</td></tr>
+      <tr><td>Builder interviews / feedback sessions</td><td>6 / 0</td><td>10 / 8 (by Q1)</td></tr>
+      <tr><td>Builder paying subscribers</td><td>0</td><td>first cohort (target after pricing test)</td></tr>
+      <tr><td>Accepted conferences</td><td>0</td><td>2</td></tr>
+      <tr><td>Paper</td><td>0</td><td>1 submitted, published by mid-2028</td></tr>
+      <tr><td>Communities joined</td><td>to count</td><td>≥ 3</td></tr>
+      <tr><td>University collaborations</td><td>0</td><td>1 signed</td></tr></tbody></table></div>
+    <div class="card"><h2>Risks to watch</h2><p>Four people, two of them building. Sequencing matters more than ambition.</p>
+      <ul class="risks"><li><b>One analyst, three jobs:</b> the business analyst + LLM engineer carries the map pipeline, interview synthesis and academics. Cap academics at about a day a week and co-write the paper with the university partner.</li><li><b>Maps capacity is shared:</b> 13 periods × ~1 week is about a quarter of full-time work, but the same person also runs interviews and academics, so it is planned as two batches (Q1, Q2). Sparse early periods may need more than a week; Q3 is the buffer.</li><li><b>Paid launch needs a legal entity:</b> a payment provider and VAT need one. The decision has to land by Q2 2027 or Q4 launch slips.</li><li><b>"Published" lags "submitted":</b> a journal paper started in 2027 will likely publish in 2028. A conference proceedings paper counts and fits the same timeline.</li><li><b>Freelance UX availability:</b> book interview and re-test windows ahead of time.</li></ul></div>
   </div>
 </div>
 <script>
 const LANES=[
- {id:'maps',name:'Open Maps',sub:'quality & convenience',c:'#4e9bff'},
- {id:'builder',name:'Map Builder',sub:'beta → public tool',c:'#c08bff'},
- {id:'community',name:'Scientific community',sub:'universities, events, authors',c:'#5fd6b8'},
- {id:'analytics',name:'Measurement',sub:'tracking, funnels, feedback',c:'#f1c477'},
- {id:'funding',name:'Funding & sustainability',sub:'grants, legal form',c:'#f08aa8'}];
-const Q=[['Q4 2026','now'],['Q1 2027',''],['Q2 2027',''],['Q3 2027',''],['Q4 2027+','later']];
-// lane, quarter index, title, status, goal(q/a), why, metric
+ {id:'maps',name:'Maps',sub:'every zone ≈ 80, all periods',c:'#4e9bff'},
+ {id:'builder',name:'Map Builder',sub:'interviews → paid product',c:'#c08bff'},
+ {id:'academics',name:'Academics',sub:'conferences, paper, university',c:'#5fd6b8'}];
+const Q=[['Q4 2026','now'],['Q1 2027',''],['Q2 2027',''],['Q3 2027',''],['Q4 2027',''],['2028','later']];
+// lane, quarter index, title, status, owner, why, metric
 const ITEMS=[
- ['maps',0,'Data quality audit by period & source','progress','q','Find where borders, dates or names are weak before adding more.','% features audited; top-20 issues list'],
- ['maps',1,'Show source & confidence on every feature','planned','q','Scientists will only cite what they can verify.','% features with a cited source'],
- ['maps',1,'Convenience pass: search, year jump, layers, export','planned','q','Remove friction in the daily research flow.','time to find a place/year; tool usage'],
- ['maps',2,'Expert review: historians flag & correct','planned','q','Turns the community into a quality engine.','errors reported → fixed (days)'],
- ['maps',3,'Versioned, citable datasets (DOI) + open download','planned','a','Lets papers cite a specific map version.','downloads; citations'],
- ['maps',4,'API & academic licence terms','idea','a','Lets other tools build on Historica.','API users'],
- ['builder',0,'Beta: ~40 testers, fix top UX issues (import first)','progress','a','Beta feedback is the cheapest way to find what blocks first maps.','first-map completion rate'],
- ['builder',1,'Templates & onboarding for teachers/researchers','planned','a','A guided first map lifts activation.','signup → first map'],
- ['builder',2,'Public launch: publish, share link, embed, export','planned','a','Published maps are what others see and cite.','maps published / week'],
- ['builder',3,'Collaboration & classroom mode','planned','a','Fits how courses and research groups work.','maps per active group'],
- ['builder',4,'Open Maps as base layers inside Builder; v1.0','idea','q','Joins the two goals: verified base + your own data.','share of maps using base layers'],
- ['community',0,'University outreach, wave 1 (letters, contacts)','progress','a','Early champions give feedback and credibility.','replies; calls booked'],
- ['community',1,'Conference submissions (DH, FOSS4G, SotM)','planned','a','Where researchers find new tools.','accepted talks'],
- ['community',2,'Pilot courses with 3 universities','planned','a','Real classes expose real needs.','universities piloting'],
- ['community',3,'Authors & educators programme, articles','planned','a','45+ authors already — turn them into advocates.','new authors; article → map clicks'],
- ['community',4,'Ambassadors, case studies, first papers citing us','idea','a','Social proof for the next wave.','citations / mentions'],
- ['analytics',0,'Tracking P0 events implemented','progress','a','No data today on actions inside the map.','events passing acceptance'],
- ['analytics',1,'Funnels live in Analyst Hub','planned','a','See where visitors, builders and social traffic drop.','7 funnels buildable'],
- ['analytics',2,'Monthly metrics review → roadmap changes','planned','a','Keeps the roadmap tied to evidence.','decisions made from data'],
- ['analytics',3,'Experiments (A/B) on onboarding & CTA','idea','a','Improve conversion once baseline is stable.','conversion uplift'],
- ['funding',0,'Grant pipeline: NLnet / NGI pending, new calls via bot','progress','a','Runway for a 3-person team.','applications sent; decisions'],
- ['funding',1,'Decide legal form (nonprofit vs. startup)','planned','a','Unlocks programmes that need an entity.','decision date'],
- ['funding',3,'Larger grant with university partners','planned','a','Pilot universities become consortium partners.','proposal submitted'],
- ['funding',4,'Sustainable model (institutional licences / donations)','idea','a','Long-term independence.','recurring revenue']];
-const KEY='historica_roadmap_v1';let ST={},filter='all',open={};
+ ['maps',0,'Baseline: score every zone in every period (−4000 → 2000)','progress','BA/LLM','We cannot aim at 80 without knowing where each zone stands today. Rank periods by gap to 80.','periods scored; gap list'],
+ ['maps',0,'Fix the update routine: ~1 week per period (400–500 yrs)','planned','BA/BE','One week per period is the planning unit. Write the steps down so a batch can be repeated and checked.','weeks per period'],
+ ['maps',1,'Batch 1: lift 6 periods to ≥ 80 and ship','planned','BA/LLM','About 6 weeks of work, shared with interviews. Start with the most-viewed or lowest-scoring periods.','periods ≥ 80; weakest zone score'],
+ ['maps',2,'Batch 2: remaining 7 periods → all ≈ 80','planned','BA/LLM','About 7 weeks of work. Finishes the −4000 → 2000 range.','13 of 13 periods ≥ 80'],
+ ['maps',3,'Re-score everything; fix weakest zones (buffer)','planned','BA/LLM','Catches regressions and the sparse periods that took longer than a week.','min score per period'],
+ ['maps',4,'Historian spot-check of borders in the weakest zones','planned','BA','Independent check that a score of 80 matches what experts see.','errors found; fixed'],
+ ['maps',5,'Maintain: re-score each release, fix the weakest zones','idea','BA/LLM','Quality stays at 80 only if every change is scored.','min score per period'],
+ ['builder',0,'Finish 10 interviews (6 done) + 8 feedback sessions','progress','UX, BA','Fastest way to learn why first maps stall. UX freelancer writes the guide and tests with us.','interviews; sessions; top-10 problems'],
+ ['builder',1,'Triage bugs & feature suggestions into one backlog','planned','BA, UX','Turn raw feedback into a ranked list: fix, build, park.','backlog ranked; scope set'],
+ ['builder',1,'Dev cycle 1: top bugs + top 3 features','planned','FE, BE','Remove what blocks a first finished map before adding anything new.','first-map completion rate'],
+ ['builder',2,'New testing round: 8 users, regression + new features','planned','UX, BA','Check that dev cycle 1 helped, and find what is still missing for paying users.','completion rate vs round 1'],
+ ['builder',3,'Dev cycle 2: fixes + accounts, plans, limits','planned','FE, BE','Prepare the product for payment: sign-in, free vs paid limits, export gating.','paid features ready'],
+ ['builder',3,'Pricing test + payment provider set up','planned','BA, BE','Needs the legal-entity decision. Ask testers what they would pay for.','willingness to pay; provider live'],
+ ['builder',4,'Production launch with paid subscription','planned','All','Soft launch to beta testers first, then public.','paying users; conversion'],
+ ['builder',5,'Classroom / university plan inside Builder','idea','FE, BE','Feeds the university package.','groups; seats'],
+ ['academics',0,'Join 2–3 historical / digital-humanities communities','progress','BA','Reputation and conference leads come from being present. Use the Communities tracker.','communities joined'],
+ ['academics',0,'Shortlist conferences and note deadlines','planned','BA','Pick 3–4 where maps or DH tools fit. Deadlines set the rest of the year.','shortlist with dates'],
+ ['academics',1,'Submit to conference 1; first university conversation','planned','BA','Contact the universities that replied in outreach wave 1.','submission sent; calls booked'],
+ ['academics',2,'Start paper (map-quality scoring method) with a university co-author','planned','BA, partner','We own the scoring data, so the method paper is the natural first one. A co-author speeds it up.','draft ready'],
+ ['academics',3,'Submit paper; submit to conference 2; sign 1 university collaboration','planned','BA','A conference proceedings paper can count as the published paper.','paper submitted; collab signed'],
+ ['academics',4,'Present at conference(s); pilot results with the partner','planned','BA, UX','Results feed the university package.','accepted talks: 2 / yr'],
+ ['academics',5,'University package: maps + Map Builder for students','idea','All','Needs Builder live, classroom plan and the pilot as proof.','package signed with 1 university']];
+const KEY='historica_roadmap_v2';let ST={},filter='all',open={};
 try{ST=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}};
 const NEXT={idea:'planned',planned:'progress',progress:'done',done:'idea'};
 const LBL={progress:'In progress',planned:'Planned',idea:'Idea',done:'Done'};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function render(){
- document.getElementById('chips').innerHTML=[['all','Everything'],...LANES.map(l=>[l.id,l.name]),['q','Goal 1 · Quality'],['a','Goal 2 · Adoption']].map(([k,l])=>`<button class="chip ${filter===k?'on':''}" onclick="filter='${k}';render()">${l}</button>`).join('');
+ document.getElementById('chips').innerHTML=[['all','Everything'],...LANES.map(l=>[l.id,l.name])].map(([k,l])=>`<button class="chip ${filter===k?'on':''}" onclick="filter='${k}';render()">${l}</button>`).join('');
  let h='<div></div>'+Q.map(([q,t])=>`<div class="qh">${q}<small>${t==='now'?'now':t==='later'?'later':'&nbsp;'}</small></div>`).join('');
  LANES.forEach(l=>{h+=`<div class="lane" style="--c:${l.c}">${l.name}<small>${l.sub}</small></div>`;
-  for(let q=0;q<5;q++){h+=`<div class="cell">`+ITEMS.map((it,i)=>[it,i]).filter(([it])=>it[0]===l.id&&it[1]===q).filter(([it])=>filter==='all'||filter===l.id||filter===it[4]).map(([it,i])=>{const s=ST[i]||it[3];
-   return `<div class="item ${open[i]?'open':''}" style="--c:${l.c}" onclick="open[${i}]=!open[${i}];render()"><div class="row"><b>${esc(it[2])}</b><button class="st ${s}" title="Click to change status" onclick="event.stopPropagation();ST[${i}]=NEXT['${s}'];save();render()">${LBL[s]}</button></div><div style="margin-top:6px"><span class="tag ${it[4]}">${it[4]==='q'?'Goal 1 · quality':'Goal 2 · adoption'}</span></div><div class="det"><i>Why:</i> ${esc(it[5])}<br><i>Metric:</i> ${esc(it[6])}</div></div>`}).join('')+`</div>`}});
+  for(let q=0;q<Q.length;q++){h+=`<div class="cell">`+ITEMS.map((it,i)=>[it,i]).filter(([it])=>it[0]===l.id&&it[1]===q).filter(([it])=>filter==='all'||filter===l.id).map(([it,i])=>{const s=ST[i]||it[3];
+   return `<div class="item ${open[i]?'open':''}" style="--c:${l.c}" onclick="open[${i}]=!open[${i}];render()"><div class="row"><b>${esc(it[2])}</b><button class="st ${s}" title="Click to change status" onclick="event.stopPropagation();ST[${i}]=NEXT['${s}'];save();render()">${LBL[s]}</button></div><div style="margin-top:6px"><span class="tag">${esc(it[4])}</span></div><div class="det"><i>Why:</i> ${esc(it[5])}<br><i>Metric:</i> ${esc(it[6])}</div></div>`}).join('')+`</div>`}});
  document.getElementById('board').innerHTML=h}
 render();
 </script>
