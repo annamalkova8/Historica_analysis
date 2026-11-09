@@ -1,69 +1,78 @@
-# Getting API access for the social analytics collectors
+# Как получить доступ к API для сборщиков данных из соцсетей
 
-Goal: get 4 values (plus 1 optional) so `fb.py` and `linkedin.py` can run.
+Цель: получить 4 значения, чтобы запускались `fb.py` и `linkedin.py`.
 
-| Variable | Used by | Where it comes from |
+| Переменная | Где используется | Где взять |
 |---|---|---|
-| `FB_PAGE_ID` | fb.py | Part 1, step 5 |
-| `FB_PAGE_TOKEN` | fb.py | Part 1, step 4 |
-| `LI_TOKEN` | linkedin.py | Part 2, step 5 |
-| `LI_ORG_ID` | linkedin.py | Part 2, step 6 |
+| `FB_PAGE_ID` | fb.py | Часть 1, шаг 4 |
+| `FB_PAGE_TOKEN` | fb.py | Часть 1, шаг 4 |
+| `LI_TOKEN` | linkedin.py | Часть 2, шаг 5 |
+| `LI_ORG_ID` | linkedin.py | Часть 2, шаг 6 |
 
-**Requirement:** you must be an **Admin** of the Facebook Page and a **Super admin** of the LinkedIn Page. Without that, no API will return follower data.
+**Условие:** вы должны быть **администратором** страницы Facebook и **Super admin** страницы LinkedIn. Без этого API не отдаст данные о подписчиках.
 
-Never paste tokens into chat, email or git. Send them through a password manager.
+Не отправляйте токены в чат, почту или git. Передавайте их через менеджер паролей.
 
 ---
 
-## Part 1 - Facebook (about 20 minutes, no review needed)
+## Часть 1 - Facebook (около 20 минут, проверка приложения не нужна)
 
-1. Go to https://developers.facebook.com/ -> **My Apps** -> **Create App**. Choose use case **Other** -> app type **Business**. Name it e.g. "Historica Analytics".
-2. In the app: **App settings -> Basic**. Note the **App ID** and **App Secret** (needed in step 4).
-3. Open the Graph API Explorer: https://developers.facebook.com/tools/explorer/
-   - Select your app at the top right.
-   - Under **Permissions** add: `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `read_insights`.
-   - Click **Generate Access Token** and approve, selecting the **Historica** page when asked.
-   - This gives a short-lived **user** token (about 1 hour).
-4. Turn it into a permanent **page** token:
-   1. Exchange for a long-lived user token (open in a browser or curl):
-      `https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=APP_ID&client_secret=APP_SECRET&fb_exchange_token=SHORT_LIVED_TOKEN`
-   2. Using the long-lived token returned, request:
-      `https://graph.facebook.com/v21.0/me/accounts?access_token=LONG_LIVED_USER_TOKEN`
-   3. In the response find the entry for **Historica**. Its `access_token` is `FB_PAGE_TOKEN` (page tokens derived from a long-lived user token do not expire). Its `id` is `FB_PAGE_ID`.
-5. Quick test:
+1. Откройте https://developers.facebook.com/ -> **My Apps** -> **Create App**. Выберите сценарий **Other** -> тип приложения **Business**. Назовите, например, «Historica Analytics».
+2. В приложении: **App settings -> Basic**. Запишите **App ID** и **App Secret** (понадобятся на шаге 3).
+3. Получите постоянный токен страницы:
+   1. Откройте Graph API Explorer: https://developers.facebook.com/tools/explorer/
+      - Вверху справа выберите своё приложение.
+      - В **Permissions** добавьте: `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `read_insights`.
+      - Нажмите **Generate Access Token**, подтвердите и, когда спросят, выберите страницу **Historica**.
+      - Вы получите короткоживущий токен **пользователя** (около 1 часа).
+   2. Обменяйте его на долгоживущий токен пользователя (откройте в браузере или через curl):
+      `https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=APP_ID&client_secret=APP_SECRET&fb_exchange_token=КОРОТКИЙ_ТОКЕН`
+   3. С полученным долгоживущим токеном выполните запрос:
+      `https://graph.facebook.com/v21.0/me/accounts?access_token=ДОЛГОЖИВУЩИЙ_ТОКЕН_ПОЛЬЗОВАТЕЛЯ`
+   4. В ответе найдите запись **Historica**. Её `access_token` - это `FB_PAGE_TOKEN` (токены страницы, полученные из долгоживущего токена пользователя, не истекают). Её `id` - это `FB_PAGE_ID`.
+4. Быстрая проверка:
    `https://graph.facebook.com/v21.0/PAGE_ID?fields=followers_count&access_token=PAGE_TOKEN`
-   It should return a follower number.
+   Должно вернуться число подписчиков.
 
-Notes
-- No App Review is required while the app stays in **Development mode**, as long as the person who made the token is an admin/developer of the app and of the page. If someone else will run it, add them under **App roles**.
-- Facebook only provides age/gender, country and city **totals** for followers. There is no education or occupation data.
-- Demographics need roughly 100+ followers.
-
----
-
-## Part 2 - LinkedIn (about 30 minutes of work, then waiting for approval: days to weeks)
-
-1. Go to https://www.linkedin.com/developers/apps -> **Create app**.
-   - Link it to the **Historica Foundation** company page.
-   - Upload a logo, accept terms.
-2. The page **Super admin** must open the verification link shown in the app's **Settings** tab and click **Approve**. Until then the app can't be used.
-3. **Products** tab -> request **Community Management API**. Fill in the access form (organization details, use case: "Analyzing our own company page followers and comments"). This is the slow step.
-   - LinkedIn requires this product on a dedicated app, so don't add other products to it.
-   - Start with the **Development tier**. It is enough for your own page. The Standard tier needs a longer review.
-4. After approval, open the **Auth** tab and note the **Client ID** and **Client Secret**. Add a redirect URL (e.g. `http://localhost:8000/callback`) if you want to run the OAuth flow yourself.
-5. Get the token (`LI_TOKEN`): use the OAuth token generator at https://www.linkedin.com/developers/tools/oauth
-   - Select the app and tick scopes: `r_organization_social`, `r_organization_followers`, `rw_organization_admin`.
-   - Sign in as the page Super admin and approve.
-   - The token lasts **60 days**, so repeat the step then. Refresh tokens are only available to approved partners.
-6. Get the numeric organization ID (`LI_ORG_ID`): open the page's admin view (linkedin.com/company/historica-foundation/admin/). The URL becomes `linkedin.com/company/<NUMBER>/admin/`. That number is the ID.
-
-Notes
-- LinkedIn only provides follower **totals** by country/region, seniority, industry, job function and company size. There is no age or education data and no individual followers.
-- Demographic breakdowns need at least 100 followers.
+Примечания
+- Проверка приложения (App Review) не нужна, пока приложение в режиме **Development**, а токен создал администратор или разработчик и приложения, и страницы. Если запускать будет другой человек, добавьте его в **App roles**.
+- Facebook отдаёт только **суммарные** данные о подписчиках: возраст/пол, страна и город. Данных об образовании и профессии нет.
+- Для демографии нужно примерно 100+ подписчиков.
+- Раздел **Integrations / Connect data** в Events Manager (Meta Pixel, Conversions API, Facebook SDK) для этого не нужен: он относится к рекламе.
 
 ---
 
-## Using the values
+## Часть 2 - LinkedIn (около 30 минут работы, затем ожидание одобрения: от нескольких дней до нескольких недель)
+
+1. Откройте https://www.linkedin.com/developers/apps -> **Create app**.
+   - Привяжите приложение к странице компании **Historica Foundation**.
+   - Загрузите логотип, примите условия.
+2. **Super admin** страницы должен открыть ссылку верификации на вкладке **Settings** приложения и нажать **Approve**. Пока этого нет, приложение использовать нельзя.
+3. Вкладка **Products** -> запросите **Community Management API**. Заполните форму доступа (данные организации, цель: «Анализ подписчиков и комментариев нашей собственной страницы компании»). Это самый долгий шаг.
+   - LinkedIn требует держать этот продукт в отдельном приложении, поэтому не добавляйте в него другие продукты.
+   - Начните с уровня **Development tier**. Для своей страницы его достаточно. Для **Standard tier** проверка дольше.
+4. После одобрения откройте вкладку **Auth** и запишите **Client ID** и **Client Secret**. Если хотите пройти OAuth самостоятельно, добавьте redirect URL (например, `http://localhost:8000/callback`).
+5. Получите токен (`LI_TOKEN`): используйте генератор OAuth-токенов https://www.linkedin.com/developers/tools/oauth
+   - Выберите приложение и отметьте права: `r_organization_social`, `r_organization_followers`, `rw_organization_admin`.
+   - Войдите как Super admin страницы и подтвердите.
+   - Токен действует **60 дней**, затем шаг нужно повторить. Refresh-токены доступны только одобренным партнёрам.
+6. Получите числовой ID организации (`LI_ORG_ID`): откройте админку страницы (linkedin.com/company/historica-foundation/admin/). URL превратится в `linkedin.com/company/<ЧИСЛО>/admin/`. Это число и есть ID.
+
+Примечания
+- LinkedIn отдаёт только **суммарные** данные о подписчиках: по стране/региону, стажу (seniority), отрасли, функции и размеру компании. Возраста и образования нет, отдельных подписчиков тоже нет.
+- Для демографических разрезов нужно минимум 100 подписчиков.
+
+---
+
+## Переход с соцсетей на сайт
+
+Ни Facebook, ни LinkedIn не отдают данные о посетителях, перешедших на сайт. Чтобы это считать:
+- Добавляйте UTM-метки ко всем ссылкам на сайт в постах, например `?utm_source=facebook&utm_medium=social&utm_campaign=...`.
+- Визиты считает аналитика сайта. Отчёт по ним строит `web_traffic.py`.
+
+---
+
+## Использование значений
 
 ```bash
 export FB_PAGE_ID=...
@@ -76,4 +85,4 @@ python fb.py
 python linkedin.py
 ```
 
-Results are stored in `data/social.db` (SQLite).
+Результаты сохраняются в `data/social.db` (SQLite).

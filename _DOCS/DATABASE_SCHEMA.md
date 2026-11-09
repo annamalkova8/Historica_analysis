@@ -81,6 +81,7 @@ One row per source check or Jira sync. `found` = items returned; `added` = new r
 | `rivalDirs` | Rivals → Directions & claims | UI only | — | Seeded from the Oct 2026 report. |
 | `mapq` | Rivals → Map quality analysis | UI only (manual or imported benchmark report) | — | Matched on region + year when importing. |
 | `mapqIn` | Project progress → Map quality → before/after | UI only (filled by the tab's ↻ Update, which reads `<zone>_<period>/<zone>_report.json` files from the map_score_service `out` folder in the browser) | — | One row per zone + period; re-reading a report refreshes the row. |
+| `followers` | Analytics → Social & Newsletter (and Public tab) | UI only (typed by hand) | `name` | One row per network (`Facebook`, `LinkedIn`): `count`, `date` of last edit. The hub sums them for "All followers". Seeded with 17,000 / 3,400. |
 | `roadmap` | Project progress | UI only | — | Seeded from `historica_roadmap.html`. |
 | `unis` | Academic Outreach | UI only | — | No search service (manual). |
 | `testers` | Map Builder Testers | UI only | — | No search service (manual). |
