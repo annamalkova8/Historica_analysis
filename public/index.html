@@ -480,7 +480,7 @@ async function loadConfluenceTesters(){
  save();render()}
 function setTF(id,k,v){const t=S.testers.find(t=>t.id===id);if(!t)return;t[k]=v;save();render()} // re-render so the summary tiles follow the table
 /** older rows kept the interview inside "fb" (Interview / Both): move it to the separate Interview column */
-function migrateTesters(){let ch=false;S.testers.forEach(t=>{if(t.ext==='confluence'&&!t.fbReset){t.fb='None';t.fbReset=true;ch=true}}); // feedback is filled in by hand now, not taken from Confluence
+function migrateTesters(){let ch=false;S.testers.forEach(t=>{if(t.ext==='confluence'&&!t.fbReset){t.fbReset=true;ch=true}}); // stamp only: Feedback typed by hand must never be cleared // feedback is filled in by hand now, not taken from Confluence
  S.testers.forEach(t=>{if(t.iv===undefined){t.iv=t.fb==='Interview'||t.fb==='Both'?'Yes':'No';if(t.fb==='Interview')t.fb='None';else if(t.fb==='Both')t.fb='Google Form';ch=true}
  else if(t.fb==='Interview'||t.fb==='Both'){t.iv='Yes';t.fb=t.fb==='Both'?'Google Form':'None';ch=true}});return ch}
 function addTester(){let n=S.testers.length+1;while(S.testers.some(t=>t.id==='T-'+String(n).padStart(3,'0')))n++;S.testers.unshift({id:'T-'+String(n).padStart(3,'0'),role:document.getElementById('nr').value,src:document.getElementById('ns').value,iv:'No',fb:'None'});save();render()}
