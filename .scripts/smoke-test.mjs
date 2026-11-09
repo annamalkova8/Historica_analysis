@@ -70,7 +70,7 @@ assert.equal(r.json.added, 1, JSON.stringify(r.json));
 st = await call('state', { headers: auth });
 assert.equal(st.json.data.confs[0].cost, 350);
 
-setLlm(async () => JSON.stringify([{ name: 'r/historyteachers', url: 'https://www.reddit.com/r/historyteachers/?utm=1', platform: 'Reddit', priority: 'Very high', goal: 'Feedback' }]));
+setLlm(async () => JSON.stringify([{ name: 'EuroClio Hubs', url: 'https://euroclio.eu/euroclio-hubs/?utm=1', platform: 'Association network', priority: 'Very high', goal: 'Feedback' }]));
 r = await call('run', { method: 'POST', headers: auth, body: { service: 'communities', task: 0 } });
 assert.equal(r.json.added, 1);
 r = await call('run', { method: 'POST', headers: auth, body: { service: 'communities', task: 2 } });

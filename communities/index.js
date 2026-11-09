@@ -16,7 +16,6 @@ enthusiasts, historical map communities. Prefer small, active, relevant communit
     { name: 'EuroClio hubs', check_url: 'https://euroclio.eu/euroclio-hubs/', notes: 'National/regional history educator associations in Europe.' },
     { name: 'AHA Communities', check_url: 'https://communities.historians.org/', notes: 'Teaching and digital history communities.' },
     { name: 'ADHO and DH associations', check_url: 'https://adho.org/', notes: 'Constituent organisations and special interest groups; mailing lists.' },
-    { name: 'Reddit communities', check_url: 'https://www.reddit.com/subreddits/', notes: 'Active subreddits for history teaching, historical maps, geography, digital humanities. Note self-promotion rules.' },
     { name: 'NCHE and US history educator networks', check_url: 'https://ncheteach.org/', notes: 'History educator communities, Discord and mailing lists.' },
     { name: 'Humanist and DH mailing lists', check_url: 'https://dhhumanist.org/', notes: 'Open digital humanities lists that accept project announcements.' },
     { name: 'Geovistory and linked-open-data history communities', check_url: 'https://www.geovistory.org/community', notes: 'Digital historians and developers working on historical data.' },
@@ -34,12 +33,12 @@ Project profile:
 
 ${profile}
 
-You have a web search tool. Find ACTIVE communities (forums, subreddits, Discord/Slack servers, mailing lists,
+You have a web search tool. Find ACTIVE communities (forums, Discord/Slack servers, mailing lists,
 association networks, social groups) relevant to the profile. Today is ${today()}.
 
 For each community output a JSON object with exactly these fields:
 - "name": community name
-- "platform": "Reddit" | "Discord" | "Slack" | "Mailing list" | "Forum" | "Facebook group" | "LinkedIn group" | "Association network" | "Other"
+- "platform": "Discord" | "Slack" | "Mailing list" | "Forum" | "Facebook group" | "LinkedIn group" | "Association network" | "Other"
 - "audience": who is in it
 - "url": direct URL to the community or its join page
 - "size_activity": member count / activity level if stated, else "unknown"
@@ -69,7 +68,7 @@ ${qs.map((x) => `- ${x}`).join('\n')}
 
 Follow the output format exactly.`;
   },
-  accept: (it) => !!it.name && !!it.url,
+  accept: (it) => !!it.name && !!it.url && !/reddit\.com/i.test(String(it.url)) && !/reddit/i.test(String(it.platform || '')),   // Reddit is excluded on purpose
   key: (it) => normUrl(it.url) || normName(it.name),
   similar: sameComm,
   toRecord(it, taskName) {
