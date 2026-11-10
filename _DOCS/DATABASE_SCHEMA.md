@@ -106,10 +106,10 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 |---|---|
 | `name`, `source`, `link` | "NGI Zero Commons Fund", "NLnet", URL |
 | `deadline`, `sum`, `period` | text or `"unknown"` |
-| `oss`, `articles` | `Yes` / `No` / `?` — open-source required? scientific articles required? |
-| `docs` | documents required (comma list) |
+| `oss`, `articles`, `docs` | legacy fields still filled by the Fund search; **no longer shown** in the Grants table |
+| `comment` | free text, filled in by hand in the Grants table |
 | `note`, `kind` (`grant`…), `consortium` (`yes`/`no`/`unclear`) | service output |
-| `applied` | `No` / `Yes` |
+| `applied` | `No` / `Planned` / `Yes` (same scale as conferences) |
 | `result` | `—` / `Pending` / `Accepted` / `Rejected` |
 | `isNew`, `hidden`, `found`, `firstSeen` | flags (see above) |
 
@@ -117,7 +117,7 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 `name`, `focus`, `date` (YYYY-MM-DD or text), `loc`, `country` (optional; if empty the UI takes the last part of `loc`), `format` (`in-person`/`online`/`hybrid`/`unknown`), `deadline` (CFP), `costText` (as stated), `cost` (number, €), `link`, `note`, `source`, `applied` (`No`/`Planned`/`Yes`), `result` (`—`/`Pending`/`Accepted`/`Rejected`), flags.
 
 ### `comms`
-`name`, `platform`, `audience`, `url`, `priority` (`Very high`/`High`/`Medium`), `approach`, `goal` (`Acquisition`/`Feedback`/`Partnership`), `rules`, `size`, `note`, `source`, `contact`, `date` (last contacted), `status` (`Not started`/`Joined`/`Contacted`/`Posted`/`Replied`/`Partnership`), `responses`, `visits`, `testers` (numbers), flags.
+`name`, `platform`, `audience`, `url`, `priority` (`Very high`/`High`/`Medium`), `approach`, `goal` (`Acquisition`/`Feedback`/`Partnership`), `rules`, `size`, `note`, `source`, `contact`, `date` (last contacted), `status` (`Not started`/`Planned`/`Joined`/`Contacted`/`Posted`/`Replied`/`Partnership`), `responses`, `visits`, `testers` (numbers), flags.
 
 ### `rivals`
 | Field | Meaning |
@@ -147,7 +147,7 @@ Rows added by a service carry `isNew: true`, `found: "ai"`, `firstSeen` (YYYY-MM
 `key`, `summary`, `status`, `cat` (Jira status category: `new`/`indeterminate`/`done`), `type`, `assignee` (`Unassigned` if none), `priority`, `labels[]`, `created`, `updated`, `resolved`, `due` (YYYY-MM-DD or empty), `epic` (parent key), `epicName`, `points` (story points, 0 if the field is empty), `url`.
 
 ### `unis`
-`name`, `country`, `dept`, `contact`, `email`, `wrote` (`Not yet`/`Drafted`/`Sent`/`Replied`), `status` (`Prospect`/`Contacted`/`In conversation`/`Pilot`/`Declined`), `last` (date of last touch). **Contains personal data (names, emails of university staff).**
+`name`, `country`, `dept`, `contact`, `email`, `wrote` (`Not yet`/`Drafted`/`Sent`/`Replied`), `status` (`Prospect`/`Contacted`/`In conversation`/`Pilot`/`Declined`), `last` (date of last touch). `hidden`/`hiddenAt` when blocked with 🚫 (never show again; ↩ restores). **Contains personal data (names, emails of university staff).**
 
 ### `testers`
 `id` (`T-001`…), `role`, `src` (where they came from), `iv` (interviewed: `Yes`/`No`), `fb` (feedback channel: `None`/`Email`/`Google Form`/`All`; older rows with `Interview`/`Both` are migrated to `iv` on load), `proj` (one-sentence project description), `maps` (number of maps built). Personal data is not collected here beyond role/source. Rows loaded by **↻ Load from Confluence** have ids `C-001`…, `ext: 'confluence'` and `key` (a hash of the e-mail/name, only used to match the same tester on the next load); role/source/project/maps and `iv` (interview Yes/No) are refreshed from the page on every load, while `fb` (feedback channel) is filled in by hand in the hub and kept. Names and e-mails from the page are never stored. The page id is in `api/confluence.js` (override with env `BETA_TESTERS_PAGE`); it uses the same `JIRA_BASE_URL`/`JIRA_EMAIL`/`JIRA_API_TOKEN`.
