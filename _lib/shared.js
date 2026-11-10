@@ -1,6 +1,14 @@
 // Helpers and prompt fragments shared by all search services.
 
 export const today = () => new Date().toISOString().slice(0, 10);
+/** true when a free-text deadline is a real date (ISO, or text with a 4-digit year) that is before today; rolling/unknown/none -> false */
+export const deadlinePassed = (t) => {
+  const v = String(t || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v < today();
+  if (!/\b(19|20)\d{2}\b/.test(v)) return false;
+  const ms = Date.parse(v);
+  return !isNaN(ms) && new Date(ms).toISOString().slice(0, 10) < today();
+};
 export const str = (v, d = 'unknown') => (v === undefined || v === null || String(v).trim() === '' ? d : String(v).trim());
 export const yn = (v) => ({ yes: 'Yes', no: 'No' }[String(v).toLowerCase()] || '?');
 export const normUrl = (u) =>

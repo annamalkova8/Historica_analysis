@@ -1,5 +1,5 @@
 // Conference search: upcoming conferences and calls for papers.
-import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
+import { today, deadlinePassed, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
 import { sameConf } from '../_lib/dedupe.js';
 export default {
   id: 'conferences',
@@ -48,7 +48,7 @@ For each conference output a JSON object with exactly these fields:
 - "topics": short comma-separated topics
 - "relevance_note": one sentence on why Historica should care, and what kind of submission fits (talk, poster, demo, workshop)
 
-Skip conferences that already took place and ones unrelated to the topics above.
+Skip conferences that already took place, ones whose submission deadline is before ${today()}, and ones unrelated to the topics above.
 
 ${JSON_ONLY}`;
   },
@@ -72,6 +72,7 @@ Find conferences that fit the profile. Follow the output format exactly.`;
     if (!it.name) return false;
     const d = String(it.start_date || '');
     if (/^\d{4}-\d{2}-\d{2}$/.test(d) && d < today()) return false;
+    if (deadlinePassed(it.cfp_deadline)) return false;   // submission deadline already passed
     return true;
   },
   key: (it) => normName(it.name),
