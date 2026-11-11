@@ -98,7 +98,7 @@ iframe.dash{width:100%;height:420px;border:1px solid #30425e;border-radius:10px;
 .cov{margin-top:10px;display:flex;flex-direction:column;gap:8px}
 .covrow{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;font-size:12.5px}
 .covcells{display:grid;grid-template-columns:repeat(60,1fr);gap:2px}
-.covcells i{height:20px;border-radius:3px;background:#1a2a43;display:block}.covcells i.d{background:#70e0b7}.covcells i.p{background:#4e9bff}
+.covcells i{height:20px;border-radius:3px;background:#1a2a43;display:block}.covcells i.g{background:#70e0b7}.covcells i.b{background:#4e9bff}.covcells i.o{background:#f1a04e}.covcells i.r{background:#f06a6a}
 .covcells span{font-size:9.5px;color:var(--mut);white-space:nowrap;height:12px}
 .covleg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:8px}.covleg b{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
 .rm{display:grid;grid-template-columns:150px repeat(6,minmax(180px,1fr));gap:8px;min-width:1300px;align-items:start}
@@ -890,15 +890,15 @@ function progress(){const tabs=`<div class="toolbar" style="margin-top:0"><div c
 const MQ_PLAN={zones:5,from:-4000,step:100,count:60,target:80};
 function mqCover(){const P=MQ_PLAN,I=S.mapqIn,seen=[...new Set(I.map(x=>x.zone))].sort(),n=Math.max(P.zones,seen.length),best={};
  I.forEach(x=>{const b=Math.floor(x.period/P.step)*P.step,k=x.zone+'|'+b;if(!(k in best)||x.afterCommon>best[k])best[k]=x.afterCommon});
- const rows=Array.from({length:n},(_,zi)=>{const z=seen[zi];return {name:z?mqZone(z):'Zone '+(zi+1)+' (empty)',cells:Array.from({length:P.count},(_,i)=>{const p=P.from+i*P.step,sc=z?best[z+'|'+p]:undefined;return {p,sc,st:sc===undefined?'':sc>=P.target?'d':'p'}})}});
- const all=rows.flatMap(r=>r.cells);return {rows,total:all.length,done:all.filter(c=>c.st==='d').length,prog:all.filter(c=>c.st==='p').length}}
+ const rows=Array.from({length:n},(_,zi)=>{const z=seen[zi];return {name:z?mqZone(z):'Zone '+(zi+1)+' (empty)',cells:Array.from({length:P.count},(_,i)=>{const p=P.from+i*P.step,sc=z?best[z+'|'+p]:undefined;return {p,sc,st:sc===undefined?'':sc>=80?'g':sc>=70?'b':sc>50?'o':'r'}})}});
+ const all=rows.flatMap(r=>r.cells);return {rows,total:all.length,done:all.filter(c=>c.st==='g').length,prog:all.filter(c=>'bor'.includes(c.st)&&c.st).length}}
 function mqCoverCard(){const C=mqCover(),P=MQ_PLAN,pc=v=>Math.round(v/C.total*100);
  const lab=Array.from({length:P.count},(_,i)=>`<span>${i%10===0?P.from+i*P.step:''}</span>`).join('');
- const rows=C.rows.map(r=>`<div class="covrow"><b>${esc(r.name)}</b><div class="covcells">${r.cells.map(c=>`<i class="${c.st}" title="${esc(r.name)} · ${c.p}: ${c.sc===undefined?'not analysed yet':c.sc+(c.st==='d'?' — done':' — in progress')}"></i>`).join('')}</div></div>`).join('');
+ const rows=C.rows.map(r=>`<div class="covrow"><b>${esc(r.name)}</b><div class="covcells">${r.cells.map(c=>`<i class="${c.st}" title="${esc(r.name)} · ${c.p}: ${c.sc===undefined?'not analysed yet':c.sc+(c.st==='g'?' — done':' — in progress')}"></i>`).join('')}</div></div>`).join('');
  return card(`<div class="sectionhead"><h2>Maps · ${C.rows.length} zones × ${P.count} centuries = ${C.total} objects</h2></div>
  <div class="stats"><div class="card"><div class="metric">Done · score ≥ ${P.target}</div><div class="number">${C.done}<span class="muted"> / ${C.total}</span></div><div class="trend">${pc(C.done)}%</div></div><div class="card"><div class="metric">In progress · analysed, below ${P.target}</div><div class="number">${C.prog}</div><div class="trend warn">${pc(C.prog)}%</div></div><div class="card"><div class="metric">Not started</div><div class="number">${C.total-C.done-C.prog}</div><div class="muted">${pc(C.total-C.done-C.prog)}%</div></div></div>
  <div class="cov">${rows}<div class="covrow"><span></span><div class="covcells">${lab}</div></div></div>
- <div class="covleg"><span><b style="background:#70e0b7"></b>Done (score ≥ ${P.target})</span><span><b style="background:#4e9bff"></b>In progress (has a score, below ${P.target})</span><span><b style="background:#1a2a43"></b>Not started</span><span>Synced from Map quality → before / after reports (best score per zone and century; hover a cell for the value).</span></div>`)}
+ <div class="covleg"><span><b style="background:#70e0b7"></b>≥ 80 (done)</span><span><b style="background:#4e9bff"></b>70–80</span><span><b style="background:#f1a04e"></b>50–70</span><span><b style="background:#f06a6a"></b>≤ 50</span><span><b style="background:#1a2a43"></b>Not started</span><span>Synced from Map quality → before / after reports (best score per zone and century; hover a cell for the value).</span></div>`)}
 function roadmapView(){const R=S.roadmap,cnt=s=>R.filter(x=>x.status===s).length,J=JI(),jd=J.filter(i=>i.cat==='done'&&i.resolved>=dAgo(30)).length;
  const CV=mqCover(),laneRows=LANES.map(l=>{if(l.id==='maps')return [l.name,Math.round(CV.done/CV.total*100),CV.done+'/'+CV.total+' objects ≥ '+MQ_PLAN.target];const L=R.filter(x=>x.lane===l.id);const d=L.filter(x=>x.status==='done').length;return [l.name,L.length?Math.round(d/L.length*100):0,d+'/'+L.length+' done']});
  const board=rmBoard();
