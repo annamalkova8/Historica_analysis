@@ -888,11 +888,11 @@ function mapQuality(){const I=S.mapqIn,M=S.mapq,ex=[...I].sort((a,b)=>String(b.d
 function progress(){const tabs=`<div class="toolbar" style="margin-top:0"><div class="tabs">${[['roadmap','Roadmap'],['jira','Jira analytics'],['mapquality','Map quality']].map(([k,l])=>`<button class="tab ${pgTab===k?'active':''}" onclick="pgTab='${k}';render()">${l}</button>`).join('')}</div></div>`;
  return tabs+(pgTab==='jira'?team():pgTab==='mapquality'?mapQuality():roadmapView())}
 const MQ_PLAN={zones:5,from:-4000,step:100,count:60,target:80};
-function mqCover(){const P=MQ_PLAN,I=S.mapqIn,seen=[...new Set(I.map(x=>x.zone))].sort(),n=Math.max(P.zones,seen.length),best={};
+function mqCover(){const P=MQ_PLAN,I=S.mapqIn,seen=[...new Set(I.map(x=>x.zone))].sort(),n=seen.length,best={};
  I.forEach(x=>{const b=Math.floor(x.period/P.step)*P.step,k=x.zone+'|'+b;if(!(k in best)||x.afterCommon>best[k])best[k]=x.afterCommon});
  const rows=Array.from({length:n},(_,zi)=>{const z=seen[zi];return {name:z?mqZone(z):'Zone '+(zi+1)+' (empty)',cells:Array.from({length:P.count},(_,i)=>{const p=P.from+i*P.step,sc=z?best[z+'|'+p]:undefined;return {p,sc,st:sc===undefined?'':sc>=80?'g':sc>=70?'b':sc>50?'o':'r'}})}});
  const all=rows.flatMap(r=>r.cells);return {rows,total:all.length,done:all.filter(c=>c.st==='g').length,prog:all.filter(c=>'bor'.includes(c.st)&&c.st).length}}
-function mqCoverCard(){const C=mqCover(),P=MQ_PLAN,pc=v=>Math.round(v/C.total*100);
+function mqCoverCard(){const C=mqCover(),P=MQ_PLAN,pc=v=>C.total?Math.round(v/C.total*100):0;
  const lab=Array.from({length:P.count},(_,i)=>`<span>${i%10===0?P.from+i*P.step:''}</span>`).join('');
  const rows=C.rows.map(r=>`<div class="covrow"><b>${esc(r.name)}</b><div class="covcells">${r.cells.map(c=>`<i class="${c.st}" title="${esc(r.name)} · ${c.p}: ${c.sc===undefined?'not analysed yet':c.sc+(c.st==='g'?' — done':' — in progress')}"></i>`).join('')}</div></div>`).join('');
  return card(`<div class="sectionhead"><h2>Maps · ${C.rows.length} zones × ${P.count} centuries = ${C.total} objects</h2></div>
@@ -900,7 +900,7 @@ function mqCoverCard(){const C=mqCover(),P=MQ_PLAN,pc=v=>Math.round(v/C.total*10
  <div class="cov">${rows}<div class="covrow"><span></span><div class="covcells">${lab}</div></div></div>
  <div class="covleg"><span><b style="background:#70e0b7"></b>≥ 80 (done)</span><span><b style="background:#4e9bff"></b>70–80</span><span><b style="background:#f1a04e"></b>50–70</span><span><b style="background:#f06a6a"></b>≤ 50</span><span><b style="background:#1a2a43"></b>Not started</span><span>Synced from Map quality → before / after reports (best score per zone and century; hover a cell for the value).</span></div>`)}
 function roadmapView(){const R=S.roadmap,cnt=s=>R.filter(x=>x.status===s).length,J=JI(),jd=J.filter(i=>i.cat==='done'&&i.resolved>=dAgo(30)).length;
- const CV=mqCover(),laneRows=LANES.map(l=>{if(l.id==='maps')return [l.name,Math.round(CV.done/CV.total*100),CV.done+'/'+CV.total+' objects ≥ '+MQ_PLAN.target];const L=R.filter(x=>x.lane===l.id);const d=L.filter(x=>x.status==='done').length;return [l.name,L.length?Math.round(d/L.length*100):0,d+'/'+L.length+' done']});
+ const CV=mqCover(),laneRows=LANES.map(l=>{if(l.id==='maps')return [l.name,(CV.total?Math.round(CV.done/CV.total*100):0),CV.done+'/'+CV.total+' objects ≥ '+MQ_PLAN.target];const L=R.filter(x=>x.lane===l.id);const d=L.filter(x=>x.status==='done').length;return [l.name,L.length?Math.round(d/L.length*100):0,d+'/'+L.length+' done']});
  const board=rmBoard();
  const epics={};J.forEach(i=>{if(!i.epic)return;const e=epics[i.epic]||(epics[i.epic]={k:i.epic,n:i.epicName||i.epic,d:0,t:0,p:0,pd:0});e.t++;e.p+=i.points||0;if(i.cat==='done'){e.d++;e.pd+=i.points||0}});
  const E=Object.values(epics).sort((a,b)=>(b.t-b.d)-(a.t-a.d));
