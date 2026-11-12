@@ -765,6 +765,16 @@ async function syncGaNow(){runState.ga={running:true,log:[],total:1,done:0,cur:'
  catch(e){if(e.message==='login')return;runState.ga.log=['⚠ '+lg(e.message)]}
  runState.ga.running=false;try{GA=await api('/api/ga')}catch(e){}render()}
 const analyticsViews=()=>`<div class="tabs">${[['public','Public · shown on website'],['expected','Analytics · what we expect']].map(([k,l])=>`<button class="tab ${aView===k?'active':''}" onclick="aView='${k}';render()">${l}</button>`).join('')}</div>`;
+/* ---- real numbers from Google Analytics for the Analytics page (site = www.historica.org, map = map.historica.org) ---- */
+const gaN=v=>Math.round(v||0).toLocaleString('en-US');
+const gaScope=k=>{const sc=GA&&GA.data&&GA.data.scopes&&GA.data.scopes[k];if(!sc)return null;const T=Object.fromEntries((sc.totals||[]).map(t=>[t.dateRange,t]));return {sc,T,d30:T.d30||{},p30:T.p30||{},d7:T.d7||{}}};
+const gaNeed=()=>!GA?'loading…':GA.error?'Google Analytics error':!GA.configured?'GA connection (GA_PROPERTY_ID)':'GA ↻ Update';
+const gaUsers=(k,label)=>{const g=gaScope(k);if(!g)return nostat(label,gaNeed());const a=g.d30.activeUsers||0,b=g.p30.activeUsers||0,ch=b?Math.round((a-b)/b*100):null;return stat(label,gaN(a),ch===null?'Google Analytics':(ch>=0?'↑ ':'↓ ')+Math.abs(ch)+'% vs prev 30d')};
+function gaWeekly(k){const g=gaScope(k);if(!g)return null;const d=g.sc.daily||[],w=[];for(let i=d.length;i>0&&w.length<12;i-=7)w.unshift(d.slice(Math.max(0,i-7),i).reduce((x,r)=>x+r.activeUsers,0));return w.length>1?w:null}
+const gaWeeklyCard=(title,sets,need)=>sets.every(x=>x.d)?card(`<div class="sectionhead"><h2>${title}</h2><span class="muted">Google Analytics · last 12 weeks</span></div>${line(sets)}`):nodata(title,need||gaNeed(),170);
+const gaSources=(k,title)=>{const g=gaScope(k);if(!g)return nodata(title,gaNeed(),170);const ch=g.sc.channels||[],tot=ch.reduce((x,c)=>x+c.sessions,0)||1;return card(`<h2 style="margin-bottom:8px">${title} <span class="tag">sessions · 30d</span></h2>${bars(ch.slice(0,7).map(c=>[c.sessionDefaultChannelGroup||'(not set)',Math.round(c.sessions/tot*100)]))}`)};
+const gaDur=v=>{v=Math.round(v||0);return Math.floor(v/60)+'m '+String(v%60).padStart(2,'0')+'s'};
+const gaActive=k=>{const g=gaScope(k);return g?stat('Avg active time',gaDur(g.d30.activeUsers?g.d30.userEngagementDuration/g.d30.activeUsers:0),'per visitor · 30d'):nostat('Avg active time',gaNeed())};
 async function loadJira(){try{JS=await api('/api/jira')}catch(e){if(e.message==='login')return;JS={error:e.message}}if(page==='progress')render()}
 async function syncJiraNow(){runState.jira={running:true,log:[],total:1,done:0,cur:'Jira issues'};render();
  try{const r=await api('/api/jira',{method:'POST'});runState.jira.log=['✓ '+r.count+' issues synced from Jira']}
