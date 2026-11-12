@@ -382,13 +382,13 @@ const nodata=(title,need,h=110)=>card(`<h2 style="margin-bottom:8px">${title}${n
 const nostat=(label,need)=>stat(label,`<span style="font-size:15px;font-weight:600">${NO}</span>`,need?'needs '+need:'');
 const funnelNo=i=>nodata(PRESETS[i][0]+' (funnel)',PRESETS[i][1].join(' → '),90);
 const noCell=`<span class="muted">${NO}</span>`;
-function analytics(){if(aView==='ga')return `<div class="toolbar" style="margin-top:0">${analyticsViews()}</div>${gaView()}`;const exp=aView==='expected',fn=exp&&aTab==='funnels';
+function analytics(){const exp=aView==='expected',fn=exp&&aTab==='funnels';
  const views=analyticsViews();
  const subs=exp?`<div class="tabs" style="margin-top:12px">${[['website','Website'],['map','Map'],['social','Social & Newsletter'],['publicity','Publicity'],['builder','Map Builder users'],['funnels','Funnels']].map(([k,l])=>`<button class="tab ${aTab===k?'active':''}" onclick="aTab='${k}';render()">${l}</button>`).join('')}</div>`:'';
  const note=exp?(fn?'':`<div class="note" style="margin:14px 0">Everything we plan to measure. Where the number is not collected yet, the card says <b>${NO}</b> and names what is needed (tracking events from the spec, UTM links, or the Facebook / LinkedIn collectors).</div>`)
-  :`<div class="note" style="margin:14px 0"><b>Public view</b> — the figures shown on the website. Website and map traffic come from Google Analytics (press ↻ Update on the Google Analytics tab to refresh); newsletter and a few other figures are still typed in by hand.</div>`;
+  :`<div class="note" style="margin:14px 0"><b>Public view</b> — the figures shown on the website. Website and map traffic come from Google Analytics (synced automatically, or press ↻ Update above); newsletter and a few other figures are still typed in by hand.</div>`;
  const body=!exp?websitePublic():fn?funnels():({website:siteX,map:mapX,social:socialX,publicity:pubX,builder:builderX}[aTab])();
- return `<div class="toolbar" style="margin-top:0">${views}</div>${subs}${note}${body}`}
+ return `<div class="toolbar" style="margin-top:0">${views}</div>${subs}${gaBar()}${note}${body}`}
 /* ---- Social followers: typed in by hand; every change is a dated row, the hub sums the latest of each network ---- */
 const folTs=f=>f.ts||((f.date||'1970-01-01')+'T00:00:00.000Z');
 const folHist=()=>[...(S.followers||[])].filter(f=>f.name).sort((a,b)=>folTs(a).localeCompare(folTs(b)));
@@ -421,10 +421,12 @@ function websitePublic(){const T=S.testers,fb=T.filter(t=>t.fb&&t.fb!=='None').l
 function siteX(){return `<div class="stats">${gaUsers('site','Website visitors · 30d')}${gaUsers('map','Map visitors · 30d')}${stat('Social followers',folFmt(fol().total),folSub(fol()))}${stat('Newsletter','5,000+','subscribers')}</div>
  <div class="grid">${gaWeeklyCard('Weekly visitors',[{name:'Website',d:gaWeekly('site')}])}${gaSources('site','Traffic sources')}</div>
  <div class="stats">${nostat('CTR website → map','map_cta_clicked')}${nostat('Donation conversion','donation_completed')}${gaActive('site')}${nostat('Avg donation','payment webhook')}</div>
+ <div class="grid eq">${gaTable('site','Top pages','pages','Page','pagePath')}${gaTable('site','Countries','countries','Country','country')}</div>
  <div class="grid eq">${funnelNo(0)}${funnelNo(3)}</div>`}
 function mapX(){const g=gaScope('map'),ret=g&&(g.sc.returning||[]).find(x=>x.newVsReturning==='returning'),nw=g&&(g.sc.returning||[]).find(x=>x.newVsReturning==='new'),mob=g&&(g.sc.devices||[]).find(x=>x.deviceCategory==='mobile'),dv=g&&(g.sc.devices||[]).reduce((x,d)=>x+d.sessions,0);
  return `<div class="stats">${gaUsers('map','Map visitors · 30d')}${g?stat('Returning visitors',pct(ret?ret.activeUsers:0,(ret?ret.activeUsers:0)+(nw?nw.activeUsers:0)),'of visitors · 30d'):nostat('Returning visitors',gaNeed())}${g?stat('Avg session',gaDur(g.d30.sessions?g.d30.userEngagementDuration/g.d30.sessions:0),'engaged time · 30d'):nostat('Avg session',gaNeed())}${g?stat('Mobile share',pct(mob?mob.sessions:0,dv),'of sessions · 30d'):nostat('Mobile share',gaNeed())}</div>
  <div class="grid">${gaWeeklyCard('Map visitors, weekly',[{name:'Map',d:gaWeekly('map')}])}${gaSources('map','Where map visitors come from')}</div>
+ <div class="grid eq">${gaTable('map','Countries','countries','Country','country')}${gaTable('map','Devices','devices','Device','deviceCategory')}</div>
  <div class="grid eq">${nodata('Most explored periods','year_selected')}${nodata('Tool usage','tool_used')}</div>
  <div class="grid eq">${funnelNo(4)}${funnelNo(6)}</div>`}
 function socialX(){const ch=['Facebook','LinkedIn','Newsletter'];
@@ -749,48 +751,20 @@ async function runUpdate(id){
  if(!SV.llmConfigured){alert('OPENAI_API_KEY is not set on the server. Add it in Vercel → Settings → Environment Variables and redeploy.');return}
  if(!confirm('Update "'+s.title+'": the AI will check '+s.tasks.length+' sources/queries (uses OpenAI credits, can take a few minutes). Continue?'))return;
  return runAll(id)}
-let GA=null,gaLoading=false,gaWin=30;
-async function loadGa(){try{GA=await api('/api/ga')}catch(e){if(e.message==='login')return;GA={error:e.message}}if(page==='analytics')render()}
+let GA=null,gaLoading=false,gaAuto=false;
+async function loadGa(){try{GA=await api('/api/ga')}catch(e){if(e.message==='login')return;GA={error:e.message}}if(page==='analytics')render();
+ const d=GA&&GA.data;if(GA&&GA.configured&&!gaAuto&&(!d||!d.scopes||Date.now()-new Date(d.at)>12*36e5)){gaAuto=true;syncGaNow()}}
+const gaBar=()=>{if(!GA)return '';const rs=runState.ga||{},d=GA.data;
+ if(GA.error)return `<div class="note warn" style="margin:10px 0">Cannot read Google Analytics status: ${esc(GA.error)}</div>`;
+ if(!GA.configured)return `<div class="note warn" style="margin:10px 0"><b>Google Analytics is not connected yet</b>, so traffic numbers show “${NO}”. In Vercel → Settings → Environment Variables add <code>GA_PROPERTY_ID</code> and <code>GA_SERVICE_ACCOUNT_JSON</code> (whole key file; the account needs the <b>Viewer</b> role), then redeploy.</div>`;
+ const err=rs.log&&rs.log[0]&&rs.log[0][0]==='⚠'?`<div class="note warn" style="margin:8px 0">${esc(rs.log[0])}</div>`:'';
+ return `<div class="muted" style="margin:10px 0">Traffic numbers: Google Analytics · ${d?'last sync '+esc(new Date(d.at).toLocaleString()):'not synced yet'} <button class="btn small" style="margin-left:8px" ${rs.running?'disabled':''} onclick="syncGaNow()">${rs.running?'Updating…':'↻ Update'}</button></div>${err}`};
+const gaTable=(k,title,key,label,dim)=>{const g=gaScope(k);if(!g)return nodata(title,gaNeed(),120);const rows=(g.sc[key]||[]).slice(0,10);return card(`<h2 style="margin-bottom:10px">${title} <span class="tag">30 days</span></h2>${rows.length?table([label,'Visitors','Sessions','Page views'],rows.map(r=>[esc(r[dim]||'(not set)'),gaN(r.activeUsers),gaN(r.sessions),gaN(r.screenPageViews)])):'<div class="muted">No data</div>'}`)};
 async function syncGaNow(){runState.ga={running:true,log:[],total:1,done:0,cur:'Google Analytics'};render();
  try{const r=await api('/api/ga',{method:'POST'});runState.ga.log=['✓ '+r.days+' days of data synced from Google Analytics']}
  catch(e){if(e.message==='login')return;runState.ga.log=['⚠ '+lg(e.message)]}
  runState.ga.running=false;try{GA=await api('/api/ga')}catch(e){}render()}
-const analyticsViews=()=>`<div class="tabs">${[['public','Public · shown on website'],['expected','Analytics · what we expect'],['ga','Google Analytics']].map(([k,l])=>`<button class="tab ${aView===k?'active':''}" onclick="aView='${k}';render()">${l}</button>`).join('')}</div>`;
-function gaView(){
- const rs=runState.ga||{},btn=`<button class="btn small" ${rs.running?'disabled':''} onclick="syncGaNow()">${rs.running?'Updating…':'↻ Update'}</button>`;
- if(!GA)return card('<h2>Google Analytics</h2><div class="muted">Loading…</div>');
- if(GA.error)return `<div class="note warn">Cannot read Google Analytics status: ${esc(GA.error)}</div>`;
- const msg=rs.log&&rs.log.length?`<div class="note" style="margin:10px 0">${esc(rs.log.join(' '))}</div>`:'';
- if(!GA.configured)return card(`<h2>Google Analytics</h2><div class="note warn" style="margin-top:10px"><b>Google Analytics is not connected yet.</b> In Vercel → Settings → Environment Variables add <code>GA_PROPERTY_ID</code> (the number from GA → Admin → Property details) and <code>GA_SERVICE_ACCOUNT_JSON</code> (the whole content of the service-account key file; the account needs the <b>Viewer</b> role on the property), then redeploy.</div>`);
- const D=GA.data;
- if(!D)return card(`<div class="sectionhead"><h2>Google Analytics</h2><div class="actions">${btn}</div></div>${msg}<div class="mock">No data yet — press <b>↻ Update</b> to pull it from Google Analytics.</div>`);
- const T=Object.fromEntries((D.totals||[]).map(t=>[t.dateRange||'d7',t])),n=v=>Math.round(v||0).toLocaleString('en-US'),pct=v=>((v||0)*100).toFixed(1)+'%',dur=v=>{v=Math.round(v||0);return Math.floor(v/60)+'m '+String(v%60).padStart(2,'0')+'s'};
- const t=T['d'+gaWin]||T.d30||{},win=`<select class="mini" onchange="gaWin=+this.value;render()">${[7,30,90].map(x=>`<option value="${x}" ${x===gaWin?'selected':''}>Last ${x} days</option>`).join('')}</select>`;
- const er=t.sessions?t.engagedSessions/t.sessions:0;
- const stats=`<div class="stats">${stat('Visitors · '+gaWin+'d',n(t.activeUsers),n(t.newUsers)+' new')}${stat('Sessions',n(t.sessions),pct(er)+' engaged')}${stat('Page views',n(t.screenPageViews),n(t.eventCount)+' events')}${stat('Avg session',dur(t.averageSessionDuration),'bounce '+pct(t.bounceRate))}</div>`;
- const cmp=table(['Metric','7 days','30 days','90 days'],[['Visitors','activeUsers'],['New visitors','newUsers'],['Sessions','sessions'],['Page views','screenPageViews'],['Events','eventCount']].map(([l,k])=>[l,n((T.d7||{})[k]),n((T.d30||{})[k]),n((T.d90||{})[k])]));
- const days=(D.daily||[]).slice(-gaWin*1).map(d=>({d:d.date,v:d.activeUsers,s:d.sessions})),W=720,H=170,L=34,B=22,mx=Math.max(1,...days.map(x=>x.v)),x=i=>L+(W-L-6)*(days.length>1?i/(days.length-1):0),y=v=>H-B-(H-B-8)*v/mx;
- const line=days.map((p,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(p.v).toFixed(1)).join(' '),lab=[0,Math.floor(days.length/2),days.length-1].filter((v,i,a)=>days.length&&a.indexOf(v)===i).map(i=>`<text x="${x(i)}" y="${H-6}" text-anchor="middle" fill="#8a9bb4" font-size="10">${days[i].d.replace(/(\d{4})(\d\d)(\d\d)/,'$1-$2-$3')}</text>`).join('');
- const chart=card(`<h2 style="margin-bottom:6px">Visitors per day</h2><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Active users per day"><line x1="${L}" y1="${y(0)}" x2="${W-6}" y2="${y(0)}" stroke="#273751"/><text x="${L-4}" y="${y(mx)+4}" text-anchor="end" fill="#8a9bb4" font-size="10">${n(mx)}</text><path d="${line}" fill="none" stroke="#4e9bff" stroke-width="2"/>${lab}</svg>`);
- const tb=(title,rows,key,label,extra)=>card(`<h2 style="margin-bottom:10px">${title} <span class="tag">90 days</span></h2>${(rows||[]).length?table([label,'Visitors','Sessions','Page views','Engaged'],(rows||[]).slice(0,extra||10).map(r=>[esc(r[key]||'(not set)'),n(r.activeUsers),n(r.sessions),n(r.screenPageViews),pct(r.engagementRate)])):'<div class="muted">No data</div>'}`);
- const ev=card(`<h2 style="margin-bottom:10px">Events <span class="tag">90 days</span></h2>${table(['Event','Count','Users'],(D.events||[]).slice(0,20).map(r=>[esc(r.eventName),n(r.eventCount),n(r.totalUsers)]))}<div class="note">These are the events GA already receives — compare with the tracking spec to see which P0 events are live.</div>`);
- return `<div class="sectionhead" style="margin-bottom:10px"><div><span class="muted">Property ${esc(D.property)} · last sync ${esc(new Date(D.at).toLocaleString())}</span></div><div class="actions">${win}${btn}</div></div>${msg}${stats}
- <div class="grid eq" style="margin-top:16px">${chart}${card('<h2 style="margin-bottom:10px">Period comparison</h2>'+cmp)}</div>
- <div class="grid eq" style="margin-top:16px">${tb('Channels',D.channels,'sessionDefaultChannelGroup','Channel')}${tb('Source / medium',D.sources,'sessionSourceMedium','Source / medium')}</div>
- <div class="grid eq" style="margin-top:16px">${tb('Countries',D.countries,'country','Country')}${tb('Devices',D.devices,'deviceCategory','Device')}</div>
- <div class="grid eq" style="margin-top:16px">${tb('Top pages',D.pages,'pagePath','Page',15)}${tb('Landing pages',D.landing,'landingPagePlusQueryString','Landing page',15)}</div>
- <div class="grid eq" style="margin-top:16px">${tb('Campaigns (UTM)',D.campaigns,'sessionCampaignName','Campaign')}${ev}</div>
- <div class="grid eq" style="margin-top:16px">${tb('Cities',D.cities,'city','City')}${tb('Browsers',D.browsers,'browser','Browser')}</div>`}
-/* ---- real numbers from Google Analytics for the Analytics page (site = www.historica.org, map = map.historica.org) ---- */
-const gaN=v=>Math.round(v||0).toLocaleString('en-US');
-const gaScope=k=>{const sc=GA&&GA.data&&GA.data.scopes&&GA.data.scopes[k];if(!sc)return null;const T=Object.fromEntries((sc.totals||[]).map(t=>[t.dateRange,t]));return {sc,T,d30:T.d30||{},p30:T.p30||{},d7:T.d7||{}}};
-const gaNeed=()=>!GA?'loading…':GA.error?'Google Analytics error':!GA.configured?'GA connection (GA_PROPERTY_ID)':'GA ↻ Update';
-const gaUsers=(k,label)=>{const g=gaScope(k);if(!g)return nostat(label,gaNeed());const a=g.d30.activeUsers||0,b=g.p30.activeUsers||0,ch=b?Math.round((a-b)/b*100):null;return stat(label,gaN(a),ch===null?'Google Analytics':(ch>=0?'↑ ':'↓ ')+Math.abs(ch)+'% vs prev 30d')};
-function gaWeekly(k){const g=gaScope(k);if(!g)return null;const d=g.sc.daily||[],w=[];for(let i=d.length;i>0&&w.length<12;i-=7)w.unshift(d.slice(Math.max(0,i-7),i).reduce((x,r)=>x+r.activeUsers,0));return w.length>1?w:null}
-const gaWeeklyCard=(title,sets,need)=>sets.every(x=>x.d)?card(`<div class="sectionhead"><h2>${title}</h2><span class="muted">Google Analytics · last 12 weeks</span></div>${line(sets)}`):nodata(title,need||gaNeed(),170);
-const gaSources=(k,title)=>{const g=gaScope(k);if(!g)return nodata(title,gaNeed(),170);const ch=g.sc.channels||[],tot=ch.reduce((x,c)=>x+c.sessions,0)||1;return card(`<h2 style="margin-bottom:8px">${title} <span class="tag">sessions · 30d</span></h2>${bars(ch.slice(0,7).map(c=>[c.sessionDefaultChannelGroup||'(not set)',Math.round(c.sessions/tot*100)]))}`)};
-const gaDur=v=>{v=Math.round(v||0);return Math.floor(v/60)+'m '+String(v%60).padStart(2,'0')+'s'};
-const gaActive=k=>{const g=gaScope(k);return g?stat('Avg active time',gaDur(g.d30.activeUsers?g.d30.userEngagementDuration/g.d30.activeUsers:0),'per visitor · 30d'):nostat('Avg active time',gaNeed())};
+const analyticsViews=()=>`<div class="tabs">${[['public','Public · shown on website'],['expected','Analytics · what we expect']].map(([k,l])=>`<button class="tab ${aView===k?'active':''}" onclick="aView='${k}';render()">${l}</button>`).join('')}</div>`;
 async function loadJira(){try{JS=await api('/api/jira')}catch(e){if(e.message==='login')return;JS={error:e.message}}if(page==='progress')render()}
 async function syncJiraNow(){runState.jira={running:true,log:[],total:1,done:0,cur:'Jira issues'};render();
  try{const r=await api('/api/jira',{method:'POST'});runState.jira.log=['✓ '+r.count+' issues synced from Jira']}
