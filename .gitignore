@@ -6,3 +6,4 @@ node_modules
 historica-grant-bot/
 .env.example
 key.md
+ga-service-account.json
