@@ -156,6 +156,16 @@ const DEFAULTS=()=>({
   {name:'OIS Restack 1st Open Call',source:'NGI (Next Generation Internet)',link:'https://ngi.eu/opencalls/',deadline:'unknown',sum:'unknown',period:'unknown',oss:'?',articles:'?',docs:'unknown',applied:'Yes',result:'Pending'},
   {name:'AWS Activate Credits',source:'AWS Activate (Startup Credits)',link:'https://aws.amazon.com/startups/credits/',deadline:'unknown',sum:'unknown',period:'unknown',oss:'?',articles:'?',docs:'unknown',applied:'Yes',result:'Pending'},
   {name:'NVIDIA Inception Program',source:'NVIDIA Inception Program',link:'https://www.nvidia.com/en-us/startups/',deadline:'unknown',sum:'unknown',period:'unknown',oss:'?',articles:'?',docs:'unknown',applied:'Yes',result:'Pending'}],
+ bloggers:[
+  {name:'Kings and Generals',url:'https://www.youtube.com/@KingsandGenerals',subs:'',topic:'Military history, battles and empires, ancient to modern; documentary series',maps:'Yes',mapNote:'Animated campaign maps',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+  {name:'Historia Civilis',url:'https://www.youtube.com/@HistoriaCivilis',subs:'',topic:'Roman Republic and ancient history, narrated explainers',maps:'Yes',mapNote:'Animated maps and illustrations',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+  {name:'Epic History',url:'https://www.youtube.com/@EpicHistoryTV',subs:'',topic:'Wars, empires and key events, short documentaries',maps:'Yes',mapNote:'Animated maps',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+  {name:'OverSimplified',url:'https://www.youtube.com/@OverSimplified',subs:'',topic:'Comedic cartoon retellings of wars and revolutions',maps:'Sometimes',mapNote:'Cartoon maps for context',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+  {name:'RealLifeLore',url:'https://www.youtube.com/@RealLifeLore',subs:'',topic:'Geography, borders, geopolitics and some history',maps:'Yes',mapNote:'Map-driven explainers',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+  {name:'History Matters',url:'https://www.youtube.com/@HistoryMatters',subs:'',topic:'Short explainers on historical events and empires',maps:'Yes',mapNote:'Map-based visuals',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+  {name:'Invicta',url:'https://www.youtube.com/@Invicta',subs:'',topic:'Military history, strategy and campaigns',maps:'Sometimes',mapNote:'Occasional maps',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+  {name:'The History Guy',url:'https://www.youtube.com/@TheHistoryGuyChannel',subs:'',topic:'Lesser-known stories from history',maps:'No',mapNote:'Mostly archival images',contact:'',priority:'Medium',status:'Not started',date:'',comments:'Pre-filled from memory: verify URL, topic and map use; add contact.'},
+ ],
  unis:[
   {name:'University of Oxford',country:'UK',dept:'Digital Humanities / e-Research',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''},
   {name:'University of Amsterdam',country:'NL',dept:'Humanities / Digital Humanities',contact:'',email:'',wrote:'Not yet',status:'Prospect',last:''},
@@ -259,7 +269,7 @@ We would welcome the opportunity to discuss the project further.
 Kind regards,
 {{sender_name}}`}];
 let S,SNAP={},syncT=null,syncing=false,dirty=false;
-const COLLS=['grants','confs','comms','unis','testers','tplList','funnels','rivals','rivalDirs','mapq','mapqIn','followers','roadmap'];
+const COLLS=['grants','confs','comms','bloggers','unis','testers','tplList','funnels','rivals','rivalDirs','mapq','mapqIn','followers','roadmap'];
 let pendingKinds=[];
 const UIKEY='historica_hub_ui_v1';
 const uid=()=>'c_'+(window.crypto&&crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36));
@@ -325,7 +335,7 @@ function hideRec(c,i){S[c][i].hidden=true;S[c][i].isNew=false;save();render()}
 const deadlinePassed=t=>{const v=String(t||'').trim(),td=new Date().toISOString().slice(0,10);if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v<td;if(!/\b(19|20)\d{2}\b/.test(v))return false;const m=Date.parse(v);return !isNaN(m)&&new Date(m).toISOString().slice(0,10)<td};
 const confExpired=c=>!c.hidden&&c.applied==='No'&&deadlinePassed(c.deadline); // computed against today's date on every render; rows we applied to / plan to apply to stay
 const visible=(x,f)=>x.hidden?f==='Hidden':(f!=='New'||x.isNew);
-const SORT={confs:{k:'date',d:1},grants:{k:'name',d:1},comms:{k:'priority',d:1}};
+const SORT={confs:{k:'date',d:1},grants:{k:'name',d:1},comms:{k:'priority',d:1},bloggers:{k:'name',d:1}};
 function sortBy(c,k){const s=SORT[c];s.d=s.k===k?-s.d:1;s.k=k;render()}
 const th=(c,k,l)=>`<span style="cursor:pointer;user-select:none" onclick="sortBy('${c}','${k}')">${l}${SORT[c].k===k?(SORT[c].d>0?' ▲':' ▼'):' ↕'}</span>`;
 const confCountry=c=>{if(c.country)return c.country;const l=String(c.loc||'').trim();if(!l||/^(tbd|unknown)$/i.test(l))return '';if(/^(online|virtual|remote)/i.test(l))return 'Online';const p=l.split(/[,;\/]/).map(x=>x.trim()).filter(Boolean);return p[p.length-1]||''};
@@ -372,8 +382,8 @@ function enableSort(){document.querySelectorAll('#content table').forEach(t=>{co
   h.onclick=()=>{const c=TSORT[key]&&TSORT[key].col===i?TSORT[key]:{col:i,dir:0};c.dir=c.dir===1?-1:c.dir===-1?0:1;TSORT[key]=c;tsApply(t,i,c.dir)}});
  const c=TSORT[key];if(c&&c.dir)tsApply(t,c.col,c.dir)})}
 /* ---------- pages ---------- */
-const PAGES=[['analytics','▥','Analytics'],['progress','◔','Project progress'],['testers','♙','Map Builder Testers'],['conferences','▦','Conferences'],['grants','◇','Grants & Funding'],['communities','◉','Communities'],['academia','◎','Academic Outreach'],['rivals','⚔','Rivals analysis'],['templates','✎','Templates & Letters']];
-const META={progress:['Roadmap & Jira','Project progress','Roadmap for three directions — maps at ≈80 in every period, Map Builder to a paid product, academics and the university package — plus Jira analytics: delivery and team performance.'],rivals:['Competitive intelligence','Rivals analysis','Who else makes historical maps, what is new, what we can take — and where Historica is better or worse.'],analytics:['Dashboards','Analytics','Public view (what the website shows) and Analytics (what we expect to measure — “Data not enough to show” where it is not collected yet).'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
+const PAGES=[['analytics','▥','Analytics'],['progress','◔','Project progress'],['testers','♙','Map Builder Testers'],['conferences','▦','Conferences'],['grants','◇','Grants & Funding'],['communities','◉','Communities'],['bloggers','▶','Bloggers'],['academia','◎','Academic Outreach'],['rivals','⚔','Rivals analysis'],['templates','✎','Templates & Letters']];
+const META={progress:['Roadmap & Jira','Project progress','Roadmap for three directions — maps at ≈80 in every period, Map Builder to a paid product, academics and the university package — plus Jira analytics: delivery and team performance.'],rivals:['Competitive intelligence','Rivals analysis','Who else makes historical maps, what is new, what we can take — and where Historica is better or worse.'],analytics:['Dashboards','Analytics','Public view (what the website shows) and Analytics (what we expect to measure — “Data not enough to show” where it is not collected yet).'],testers:['User research','Map Builder Testers','Who tests, where they come from, and how much feedback we got.'],conferences:['Events','Conferences','Upcoming conferences, cost, whether we applied, and the outcome.'],grants:['Funding','Grants & Funding','Pipeline fed by historica-grant-bot — what to apply with, did we apply, were we accepted.'],academia:['Partnerships','Academic Outreach','Universities, contacts, who we wrote to, and status.'],bloggers:['Outreach','YouTube Bloggers','History YouTubers: what they cover, whether they use maps, how to reach them, and where our conversation stands.'],communities:['Outreach','Historical Communities','Teacher, history and map communities: where we posted, who replied, how many testers and visits it brought.'],templates:['Writing workspace','Templates & Letters','Edit, personalise and analyse letters, forms and abstracts before sending.']};
 
 /* Analytics — two views: Public (what the website shows) and Expected (what we plan to measure) */
 const NO='Data not enough to show';
@@ -530,7 +540,7 @@ const setF=(c,i,k,v)=>{S[c][i][k]=v;save();render()};
 const RES=['—','Pending','Accepted','Rejected'];
 const APPLIED=['No','Planned','Yes']; // one "Applied?" scale for conferences and grants
 /* ---- manually resizable columns (conferences, grants, academics, communities); widths are remembered per browser ---- */
-const CW_KEY='historica_hub_colw_v1',RZ_PAGES=['conferences','grants','academia','communities'];
+const CW_KEY='historica_hub_colw_v1',RZ_PAGES=['conferences','grants','academia','communities','bloggers'];
 const cwLoad=()=>{try{return JSON.parse(localStorage.getItem(CW_KEY)||'{}')}catch(e){return {}}};
 const cwSave=(k,w)=>{try{const a=cwLoad();if(w)a[k]=w;else delete a[k];localStorage.setItem(CW_KEY,JSON.stringify(a))}catch(e){}};
 function enableResize(){if(!RZ_PAGES.includes(page))return;const saved=cwLoad();
@@ -612,6 +622,17 @@ async function saveCfg(id){try{const sources=JSON.parse(document.getElementById(
  SV=await api('/api/services');render()}catch(e){alert('Could not save: '+e.message)}}
 async function resetCfg(id){if(!confirm('Reset this service to its default sources, queries and profile?'))return;await api('/api/services?service='+id,{method:'DELETE'});SV=await api('/api/services');render()}
 
+/* YouTube bloggers */
+const BST=['Not started','Planned','Contacted','Replied','In talks','Collaboration','Declined'],BMAP=['Unknown','Yes','Sometimes','No'];
+function bloggers(){const b=S.bloggers,vb=b.filter(x=>!x.hidden),idx=[...b.keys()].filter(i=>visible(b[i],bloggerFilter)).sort(cmp('bloggers')),
+ started=vb.filter(x=>x.status!=='Not started'&&x.status!=='Planned').length,maps=vb.filter(x=>x.maps==='Yes'||x.maps==='Sometimes').length,talks=vb.filter(x=>x.status==='In talks'||x.status==='Collaboration').length;
+ const inp=(i,k,ph,w,ta)=>ta?`<textarea class="inl" rows="2" style="width:${w}px" placeholder="${ph}" onchange="S.bloggers[${i}].${k}=this.value;save()">${esc(b[i][k]||'')}</textarea>`:`<input class="inl" style="width:${w}px" placeholder="${ph}" value="${esc(b[i][k]||'')}" onchange="S.bloggers[${i}].${k}=this.value;save()">`;
+ return `<div class="stats four">${stat('Bloggers',vb.length,vb.filter(x=>x.priority==='Very high').length+' very high priority')}${stat('Use maps',maps,pct(maps,vb.length)+' of list')}${stat('Contacted',started,pct(started,vb.length)+' of list')}${stat('In talks / collaboration',talks,'active conversations')}</div>
+ ${card(`<div class="sectionhead"><h2>YouTube bloggers</h2><div class="actions"><select class="mini" onchange="bloggerFilter=this.value;render()">${['All','Hidden'].map(x=>`<option ${x===bloggerFilter?'selected':''}>${x}</option>`).join('')}</select><input class="field" id="bgn" style="width:200px" placeholder="Channel name"><input class="field" id="bgu" style="width:200px" placeholder="Channel URL"><button class="btn small" onclick="addBlogger()">+ Add</button></div></div>
+ ${table([th('bloggers','name','Channel'),'Subscribers','Content about',th('bloggers','maps','Uses maps?'),'Contact',th('bloggers','priority','Priority'),th('bloggers','status','Status'),th('bloggers','date','Last contact'),'Comments',''],idx.map(i=>{const x=b[i];return [`<a href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.name)}</b></a>${x.hidden?' <span class="tag">hidden</span>':''}`,inp(i,'subs','e.g. 250K',70),inp(i,'topic','periods, regions, format',190,1),sel(BMAP,x.maps,`setF('bloggers',${i},'maps',this.value)`)+`<input class="inl" style="width:130px;margin-top:4px" placeholder="map style / notes" value="${esc(x.mapNote||'')}" onchange="S.bloggers[${i}].mapNote=this.value;save()">`,inp(i,'contact','email / form / Instagram',150),sel(CPR,x.priority,`setF('bloggers',${i},'priority',this.value)`),sel(BST,x.status,`setF('bloggers',${i},'status',this.value)`),`<input class="inl" type="date" style="width:128px" value="${esc(x.date||'')}" onchange="S.bloggers[${i}].date=this.value;save()">`,inp(i,'comments','notes, replies, ideas',220,1),`<button class="ibtn" title="${x.hidden?'Restore':'Hide'}" onclick="setF('bloggers',${i},'hidden',${!x.hidden})">${x.hidden?'↩':'🚫'}</button><button class="ibtn" title="Delete row" onclick="delRow('bloggers',${i})">🗑</button>`]}))}
+ <div class="note">Tip: note which maps the channel uses (own animation, Google Earth, static maps) — it shows how much they could benefit from Historica maps. Write comments after every contact.</div>`)}`}
+let bloggerFilter='All';
+function addBlogger(){const n=document.getElementById('bgn').value.trim();if(!n)return;S.bloggers.unshift({name:n,url:document.getElementById('bgu').value.trim()||'#',subs:'',topic:'',maps:'Unknown',mapNote:'',contact:'',priority:'Medium',status:'Not started',date:'',comments:''});save();render()}
 /* Communities */
 const CGOAL=['Acquisition','Feedback','Partnership'],CST=['Not started','Planned','Joined','Contacted','Posted','Replied','Partnership'],CPR=['Very high','High','Medium'];
 const PLAN=[['r/historyteachers','Publish one classroom-oriented example','5–10 teacher responses'],['r/Maps','Share a map exploration example','Initial traffic and feedback'],['H-Maps','Submit a project introduction','Academic feedback'],['EuroClio','Contact regional coordinators','2–3 potential teaching pilots'],['NCHE Discord','Join discussions; request permission to share','Teacher testers'],['Geovistory','Introduce Map Builder beta','Technical testers'],['UK–Ireland DH list','Share a project introduction','Research contacts']];
@@ -729,7 +750,7 @@ const SEED={
   {region:'Spain',year:1180,ours:93.2,rivals:62.6,countryOurs:100,countryRivals:61.2,borderOurs:82.9,borderRivals:64.7,best:'chronas',wrong:'7 of 41',date:'2026-10-28',note:'Iberian Peninsula window. Report _DOCS/rivals/spain_1180.html. LLM-judged; 5 rival maps.'},
   {region:'Holy Land',year:1180,ours:75.3,rivals:65.7,countryOurs:88,countryRivals:56.8,borderOurs:56.2,borderRivals:79.1,best:'chronas',wrong:'14 of 32',date:'2026-10-28',note:'Eastern Mediterranean window. Report _DOCS/rivals/holy_land_1180.html. Our borders trail rivals here (−22.9).'}]
 };
-const NEWK=['rivals','rivalDirs','mapq','followers','roadmap'];
+const NEWK=['rivals','rivalDirs','mapq','followers','roadmap','bloggers'];
 const seedKey=(k,x)=>String(k==='mapq'?x.region+'|'+x.year:(x.name||x.title)).toLowerCase();
 SORT.rivals={k:'name',d:1};
 let pgTab='roadmap',rivalFilter='All',tpWin=30,rmFilter='all',rmOpen={},JS=null,svLoading=false,jiraLoading=false;
@@ -1010,9 +1031,9 @@ function importMapq(inp){const files=[...inp.files];let ok=0,bad=[],left=files.l
    if(row){const i=S.mapq.findIndex(x=>x.region.toLowerCase()===row.region.toLowerCase()&&String(x.year)===String(row.year));if(i>=0)S.mapq[i]={...S.mapq[i],...row,note:S.mapq[i].note||row.note};else S.mapq.unshift(row);ok++}else bad.push(f.name)}catch(e){bad.push(f.name)}
   if(--left===0){inp.value='';save();render();alert(ok+' benchmark(s) imported.'+(bad.length?'\nNot recognised: '+bad.join(', '):''))}};r.readAsText(f)})}
 
-const VIEWS={analytics,progress,testers,conferences,grants,academia,communities,rivals,templates};
+const VIEWS={analytics,progress,testers,conferences,grants,academia,communities,bloggers,rivals,templates};
 function go(p){page=p;render();window.scrollTo(0,0);if(p==='analytics')refreshFromServer().catch(()=>{})} // opening Analytics re-reads the saved data (testers edited elsewhere show up)
-function render(){const nh=a=>(a||[]).filter(x=>!x.hidden).length,cnt={testers:S.testers.length,conferences:nh(S.confs),grants:nh(S.grants),academia:nh(S.unis),communities:nh(S.comms),services:[...S.grants,...S.confs,...S.comms,...S.rivals].filter(x=>x.isNew&&!x.hidden).length,rivals:nh(S.rivals),progress:S.roadmap.filter(x=>x.status==='progress').length};
+function render(){const nh=a=>(a||[]).filter(x=>!x.hidden).length,cnt={testers:S.testers.length,conferences:nh(S.confs),grants:nh(S.grants),academia:nh(S.unis),communities:nh(S.comms),bloggers:nh(S.bloggers),services:[...S.grants,...S.confs,...S.comms,...S.rivals].filter(x=>x.isNew&&!x.hidden).length,rivals:nh(S.rivals),progress:S.roadmap.filter(x=>x.status==='progress').length};
  document.getElementById('nav').innerHTML=PAGES.map(([id,ic,l])=>`<button class="nav ${page===id?'active':''}" onclick="go('${id}')"><b>${ic}</b><span class="t">${l}</span>${cnt[id]?`<span class="cnt">${cnt[id]}</span>`:''}</button>`).join('');
  const [e,t,s]=META[page];document.getElementById('eyebrow').textContent=e;document.getElementById('title').textContent=t;document.getElementById('subtitle').textContent=s;
  document.getElementById('content').innerHTML=VIEWS[page]();if(page==='templates')refreshTpl();enableResize();enableSort();bgLoad()}
