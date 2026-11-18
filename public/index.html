@@ -428,19 +428,16 @@ const FB_KPI=10;
 function fbKpi(){const T=S.testers,iv=T.filter(t=>t.iv==='Yes').length,fb=T.filter(t=>t.fb&&t.fb!=='None').length;return {iv,fb,done:fb,goal:FB_KPI,pct:Math.min(100,Math.round(fb/FB_KPI*100))}}
 function websitePublic(){const T=S.testers,fb=T.filter(t=>t.fb&&t.fb!=='None').length,iv=T.filter(t=>t.iv==='Yes').length;
  return `<div class="stats">${stat('Beta testers',T.length,'Map Builder')}${stat('Interviewed',iv,pct(iv,T.length)+' of testers')}${stat('Gave feedback',fb,pct(fb,T.length)+' of testers')}</div>
- <div class="stats">${gaUsers('site','Website visitors · 30d')}${gaUsers('map','Map visitors · 30d')}${stat('Social followers',folFmt(fol().total),folSub(fol()))}${stat('Newsletter','5,000+','subscribers')}</div>
- <div class="grid">${gaWeeklyCard('Weekly visitors',[{name:'Website',d:gaWeekly('site')},{name:'Map',d:gaWeekly('map')}])}${gaSources('site','Traffic sources · website')}</div>`}
-function siteX(){return `<div class="stats">${gaUsers('site','Website visitors · 30d')}${gaUsers('map','Map visitors · 30d')}${stat('Social followers',folFmt(fol().total),folSub(fol()))}${stat('Newsletter','5,000+','subscribers')}</div>
+ <div class="stats">${gaUsers('site','Website visitors · 30d')}${cwUsers('Map visitors · 30d')}${stat('Social followers',folFmt(fol().total),folSub(fol()))}${stat('Newsletter','5,000+','subscribers')}</div>
+ <div class="grid">${gaWeeklyCard('Weekly visitors',[{name:'Website',d:gaWeekly('site')},{name:'Map',d:cwWeekly()}],null,'Website: Google Analytics · Map: AWS')}${gaSources('site','Traffic sources · website')}</div>`}
+function siteX(){return `<div class="stats">${gaUsers('site','Website visitors · 30d')}${cwUsers('Map visitors · 30d')}${stat('Social followers',folFmt(fol().total),folSub(fol()))}${stat('Newsletter','5,000+','subscribers')}</div>
  <div class="grid">${gaWeeklyCard('Weekly visitors',[{name:'Website',d:gaWeekly('site')}])}${gaSources('site','Traffic sources')}</div>
  <div class="stats">${nostat('CTR website → map','map_cta_clicked')}${nostat('Donation conversion','donation_completed')}${gaActive('site')}${nostat('Avg donation','payment webhook')}</div>
  <div class="grid eq">${gaTable('site','Top pages','pages','Page','pagePath')}${gaTable('site','Countries','countries','Country','country')}</div>
  <div class="grid eq">${funnelNo(0)}${funnelNo(3)}</div>`}
-function mapX(){const g=gaScope('map'),ret=g&&(g.sc.returning||[]).find(x=>x.newVsReturning==='returning'),nw=g&&(g.sc.returning||[]).find(x=>x.newVsReturning==='new'),mob=g&&(g.sc.devices||[]).find(x=>x.deviceCategory==='mobile'),dv=g&&(g.sc.devices||[]).reduce((x,d)=>x+d.sessions,0);
- return `<div class="stats">${gaUsers('map','Map visitors · 30d')}${g?stat('Returning visitors',pct(ret?ret.activeUsers:0,(ret?ret.activeUsers:0)+(nw?nw.activeUsers:0)),'of visitors · 30d'):nostat('Returning visitors',gaNeed())}${g?stat('Avg session',gaDur(g.d30.sessions?g.d30.userEngagementDuration/g.d30.sessions:0),'engaged time · 30d'):nostat('Avg session',gaNeed())}${g?stat('Mobile share',pct(mob?mob.sessions:0,dv),'of sessions · 30d'):nostat('Mobile share',gaNeed())}</div>
- <h3 style="margin:18px 0 8px">Daily map traffic · AWS CloudWatch</h3>${cwStats()}<div class="grid">${cwChart()}</div>
- <h3 style="margin:18px 0 8px">Google Analytics</h3>
- <div class="grid">${gaWeeklyCard('Map visitors, weekly',[{name:'Map',d:gaWeekly('map')}])}${gaSources('map','Where map visitors come from')}</div>
- <div class="grid eq">${gaTable('map','Countries','countries','Country','country')}${gaTable('map','Devices','devices','Device','deviceCategory')}</div>
+function mapX(){
+ return `<div class="stats">${cwUsers('Map visitors · 30d')}</div>
+ ${cwStats()}<div class="grid">${cwChart()}${gaWeeklyCard('Map visitors, weekly',[{name:'Map',d:cwWeekly()}],cwNeed(),'AWS CloudWatch')}</div>
  <div class="grid eq">${nodata('Most explored periods','year_selected')}${nodata('Tool usage','tool_used')}</div>
  <div class="grid eq">${funnelNo(4)}${funnelNo(6)}</div>`}
 function socialX(){const ch=['Facebook','LinkedIn','Newsletter'];
@@ -796,18 +793,21 @@ const gaScope=k=>{const sc=GA&&GA.data&&GA.data.scopes&&GA.data.scopes[k];if(!sc
 const gaNeed=()=>!GA?'loading…':GA.error?'Google Analytics error':!GA.configured?'GA connection (GA_PROPERTY_ID)':'GA ↻ Update';
 const gaUsers=(k,label)=>{const g=gaScope(k);if(!g)return nostat(label,gaNeed());const a=g.d30.activeUsers||0,b=g.p30.activeUsers||0,ch=b?Math.round((a-b)/b*100):null;return stat(label,gaN(a),ch===null?'Google Analytics':(ch>=0?'↑ ':'↓ ')+Math.abs(ch)+'% vs prev 30d')};
 function gaWeekly(k){const g=gaScope(k);if(!g)return null;const d=g.sc.daily||[],w=[];for(let i=d.length;i>0&&w.length<12;i-=7)w.unshift(d.slice(Math.max(0,i-7),i).reduce((x,r)=>x+r.activeUsers,0));return w.length>1?w:null}
-const gaWeeklyCard=(title,sets,need)=>sets.every(x=>x.d)?card(`<div class="sectionhead"><h2>${title}</h2><span class="muted">Google Analytics · last 12 weeks</span></div>${line(sets)}`):nodata(title,need||gaNeed(),170);
+const gaWeeklyCard=(title,sets,need,src)=>sets.every(x=>x.d)?card(`<div class="sectionhead"><h2>${title}</h2><span class="muted">${src||'Google Analytics'} · last 12 weeks</span></div>${line(sets)}`):nodata(title,need||gaNeed(),170);
 const gaSources=(k,title)=>{const g=gaScope(k);if(!g)return nodata(title,gaNeed(),170);const ch=g.sc.channels||[],tot=ch.reduce((x,c)=>x+c.sessions,0)||1;return card(`<h2 style="margin-bottom:8px">${title} <span class="tag">sessions · 30d</span></h2>${bars(ch.slice(0,7).map(c=>[c.sessionDefaultChannelGroup||'(not set)',Math.round(c.sessions/tot*100)]))}`)};
 const gaDur=v=>{v=Math.round(v||0);return Math.floor(v/60)+'m '+String(v%60).padStart(2,'0')+'s'};
 const gaActive=k=>{const g=gaScope(k);return g?stat('Avg active time',gaDur(g.d30.activeUsers?g.d30.userEngagementDuration/g.d30.activeUsers:0),'per visitor · 30d'):nostat('Avg active time',gaNeed())};
 /* ---- map traffic from AWS CloudWatch (Historica/SEO: MapDailySessions, MapDailyVisitors), synced together with Google Analytics ---- */
 const cwDaily=()=>{const d=GA&&GA.cw&&GA.cw.data&&GA.cw.data.daily;return d&&d.length?d:null};
-const cwNeed=()=>!GA?'loading…':!(GA.cw&&GA.cw.configured)?'CloudWatch (CW_AWS_ACCESS_KEY_ID)':'↻ Update';
+const cwNeed=()=>!GA?'loading…':!(GA.cw&&GA.cw.configured)?'AWS connection (AWS_ACCESS_KEY_ID)':'↻ Update';
 function cwCalc(){const d=cwDaily();if(!d)return null;const last=d[d.length-1].date,at=n=>new Date(Date.parse(last)-n*864e5).toISOString().slice(0,10);
  const sum=(k,a,b)=>{const r=d.filter(x=>x.date>=a&&x.date<=b&&x[k]!=null);return {v:r.reduce((t,x)=>t+x[k],0),n:r.length}};
  const avg=(k,a,b)=>{const s=sum(k,a,b);return s.n?s.v/s.n:null};
  return {d,last,cur:k=>avg(k,at(29),last),prev:k=>avg(k,at(59),at(30)),y:d[d.length-1]}}
 const cwTrend=(c,k)=>{const a=c.cur(k),b=c.prev(k);return a!=null&&b?(a>=b?'↑ ':'↓ ')+Math.abs(Math.round((a-b)/b*100))+'% vs prev 30d':'AWS CloudWatch'};
+function cwUsers(label){const c=cwCalc();if(!c)return nostat(label,cwNeed());const at=n=>new Date(Date.parse(c.last)-n*864e5).toISOString().slice(0,10),sum=(a,b)=>c.d.filter(x=>x.date>=a&&x.date<=b&&x.visitors!=null).reduce((t,x)=>t+x.visitors,0),a=sum(at(29),c.last),b=sum(at(59),at(30)),ch=b?Math.round((a-b)/b*100):null;
+ return stat(label,gaN(a),ch===null?'AWS · sum of daily visitors':(ch>=0?'↑ ':'↓ ')+Math.abs(ch)+'% vs prev 30d · AWS')}
+function cwWeekly(){const d=cwDaily();if(!d)return null;const w=[];for(let i=d.length;i>0&&w.length<12;i-=7)w.unshift(d.slice(Math.max(0,i-7),i).reduce((x,r)=>x+(r.visitors||0),0));return w.length>1?w:null}
 function cwStats(){const c=cwCalc();if(!c)return `<div class="stats">${nostat('Visitors / day',cwNeed())}${nostat('Sessions / day',cwNeed())}${nostat('Visitors · yesterday',cwNeed())}${nostat('Sessions per visitor',cwNeed())}</div>`;
  const v=c.cur('visitors'),se=c.cur('sessions');
  return `<div class="stats">${stat('Visitors / day',v==null?'—':gaN(v),cwTrend(c,'visitors')+' · avg 30d')}${stat('Sessions / day',se==null?'—':gaN(se),cwTrend(c,'sessions')+' · avg 30d')}${stat('Visitors · '+c.last,gaN(c.y.visitors),'sessions '+gaN(c.y.sessions))}${stat('Sessions per visitor',v?(se/v).toFixed(2):'—','avg 30d')}</div>`}

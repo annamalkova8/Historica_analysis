@@ -1,9 +1,9 @@
 // AWS CloudWatch sync (read-only): daily map traffic from the custom metrics Historica/SEO -> MapDailySessions / MapDailyVisitors.
 // Plain REST + SigV4 (no AWS SDK dependency). The result is one JSON snapshot stored in settings key "cw:data".
 //
-// Env (Vercel reserves the AWS_* names, so these have a CW_ prefix):
-//   CW_AWS_ACCESS_KEY_ID, CW_AWS_SECRET_ACCESS_KEY  - an IAM user that may call cloudwatch:GetMetricData (read-only)
-//   CW_AWS_REGION       - default eu-central-1
+// Env: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION (an IAM user that may call cloudwatch:GetMetricData, read-only).
+//   The same names with a CW_ prefix (CW_AWS_ACCESS_KEY_ID, ...) win if set - use them where the platform reserves AWS_*.
+//   Region default eu-central-1.
 //   CW_NAMESPACE        - default Historica/SEO
 import crypto from 'node:crypto';
 import { getSetting, setSetting, q } from './db.js';
@@ -12,8 +12,9 @@ let override = null;
 export function setCw(fn) { override = fn; } // tests / local preview: async () => snapshot
 
 const cfg = () => ({
-  key: process.env.CW_AWS_ACCESS_KEY_ID || '', secret: process.env.CW_AWS_SECRET_ACCESS_KEY || '', token: process.env.CW_AWS_SESSION_TOKEN || '',
-  region: process.env.CW_AWS_REGION || 'eu-central-1', ns: process.env.CW_NAMESPACE || 'Historica/SEO',
+  key: process.env.CW_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '', secret: process.env.CW_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
+  token: process.env.CW_AWS_SESSION_TOKEN || process.env.AWS_SESSION_TOKEN || '',
+  region: process.env.CW_AWS_REGION || process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'eu-central-1', ns: process.env.CW_NAMESPACE || 'Historica/SEO',
 });
 export const cwConfigured = () => !!(override || (cfg().key && cfg().secret));
 
@@ -54,13 +55,13 @@ export async function fetchSnapshot(days = 450) {
     token = j.NextToken;
   } while (token);
   const missing = Object.keys(METRICS).filter((k) => !seen[k]);
-  if (missing.length === Object.keys(METRICS).length) throw new Error(`CloudWatch returned no data for ${c.ns} (check CW_NAMESPACE / CW_AWS_REGION)`);
+  if (missing.length === Object.keys(METRICS).length) throw new Error(`CloudWatch returned no data for ${c.ns} (check CW_NAMESPACE / AWS_DEFAULT_REGION)`);
   const daily = Object.keys(byDay).sort().map((date) => ({ date, sessions: byDay[date].sessions ?? null, visitors: byDay[date].visitors ?? null }));
   return { at: new Date().toISOString(), namespace: c.ns, region: c.region, daily };
 }
 
 export async function syncCw(trigger = 'manual') {
-  if (!cwConfigured()) throw new Error('CloudWatch is not configured (set CW_AWS_ACCESS_KEY_ID and CW_AWS_SECRET_ACCESS_KEY)');
+  if (!cwConfigured()) throw new Error('CloudWatch is not configured (set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)');
   const run = (await q('INSERT INTO runs (service, task, trigger) VALUES ($1,$2,$3) RETURNING id', ['cw', 'Sync map traffic', trigger]))[0];
   let error = null, count = 0;
   try {
