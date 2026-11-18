@@ -437,6 +437,8 @@ function siteX(){return `<div class="stats">${gaUsers('site','Website visitors �
  <div class="grid eq">${funnelNo(0)}${funnelNo(3)}</div>`}
 function mapX(){const g=gaScope('map'),ret=g&&(g.sc.returning||[]).find(x=>x.newVsReturning==='returning'),nw=g&&(g.sc.returning||[]).find(x=>x.newVsReturning==='new'),mob=g&&(g.sc.devices||[]).find(x=>x.deviceCategory==='mobile'),dv=g&&(g.sc.devices||[]).reduce((x,d)=>x+d.sessions,0);
  return `<div class="stats">${gaUsers('map','Map visitors · 30d')}${g?stat('Returning visitors',pct(ret?ret.activeUsers:0,(ret?ret.activeUsers:0)+(nw?nw.activeUsers:0)),'of visitors · 30d'):nostat('Returning visitors',gaNeed())}${g?stat('Avg session',gaDur(g.d30.sessions?g.d30.userEngagementDuration/g.d30.sessions:0),'engaged time · 30d'):nostat('Avg session',gaNeed())}${g?stat('Mobile share',pct(mob?mob.sessions:0,dv),'of sessions · 30d'):nostat('Mobile share',gaNeed())}</div>
+ <h3 style="margin:18px 0 8px">Daily map traffic · AWS CloudWatch</h3>${cwStats()}<div class="grid">${cwChart()}</div>
+ <h3 style="margin:18px 0 8px">Google Analytics</h3>
  <div class="grid">${gaWeeklyCard('Map visitors, weekly',[{name:'Map',d:gaWeekly('map')}])}${gaSources('map','Where map visitors come from')}</div>
  <div class="grid eq">${gaTable('map','Countries','countries','Country','country')}${gaTable('map','Devices','devices','Device','deviceCategory')}</div>
  <div class="grid eq">${nodata('Most explored periods','year_selected')}${nodata('Tool usage','tool_used')}</div>
@@ -776,7 +778,7 @@ async function runUpdate(id){
  return runAll(id)}
 let GA=null,gaLoading=false,gaAuto=false;
 async function loadGa(){try{GA=await api('/api/ga')}catch(e){if(e.message==='login')return;GA={error:e.message}}if(page==='analytics')render();
- const d=GA&&GA.data;if(GA&&GA.configured&&!gaAuto&&(!d||!d.scopes||Date.now()-new Date(d.at)>12*36e5)){gaAuto=true;syncGaNow()}}
+ const d=GA&&GA.data,w=GA&&GA.cw;if(GA&&!gaAuto&&((GA.configured&&(!d||!d.scopes||Date.now()-new Date(d.at)>12*36e5))||(w&&w.configured&&(!w.data||Date.now()-new Date(w.data.at)>12*36e5)))){gaAuto=true;syncGaNow()}}
 const gaBar=()=>{if(!GA)return '';const rs=runState.ga||{},d=GA.data;
  if(GA.error)return `<div class="note warn" style="margin:10px 0">Cannot read Google Analytics status: ${esc(GA.error)}</div>`;
  if(!GA.configured)return `<div class="note warn" style="margin:10px 0"><b>Google Analytics is not connected yet</b>, so traffic numbers show “${NO}”. In Vercel → Settings → Environment Variables add <code>GA_PROPERTY_ID</code> and <code>GA_SERVICE_ACCOUNT_JSON</code> (whole key file; the account needs the <b>Viewer</b> role), then redeploy.</div>`;
@@ -784,7 +786,7 @@ const gaBar=()=>{if(!GA)return '';const rs=runState.ga||{},d=GA.data;
  return `<div class="muted" style="margin:10px 0">Traffic numbers: Google Analytics · ${d?'last sync '+esc(new Date(d.at).toLocaleString()):'not synced yet'} <button class="btn small" style="margin-left:8px" ${rs.running?'disabled':''} onclick="syncGaNow()">${rs.running?'Updating…':'↻ Update'}</button></div>${err}`};
 const gaTable=(k,title,key,label,dim)=>{const g=gaScope(k);if(!g)return nodata(title,gaNeed(),120);const rows=(g.sc[key]||[]).slice(0,10);return card(`<h2 style="margin-bottom:10px">${title} <span class="tag">30 days</span></h2>${rows.length?table([label,'Visitors','Sessions','Page views'],rows.map(r=>[esc(r[dim]||'(not set)'),gaN(r.activeUsers),gaN(r.sessions),gaN(r.screenPageViews)])):'<div class="muted">No data</div>'}`)};
 async function syncGaNow(){runState.ga={running:true,log:[],total:1,done:0,cur:'Google Analytics'};render();
- try{const r=await api('/api/ga',{method:'POST'});runState.ga.log=['✓ '+r.days+' days of data synced from Google Analytics']}
+ try{const r=await api('/api/ga',{method:'POST'});runState.ga.log=['✓ '+(r.days?r.days+' days synced from Google Analytics':'')+(r.cwDays!=null?(r.days?' · ':'')+r.cwDays+' days synced from CloudWatch':'')]}
  catch(e){if(e.message==='login')return;runState.ga.log=['⚠ '+lg(e.message)]}
  runState.ga.running=false;try{GA=await api('/api/ga')}catch(e){}render()}
 const analyticsViews=()=>`<div class="tabs">${[['public','Public · shown on website'],['expected','Analytics · what we expect']].map(([k,l])=>`<button class="tab ${aView===k?'active':''}" onclick="aView='${k}';render()">${l}</button>`).join('')}</div>`;
@@ -798,6 +800,19 @@ const gaWeeklyCard=(title,sets,need)=>sets.every(x=>x.d)?card(`<div class="secti
 const gaSources=(k,title)=>{const g=gaScope(k);if(!g)return nodata(title,gaNeed(),170);const ch=g.sc.channels||[],tot=ch.reduce((x,c)=>x+c.sessions,0)||1;return card(`<h2 style="margin-bottom:8px">${title} <span class="tag">sessions · 30d</span></h2>${bars(ch.slice(0,7).map(c=>[c.sessionDefaultChannelGroup||'(not set)',Math.round(c.sessions/tot*100)]))}`)};
 const gaDur=v=>{v=Math.round(v||0);return Math.floor(v/60)+'m '+String(v%60).padStart(2,'0')+'s'};
 const gaActive=k=>{const g=gaScope(k);return g?stat('Avg active time',gaDur(g.d30.activeUsers?g.d30.userEngagementDuration/g.d30.activeUsers:0),'per visitor · 30d'):nostat('Avg active time',gaNeed())};
+/* ---- map traffic from AWS CloudWatch (Historica/SEO: MapDailySessions, MapDailyVisitors), synced together with Google Analytics ---- */
+const cwDaily=()=>{const d=GA&&GA.cw&&GA.cw.data&&GA.cw.data.daily;return d&&d.length?d:null};
+const cwNeed=()=>!GA?'loading…':!(GA.cw&&GA.cw.configured)?'CloudWatch (CW_AWS_ACCESS_KEY_ID)':'↻ Update';
+function cwCalc(){const d=cwDaily();if(!d)return null;const last=d[d.length-1].date,at=n=>new Date(Date.parse(last)-n*864e5).toISOString().slice(0,10);
+ const sum=(k,a,b)=>{const r=d.filter(x=>x.date>=a&&x.date<=b&&x[k]!=null);return {v:r.reduce((t,x)=>t+x[k],0),n:r.length}};
+ const avg=(k,a,b)=>{const s=sum(k,a,b);return s.n?s.v/s.n:null};
+ return {d,last,cur:k=>avg(k,at(29),last),prev:k=>avg(k,at(59),at(30)),y:d[d.length-1]}}
+const cwTrend=(c,k)=>{const a=c.cur(k),b=c.prev(k);return a!=null&&b?(a>=b?'↑ ':'↓ ')+Math.abs(Math.round((a-b)/b*100))+'% vs prev 30d':'AWS CloudWatch'};
+function cwStats(){const c=cwCalc();if(!c)return `<div class="stats">${nostat('Visitors / day',cwNeed())}${nostat('Sessions / day',cwNeed())}${nostat('Visitors · yesterday',cwNeed())}${nostat('Sessions per visitor',cwNeed())}</div>`;
+ const v=c.cur('visitors'),se=c.cur('sessions');
+ return `<div class="stats">${stat('Visitors / day',v==null?'—':gaN(v),cwTrend(c,'visitors')+' · avg 30d')}${stat('Sessions / day',se==null?'—':gaN(se),cwTrend(c,'sessions')+' · avg 30d')}${stat('Visitors · '+c.last,gaN(c.y.visitors),'sessions '+gaN(c.y.sessions))}${stat('Sessions per visitor',v?(se/v).toFixed(2):'—','avg 30d')}</div>`}
+function cwChart(){const c=cwDaily();if(!c)return nodata('Map traffic, daily (CloudWatch)',cwNeed(),170);const r=c.slice(-60),n=x=>x==null?0:x;
+ return card(`<div class="sectionhead"><h2>Map traffic, daily</h2><span class="muted">AWS CloudWatch · last ${r.length} days</span></div>${line([{name:'Visitors',d:r.map(x=>n(x.visitors))},{name:'Sessions',d:r.map(x=>n(x.sessions))}],170,[r[0].date,'peak '+gaN(Math.max(...r.map(x=>Math.max(n(x.visitors),n(x.sessions))))),r[r.length-1].date])}`)}
 async function loadJira(){try{JS=await api('/api/jira')}catch(e){if(e.message==='login')return;JS={error:e.message}}if(page==='progress')render()}
 async function syncJiraNow(){runState.jira={running:true,log:[],total:1,done:0,cur:'Jira issues'};render();
  try{const r=await api('/api/jira',{method:'POST'});runState.jira.log=['✓ '+r.count+' issues synced from Jira']}
