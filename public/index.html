@@ -62,6 +62,16 @@ textarea.field{min-height:340px;resize:vertical;line-height:1.55;font-family:ui-
 .tag.now{background:#173c37;color:var(--green)}
 .spark{width:100%;display:block}
 .axis{display:flex;justify-content:space-between;color:var(--mut);font-size:11px;margin-top:4px}
+.hv{position:relative}
+.hv .col{position:absolute;top:0;bottom:0;transform:translateX(-50%);z-index:1}
+.hv .col .dot{display:none;position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;left:50%;border-radius:50%;border:2px solid var(--card)}
+.hv .col .vl{display:none;position:absolute;left:50%;top:0;bottom:0;width:1px;background:#5d7396}
+.hv .col .tp{display:none;position:absolute;top:-6px;left:50%;transform:translate(-50%,-100%);background:#0b1220;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;line-height:1.5;white-space:nowrap;color:#e6eefb;pointer-events:none;z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.hv .col.f .tp{left:0;transform:translate(0,-100%)}.hv .col.l .tp{left:auto;right:0;transform:translate(0,-100%)}
+.hv .col:hover .dot,.hv .col:hover .vl,.hv .col:hover .tp{display:block}
+.hv .tp b{display:block;color:var(--mut);font-weight:600;margin-bottom:2px}.hv .tp i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+.axis.pts span{font-size:10px;flex:1;text-align:center;white-space:nowrap}.axis.pts span:first-child{text-align:left;flex:.5}.axis.pts span:last-child{text-align:right;flex:.5}
+@media(max-width:700px){.axis.pts span:nth-child(even){visibility:hidden}}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:#aebfd6;margin-top:10px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
 .fn{display:grid;grid-template-columns:minmax(120px,190px) 1fr 150px;gap:12px;align-items:center;margin:9px 0;font-size:12.5px}
@@ -140,12 +150,14 @@ const bars=rows=>rows.map(([a,n,l])=>`<div class="barrow"><span>${esc(a)}</span>
 const table=(h,r)=>`<div class="tablewrap"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const badge=s=>{const g=/^(accepted|yes|replied|applied|in conversation|pilot|form|both|interview|active)$/i,a=/^(planned|pending|drafted|sent|contacted|to apply|open)$/i,r=/^(rejected|declined|no response)$/i;return `<span class="status ${g.test(s)?'green':a.test(s)?'amber':r.test(s)?'red':''}">${esc(s)}</span>`};
 const sel=(opts,val,fn)=>`<select class="mini" onchange="${fn}">${opts.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
-function line(sets,h=170,lb){const W=600,all=sets.flatMap(s=>s.d),mx=Math.max(...all)*1.08,n=sets[0].d.length;
+function line(sets,h=170,lb,pts){const W=600,all=sets.flatMap(s=>s.d),mx=Math.max(...all)*1.08,n=sets[0].d.length;
  const X=i=>i/(n-1)*W,Y=v=>h-6-v/mx*(h-16);
  const grid=[0,1,2,3].map(i=>`<line x1="0" x2="${W}" y1="${6+i*(h-12)/3}" y2="${6+i*(h-12)/3}" stroke="#2a3a54" vector-effect="non-scaling-stroke"/>`).join('');
  const paths=sets.map((s,k)=>{const p=s.d.map((v,i)=>`${i?'L':'M'}${X(i).toFixed(1)} ${Y(v).toFixed(1)}`).join(' ');
   return (sets.length===1?`<path d="${p} L${W} ${h} L0 ${h}Z" fill="${COL[k]}" opacity=".15"/>`:'')+`<path d="${p}" fill="none" stroke="${COL[k]}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`}).join('');
- return `<svg class="spark" viewBox="0 0 ${W} ${h}" preserveAspectRatio="none" style="height:${h}px">${grid}${paths}</svg><div class="axis">${lb?lb.map(x=>`<span>${esc(x)}</span>`).join(''):`<span>12 weeks ago</span><span>peak ${fmt(Math.max(...all))}</span><span>this week</span>`}</div>`+(sets.length>1||sets[0].name?`<div class="legend">${sets.map((s,k)=>`<span><i style="background:${COL[k]}"></i>${esc(s.name||'')}</span>`).join('')}</div>`:'')}
+ const hasX=pts&&pts.some(q=>q.x);
+ const hover=pts?`<div style="position:absolute;inset:0">${pts.map((q,i)=>`<div class="col ${i===0?'f':i===n-1?'l':''}" style="left:${(i/(n-1)*100).toFixed(3)}%;width:${(100/(n-1)).toFixed(3)}%"><div class="vl"></div>${sets.map((t,k)=>`<div class="dot" style="top:${Y(t.d[i]).toFixed(1)}px;background:${COL[k]}"></div>`).join('')}<div class="tp"><b>${esc(q.t||q.x||'')}</b>${sets.map((t,k)=>`<div><i style="background:${COL[k]}"></i>${t.name?esc(t.name)+': ':''}${fmt(t.d[i])}</div>`).join('')}</div></div>`).join('')}</div>`:'';
+ return `<div class="${pts?'hv':''}"><svg class="spark" viewBox="0 0 ${W} ${h}" preserveAspectRatio="none" style="height:${h}px">${grid}${paths}</svg>${hover}</div><div class="axis ${hasX?'pts':''}">${hasX?pts.map(q=>`<span>${esc(q.x||'')}</span>`).join(''):lb?lb.map(x=>`<span>${esc(x)}</span>`).join(''):`<span>12 weeks ago</span><span>peak ${fmt(Math.max(...all))}</span><span>this week</span>`}</div>`+(sets.length>1||sets[0].name?`<div class="legend">${sets.map((s,k)=>`<span><i style="background:${COL[k]}"></i>${esc(s.name||'')}</span>`).join('')}</div>`:'')}
 
 /* ---------- persistent state ---------- */
 const KEY='historica_analyst_hub_v1';
@@ -792,8 +804,12 @@ const gaN=v=>Math.round(v||0).toLocaleString('en-US');
 const gaScope=k=>{const sc=GA&&GA.data&&GA.data.scopes&&GA.data.scopes[k];if(!sc)return null;const T=Object.fromEntries((sc.totals||[]).map(t=>[t.dateRange,t]));return {sc,T,d30:T.d30||{},p30:T.p30||{},d7:T.d7||{}}};
 const gaNeed=()=>!GA?'loading…':GA.error?'Google Analytics error':!GA.configured?'GA connection (GA_PROPERTY_ID)':'GA ↻ Update';
 const gaUsers=(k,label)=>{const g=gaScope(k);if(!g)return nostat(label,gaNeed());const a=g.d30.activeUsers||0,b=g.p30.activeUsers||0,ch=b?Math.round((a-b)/b*100):null;return stat(label,gaN(a),ch===null?'Google Analytics':(ch>=0?'↑ ':'↓ ')+Math.abs(ch)+'% vs prev 30d')};
-function gaWeekly(k){const g=gaScope(k);if(!g)return null;const d=g.sc.daily||[],w=[];for(let i=d.length;i>0&&w.length<12;i-=7)w.unshift(d.slice(Math.max(0,i-7),i).reduce((x,r)=>x+r.activeUsers,0));return w.length>1?w:null}
-const gaWeeklyCard=(title,sets,need,src)=>sets.every(x=>x.d)?card(`<div class="sectionhead"><h2>${title}</h2><span class="muted">${src||'Google Analytics'} · last 12 weeks</span></div>${line(sets)}`):nodata(title,need||gaNeed(),170);
+const isoD=x=>String(x).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3');
+const wkMondays=()=>{const t=new Date();t.setUTCHours(0,0,0,0);const m=t.getTime()-((t.getUTCDay()+6)%7)*864e5;return Array.from({length:12},(_,i)=>new Date(m-(12-i)*7*864e5).toISOString().slice(0,10))}; // last 12 complete Mon-Sun weeks
+const wkSum=(rows,f)=>{const M=wkMondays(),o=M.map(()=>0);rows.forEach(r=>{const t=Date.parse(isoD(r.date));const i=Math.floor((t-Date.parse(M[0]))/(7*864e5));if(i>=0&&i<12)o[i]+=f(r)||0});return o};
+const wkPts=()=>wkMondays().map(m=>{const a=new Date(m),b=new Date(a.getTime()+6*864e5),f=(d,y)=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC',...(y?{year:'numeric'}:{})});return {x:f(a),t:'Week '+f(a)+' – '+f(b,1)}});
+function gaWeekly(k){const g=gaScope(k);if(!g||!(g.sc.daily||[]).length)return null;return wkSum(g.sc.daily,r=>r.activeUsers)}
+const gaWeeklyCard=(title,sets,need,src)=>sets.every(x=>x.d)?card(`<div class="sectionhead"><h2>${title}</h2><span class="muted">${src||'Google Analytics'} · last 12 weeks</span></div>${line(sets,170,null,wkPts())}`):nodata(title,need||gaNeed(),170);
 const gaSources=(k,title)=>{const g=gaScope(k);if(!g)return nodata(title,gaNeed(),170);const ch=g.sc.channels||[],tot=ch.reduce((x,c)=>x+c.sessions,0)||1;return card(`<h2 style="margin-bottom:8px">${title} <span class="tag">sessions · 30d</span></h2>${bars(ch.slice(0,7).map(c=>[c.sessionDefaultChannelGroup||'(not set)',Math.round(c.sessions/tot*100)]))}`)};
 const gaDur=v=>{v=Math.round(v||0);return Math.floor(v/60)+'m '+String(v%60).padStart(2,'0')+'s'};
 const gaActive=k=>{const g=gaScope(k);return g?stat('Avg active time',gaDur(g.d30.activeUsers?g.d30.userEngagementDuration/g.d30.activeUsers:0),'per visitor · 30d'):nostat('Avg active time',gaNeed())};
@@ -807,12 +823,12 @@ function cwCalc(){const d=cwDaily();if(!d)return null;const last=d[d.length-1].d
 const cwTrend=(c,k)=>{const a=c.cur(k),b=c.prev(k);return a!=null&&b?(a>=b?'↑ ':'↓ ')+Math.abs(Math.round((a-b)/b*100))+'% vs prev 30d':'AWS CloudWatch'};
 function cwUsers(label){const c=cwCalc();if(!c)return nostat(label,cwNeed());const at=n=>new Date(Date.parse(c.last)-n*864e5).toISOString().slice(0,10),sum=(a,b)=>c.d.filter(x=>x.date>=a&&x.date<=b&&x.visitors!=null).reduce((t,x)=>t+x.visitors,0),a=sum(at(29),c.last),b=sum(at(59),at(30)),ch=b?Math.round((a-b)/b*100):null;
  return stat(label,gaN(a),ch===null?'AWS · sum of daily visitors':(ch>=0?'↑ ':'↓ ')+Math.abs(ch)+'% vs prev 30d · AWS')}
-function cwWeekly(){const d=cwDaily();if(!d)return null;const w=[];for(let i=d.length;i>0&&w.length<12;i-=7)w.unshift(d.slice(Math.max(0,i-7),i).reduce((x,r)=>x+(r.visitors||0),0));return w.length>1?w:null}
+function cwWeekly(){const d=cwDaily();return d?wkSum(d,r=>r.visitors):null}
 function cwStats(){const c=cwCalc();if(!c)return `<div class="stats">${nostat('Visitors / day',cwNeed())}${nostat('Sessions / day',cwNeed())}${nostat('Visitors · yesterday',cwNeed())}${nostat('Sessions per visitor',cwNeed())}</div>`;
  const v=c.cur('visitors'),se=c.cur('sessions');
  return `<div class="stats">${stat('Visitors / day',v==null?'—':gaN(v),cwTrend(c,'visitors')+' · avg 30d')}${stat('Sessions / day',se==null?'—':gaN(se),cwTrend(c,'sessions')+' · avg 30d')}${stat('Visitors · '+c.last,gaN(c.y.visitors),'sessions '+gaN(c.y.sessions))}${stat('Sessions per visitor',v?(se/v).toFixed(2):'—','avg 30d')}</div>`}
 function cwChart(){const c=cwDaily();if(!c)return nodata('Map traffic, daily (CloudWatch)',cwNeed(),170);const r=c.slice(-60),n=x=>x==null?0:x;
- return card(`<div class="sectionhead"><h2>Map traffic, daily</h2><span class="muted">AWS CloudWatch · last ${r.length} days</span></div>${line([{name:'Visitors',d:r.map(x=>n(x.visitors))},{name:'Sessions',d:r.map(x=>n(x.sessions))}],170,[r[0].date,'peak '+gaN(Math.max(...r.map(x=>Math.max(n(x.visitors),n(x.sessions))))),r[r.length-1].date])}`)}
+ return card(`<div class="sectionhead"><h2>Map traffic, daily</h2><span class="muted">AWS CloudWatch · last ${r.length} days</span></div>${line([{name:'Visitors',d:r.map(x=>n(x.visitors))},{name:'Sessions',d:r.map(x=>n(x.sessions))}],170,[r[0].date,'peak '+gaN(Math.max(...r.map(x=>Math.max(n(x.visitors),n(x.sessions))))),r[r.length-1].date],r.map(x=>({t:x.date})))}`)}
 async function loadJira(){try{JS=await api('/api/jira')}catch(e){if(e.message==='login')return;JS={error:e.message}}if(page==='progress')render()}
 async function syncJiraNow(){runState.jira={running:true,log:[],total:1,done:0,cur:'Jira issues'};render();
  try{const r=await api('/api/jira',{method:'POST'});runState.jira.log=['✓ '+r.count+' issues synced from Jira']}
