@@ -388,9 +388,9 @@ function tsApply(t,col,dir){const body=t.tBodies[0];if(!body)return;const rows=[
  rows.forEach(r=>body.appendChild(r));
  [...t.tHead.rows[0].cells].forEach((h,i)=>{const m=h.querySelector('.tsi');if(m)m.textContent=i===col&&dir?(dir>0?'▲':'▼'):'↕'})}
 function enableSort(){document.querySelectorAll('#content table').forEach(t=>{const hr=t.tHead&&t.tHead.rows[0];if(!hr||t.tHead.rows.length>1||!t.tBodies[0])return;
- const hs=[...hr.cells];if(hs.some(h=>h.colSpan>1||h.rowSpan>1||h.querySelector('[onclick*="sortBy"]')))return; // tables with their own column sort keep it
+ const hs=[...hr.cells];if(hs.some(h=>h.colSpan>1||h.rowSpan>1))return; // columns that already have their own sort (sortBy) keep it; every other column gets the generic sort
  const key=page+'|'+hs.map(h=>h.textContent.trim()).join('|');
- hs.forEach((h,i)=>{if(!h.textContent.trim())return;h.dataset.ts='1';h.insertAdjacentHTML('beforeend','<span class="tsi">↕</span>');
+ hs.forEach((h,i)=>{if(!h.textContent.trim()||h.querySelector('[onclick*="sortBy"]'))return;h.dataset.ts='1';h.insertAdjacentHTML('beforeend','<span class="tsi">↕</span>');
   h.onclick=()=>{const c=TSORT[key]&&TSORT[key].col===i?TSORT[key]:{col:i,dir:0};c.dir=c.dir===1?-1:c.dir===-1?0:1;TSORT[key]=c;tsApply(t,i,c.dir)}});
  const c=TSORT[key];if(c&&c.dir)tsApply(t,c.col,c.dir)})}
 /* ---------- pages ---------- */
