@@ -857,9 +857,9 @@ const link=(t,u)=>u?`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)
 
 /* ===== Project progress · Map quality (score formula, before/after, vs rivals) =====
    Update buttons read report files from local folders IN THE BROWSER (a deployed server cannot see your disk):
-   - "mqin"  : <folder>/<zone>_<period>/<zone>_report.json   (map_score_service/out)  -> collection mapqIn
+   - "mqin"  : <folder>/<zone>_<period>/<zone>_report.json   (/Volumes/T7/AI_HISTORICA/Archive/anna/DEV/MAP_EVALUATOR/maps_evaluator/map_score_service/out_c)  -> collection mapqIn
    - "mqriv" : <folder>/<zone>_<year>.json                    (rivals_comparison)      -> collection mapq (shared with the Rivals page) */
-const MQ={mqin:{label:'Before / after reports',hint:'…/map_score_service/out'},mqriv:{label:'Rivals comparison reports',hint:'…/rivals_comparison'}};
+const MQ={mqin:{label:'Before / after reports',hint:'/Volumes/T7/AI_HISTORICA/Archive/anna/DEV/MAP_EVALUATOR/maps_evaluator/map_score_service/out_c'},mqriv:{label:'Rivals comparison reports',hint:'…/rivals_comparison'}};
 const mqZone=z=>String(z||'').replace(/_/g,' ').replace(/(^|\s)\S/g,x=>x.toUpperCase());
 const mqNum=v=>Number.isFinite(+v)?+v:0,mqR1=v=>Math.round(v*10)/10,mqBase=p=>String(p||'').split('/').pop();
 const mqD=(n,d=1)=>{n=Math.round(n*10**d)/10**d||0;return `<b style="color:${n>=0?'#70e0b7':'#f08a8a'}">${n>=0?'+':''}${n.toFixed(d)}</b>`};
@@ -874,9 +874,10 @@ async function mqWalk(h,base='',depth=0,out=[]){for await(const [name,e] of h.en
 function mqFromInput(files){return [...files].filter(f=>/\.json$/i.test(f.name)&&!f.name.startsWith('.')&&!/\/(cache|__pycache__|shots)\//.test(f.webkitRelativePath||'')).map(f=>({path:(f.webkitRelativePath||f.name).split('/').slice(1).join('/')||f.name,read:async()=>({text:await f.text(),mtime:f.lastModified})}))}
 /** Ask for the folder (remembered after the first time in Chrome/Edge); other browsers get a folder-upload dialog. */
 async function mqFiles(id,change){
- if(window.showDirectoryPicker){let h=change?null:await mqGet('dir_'+id);
+ const pid=id==='mqin'?'mqin_out_c':id; // new id so a folder remembered from the old "out" is not reused
+ if(window.showDirectoryPicker){let h=change?null:await mqGet('dir_'+pid);
   if(h){try{if(await h.queryPermission({mode:'read'})!=='granted'&&await h.requestPermission({mode:'read'})!=='granted')h=null}catch(e){h=null}}
-  if(!h){h=await window.showDirectoryPicker({id,mode:'read'});await mqSet('dir_'+id,h)}
+  if(!h){h=await window.showDirectoryPicker({id:pid,mode:'read'});await mqSet('dir_'+pid,h)}
   return {name:h.name,files:await mqWalk(h)}}
  return new Promise(ok=>{const i=document.createElement('input');i.type='file';i.webkitdirectory=true;i.multiple=true;i.onchange=()=>ok(i.files.length?{name:(i.files[0].webkitRelativePath||'').split('/')[0],files:mqFromInput(i.files)}:null);i.click()})}
 /** map_score_service report.json -> one before/after row (zone + period) */
