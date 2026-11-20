@@ -873,17 +873,24 @@ async function mqWalk(h,base='',depth=0,out=[]){for await(const [name,e] of h.en
   else if(depth<2)await mqWalk(e,base+name+'/',depth+1,out)}return out}
 function mqFromInput(files){return [...files].filter(f=>/\.json$/i.test(f.name)&&!f.name.startsWith('.')&&!/\/(cache|__pycache__|shots)\//.test(f.webkitRelativePath||'')).map(f=>({path:(f.webkitRelativePath||f.name).split('/').slice(1).join('/')||f.name,read:async()=>({text:await f.text(),mtime:f.lastModified})}))}
 /** Ask for the folder (remembered after the first time in Chrome/Edge); other browsers get a folder-upload dialog. */
+/** Default folder (out_c): the local preview server (npm run dev) reads it from disk, so no folder prompt. Returns null on a deployed site. */
+async function mqDefault(id){if(id!=='mqin')return null;
+ try{const r=await fetch('/local/mq/'+id);if(!r.ok)return null;const j=await r.json();if(!j.files||!j.files.length)return null;
+  return {name:j.name,files:j.files.map(f=>({path:f.path,read:async()=>({text:f.text,mtime:f.mtime})}))}}catch(e){return null}}
 async function mqFiles(id,change){
+ if(!change){const d=await mqDefault(id);if(d)return d}
  const pid=id==='mqin'?'mqin_out_c':id; // new id so a folder remembered from the old "out" is not reused
  if(window.showDirectoryPicker){let h=change?null:await mqGet('dir_'+pid);
   if(h){try{if(await h.queryPermission({mode:'read'})!=='granted'&&await h.requestPermission({mode:'read'})!=='granted')h=null}catch(e){h=null}}
   if(!h){h=await window.showDirectoryPicker({id:pid,mode:'read'});await mqSet('dir_'+pid,h)}
   return {name:h.name,files:await mqWalk(h)}}
  return new Promise(ok=>{const i=document.createElement('input');i.type='file';i.webkitdirectory=true;i.multiple=true;i.onchange=()=>ok(i.files.length?{name:(i.files[0].webkitRelativePath||'').split('/')[0],files:mqFromInput(i.files)}:null);i.click()})}
+/** Folder suffix may be any year inside a century: _100 … _199 all mean the 100s (−150 → −100). */
+const mqCentury=p=>Number.isFinite(p)&&Math.abs(p)>=100?Math.trunc(p/100)*100:p;
 /** map_score_service report.json -> one before/after row (zone + period) */
 function mqParseInside(j,path,mtime){if(!j||!j.before||!j.after||!j.before.score||!j.after.score)return null;
  const m=path.match(/(?:^|\/)([^\/]+)_(-?\d{3,4})\//),b=j.before.score,a=j.after.score,c=j.comparison||{},it=x=>(x||[]).map(y=>String(y&&y.item||y)).filter(Boolean).slice(0,6);
- const zone=j.zone||(m&&m[1]),period=+(j.period||(m&&m[2]));if(!zone||!period)return null;
+ const zone=j.zone||(m&&m[1]),period=mqCentury(+(j.period||(m&&m[2])));if(!zone||!period)return null;
  return {zone,period,beforeCommon:mqNum(b.common_score),afterCommon:mqNum(a.common_score),beforeCountry:mqNum(b.country_score),afterCountry:mqNum(a.country_score),beforeBorder:mqNum(b.border_score),afterBorder:mqNum(a.border_score),
   afterRecall:mqNum(a.recall),afterPrecision:mqNum(a.precision),afterWrong:mqNum(a.wrong_borders),afterBorders:mqNum(a.borders_on_map),afterExpected:mqNum(a.expected_countries),
   verdict:c.verdict||'',summary:c.summary||'',improved:it(c.improvements),worsened:it(c.regressions),unchanged:(c.unchanged_problems||[]).length,
@@ -916,7 +923,7 @@ async function mqUpdate(id,change){
  try{localStorage.setItem('mq_last_'+id,new Date().toLocaleString()+' · folder "'+pick.name+'"')}catch(e){}
  save();render()}
 const mqUpdBtn=id=>{const r=runState[id]||{};return `<button class="btn small" ${r.running?'disabled':''} onclick="mqUpdate('${id}')" title="Reads the report files in the folder and adds new ones / refreshes changed ones">${r.running?'Updating…':'↻ Update'}</button><button class="btn secondary small" ${r.running?'disabled':''} onclick="mqUpdate('${id}',true)" title="Pick a different folder">Change folder</button>`};
-const mqInfo=id=>`<div id="prog-${id}">${progHtml(id)}</div><div class="muted" style="margin:6px 0 10px">Source folder: <code>${MQ[id].hint}</code>${mqLast(id)?' · last update: '+esc(mqLast(id)):' · never updated'}</div>`;
+const mqInfo=id=>`<div id="prog-${id}">${progHtml(id)}</div><div class="muted" style="margin:6px 0 10px">Source folder: <code>${MQ[id].hint}</code>${id==='mqin'?' <span class="muted">(default; folder suffix may be any year of the century, e.g. _100–_199 = 100)</span>':''}${mqLast(id)?' · last update: '+esc(mqLast(id)):' · never updated'}</div>`;
 const mqEmpty=(t)=>`<div class="mock" style="height:120px">${NO}<br><span class="muted">${t}</span></div>`;
 let mqOpen=false;
 function mqChart(I){if(!I.length)return '';

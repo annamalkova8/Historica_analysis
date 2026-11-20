@@ -48,6 +48,19 @@ process.env.OPENAI_API_KEY ||= 'local-preview-no-real-key'; // canned results ar
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css' };
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
+  if (url.pathname === '/local/mq/mqin') {   // default Map quality folder, read from disk (local preview only)
+    const dir = process.env.MQ_OUT_DIR || '/Volumes/T7/AI_HISTORICA/Archive/anna/DEV/MAP_EVALUATOR/maps_evaluator/map_score_service/out_c';
+    const files = [];
+    const walk = (d, base, depth) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (e.name.startsWith('.') || /^(cache|__pycache__|shots|node_modules)$/i.test(e.name)) continue;
+      const f = path.join(d, e.name);
+      if (e.isDirectory()) { if (depth < 2) walk(f, base + e.name + '/', depth + 1); }
+      else if (/\.json$/i.test(e.name)) files.push({ path: base + e.name, text: fs.readFileSync(f, 'utf8'), mtime: fs.statSync(f).mtimeMs });
+    } };
+    try { walk(dir, '', 0); } catch (e) { res.statusCode = 404; return res.end(JSON.stringify({ error: String(e.message) })); }
+    res.setHeader('content-type', 'application/json');
+    return res.end(JSON.stringify({ name: path.basename(dir), files }));
+  }
   if (url.pathname.startsWith('/api/')) {
     const name = url.pathname.slice(5).replace(/[^a-z]/g, '');
     let body = '';
