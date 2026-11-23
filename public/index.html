@@ -316,7 +316,8 @@ function applyState(st){
  if(pendingKinds.length)flush();
  if(migrateTesters()|migrateComms()|migrateRoadmap())save();
  let added=false;TPL().forEach(t=>{if(!S.tplList.some(x=>x.name===t.name)){S.tplList.push(t);added=true}});if(added)save()}
-function migrateRoadmap(){const R=S.roadmap;if(!R.length||R.every(x=>x.rv===2))return false;
+function migrateRoadmap(){const R=S.roadmap;let lq=false;R.forEach(x=>{if(x.lane==='layers'&&!x.lq){const sd=SEED.roadmap().find(y=>y.title===x.title);if(sd)x.q=sd.q;x.lq=1;lq=true}});if(lq&&R.every(x=>x.rv===2))return true;if(R.length&&!R.some(x=>x.lane==='layers')){const have=new Set(R.map(x=>x.title.toLowerCase()));let ch=false;SEED.roadmap().filter(x=>x.lane==='layers').forEach(x=>{if(!have.has(x.title.toLowerCase())){R.push(x);ch=true}});if(ch&&R.every(x=>x.rv===2))return true}
+ if(!R.length||R.every(x=>x.rv===2))return false;
  // Nov 2026 re-plan: old seeded cards are replaced; cards added by hand are kept and moved onto the 3 new tracks
  const old=new Set(RM_OLD);S.roadmap=R.filter(x=>x.rv===2||!old.has(x.title));
  S.roadmap.forEach(x=>{if(x.rv!==2){x.lane=x.lane==='community'?'academics':LANES.some(l=>l.id===x.lane)?x.lane:'builder';x.q=Math.min(+x.q||0,QTR.length-1);x.owner=x.owner||'';delete x.goal;x.rv=2}});
@@ -703,7 +704,7 @@ function newTpl(){const n=prompt('Template name:');if(!n)return;S.tplList.push({
 
 /* ---------- shell ---------- */
 /* ===== Project progress · Team performance (Jira) · Rivals · Update buttons ===== */
-const LANES=[{id:'maps',name:'Maps',sub:'every zone ≈ 80, all periods',c:'#4e9bff'},{id:'builder',name:'Map Builder',sub:'interviews → paid product',c:'#c08bff'},{id:'academics',name:'Academics',sub:'conferences, paper, university',c:'#5fd6b8'}];
+const LANES=[{id:'maps',name:'Maps',sub:'every zone ≈ 80, all periods',c:'#4e9bff'},{id:'builder',name:'Map Builder',sub:'interviews → paid product',c:'#c08bff'},{id:'academics',name:'Academics',sub:'conferences, paper, university',c:'#5fd6b8'},{id:'layers',name:'Map layers',sub:'religions, languages, epidemiology',c:'#f1c477'}];
 const QTR=['Q4 2026','Q1 2027','Q2 2027','Q3 2027','Q4 2027','2028'];
 const RM_OLD=['Data quality audit by period & source','Show source & confidence on every feature','Convenience pass: search, year jump, layers, export','Expert review: historians flag & correct','Versioned, citable datasets (DOI) + open download','API & academic licence terms','Beta: ~40 testers, fix top UX issues (import first)','Templates & onboarding for teachers/researchers','Public launch: publish, share link, embed, export','Collaboration & classroom mode','Open Maps as base layers inside Builder; v1.0','University outreach, wave 1 (letters, contacts)','Conference submissions (DH, FOSS4G, SotM)','Pilot courses with 3 universities','Authors & educators programme, articles','Ambassadors, case studies, first papers citing us','Tracking P0 events implemented','Funnels live in Analyst Hub','Monthly metrics review → roadmap changes','Experiments (A/B) on onboarding & CTA','Grant pipeline: NLnet / NGI pending, new calls via bot','Decide legal form (nonprofit vs. startup)','Larger grant with university partners','Sustainable model (institutional licences / donations)'];
 const RM_OWNERS=['BA/LLM','FE','BE','UX','BA','All'];
@@ -729,6 +730,18 @@ const SEED={
   rmItem('builder',3,'Pricing test + payment provider set up','planned','BA, BE','Needs the legal-entity decision. Ask testers what they would pay for.','willingness to pay; provider live'),
   rmItem('builder',4,'Production launch with paid subscription','planned','All','Soft launch to beta testers first, then public.','paying users; conversion'),
   rmItem('builder',5,'Classroom / university plan inside Builder','idea','FE, BE','Feeds the university package.','groups; seats'),
+  rmItem('layers',0,'Religions: Collect data','planned','BA/LLM','Gather sources and per-period data for this layer; record source and confidence per feature.','sources collected; periods covered'),
+  rmItem('layers',0,'Religions: Pipeline: evaluate accuracy + correct','idea','BA/BE','Automated scoring against reference data, then correction of the weakest zones.','pipeline run; score per period'),
+  rmItem('layers',1,'Religions: Publish layer','idea','FE, BE','Ship the layer as a switchable layer on the map with a sources note.','layer live'),
+  rmItem('layers',1,'Religions: Control accuracy score','idea','BA/LLM','Re-score each release; the layer stays published only while its score holds.','min score per period'),
+  rmItem('layers',0,'Languages: Collect data','planned','BA/LLM','Gather sources and per-period data for this layer; record source and confidence per feature.','sources collected; periods covered'),
+  rmItem('layers',0,'Languages: Pipeline: evaluate accuracy + correct','idea','BA/BE','Automated scoring against reference data, then correction of the weakest zones.','pipeline run; score per period'),
+  rmItem('layers',1,'Languages: Publish layer','idea','FE, BE','Ship the layer as a switchable layer on the map with a sources note.','layer live'),
+  rmItem('layers',1,'Languages: Control accuracy score','idea','BA/LLM','Re-score each release; the layer stays published only while its score holds.','min score per period'),
+  rmItem('layers',0,'Epidemiology: Collect data','planned','BA/LLM','Gather sources and per-period data for this layer; record source and confidence per feature.','sources collected; periods covered'),
+  rmItem('layers',0,'Epidemiology: Pipeline: evaluate accuracy + correct','idea','BA/BE','Automated scoring against reference data, then correction of the weakest zones.','pipeline run; score per period'),
+  rmItem('layers',1,'Epidemiology: Publish layer','idea','FE, BE','Ship the layer as a switchable layer on the map with a sources note.','layer live'),
+  rmItem('layers',1,'Epidemiology: Control accuracy score','idea','BA/LLM','Re-score each release; the layer stays published only while its score holds.','min score per period'),
   rmItem('academics',0,'Join 2–3 historical / digital-humanities communities','progress','BA','Reputation and conference leads come from being present. Use the Communities tracker.','communities joined'),
   rmItem('academics',0,'Shortlist conferences and note deadlines','planned','BA','Pick 3–4 where maps or DH tools fit. Deadlines set the rest of the year.','shortlist with dates'),
   rmItem('academics',1,'Submit to conference 1; first university conversation','planned','BA','Contact the universities that replied in outreach wave 1.','submission sent; calls booked'),
@@ -1004,14 +1017,21 @@ function roadmapView(){const R=S.roadmap,cnt=s=>R.filter(x=>x.status===s).length
  ${card(`<div class="sectionhead"><h2>Roadmap · Nov 2026 → 2028</h2><div class="actions"><select class="mini" onchange="rmFilter=this.value;render()">${[['all','Everything'],...LANES.map(l=>[l.id,l.name])].map(([k,l])=>`<option value="${k}" ${rmFilter===k?'selected':''}>${l}</option>`).join('')}</select>
   <input class="field" id="rmt" style="width:210px" placeholder="New roadmap item"><select class="mini" id="rml">${LANES.map(l=>`<option value="${l.id}">${l.name}</option>`).join('')}</select><select class="mini" id="rmq">${QTR.map((q,i)=>`<option value="${i}">${q}</option>`).join('')}</select><select class="mini" id="rmg">${RM_OWNERS.map(o=>`<option>${o}</option>`).join('')}</select><button class="btn small" onclick="addRm()">+ Add</button></div></div>${board}<div class="note">Draft for discussion — dates and scope are proposals. Click an item title for its rationale, metric and Jira link.</div>`)}
  ${card(`<h2 style="margin-bottom:10px">Jira epics</h2>${E.length?table(['Epic','Issues','Done','Progress','Story points'],E.map(e=>[esc(e.n)+' <span class="muted">'+esc(e.k)+'</span>',e.t,e.d,`<div class="track" style="width:140px"><div class="fill" style="width:${Math.round(e.d/e.t*100)}%"></div></div>`,e.p?e.pd+'/'+e.p:'—'])):'<div class="mock" style="height:110px">No epics yet. Connect Jira, give issues a parent epic, then press ↻ Update.</div>'}`)}`}
-/** Outreach statistics for the roadmap: of everything planned (still planned + already done), how much was applied / contacted, and how much came back */
-function outreachCard(){const vis=a=>(a||[]).filter(x=>!x.hidden),pc=(a,b)=>b?Math.round(a/b*100)+'%':'—';
- const apply=(label,rows)=>{const pl=rows.filter(x=>x.applied==='Planned').length,done=rows.filter(x=>x.applied==='Yes').length,b=rows.filter(x=>x.result==='Accepted').length;
-  return [`<b>${label}</b><div class="muted">${rows.length} tracked</div>`,pl,done,pc(done,pl+done),b,'—',pc(b,done)]};
- const cm=vis(S.comms),CONT=['Contacted','Posted','Replied','Partnership'],plC=cm.filter(x=>x.status==='Planned').length,doneC=cm.filter(x=>CONT.includes(x.status)).length,repC=cm.filter(x=>x.status==='Replied'||x.status==='Partnership'||+x.responses>0).length;
- const rows=[apply('Conferences',vis(S.confs)),apply('Funds & grants',vis(S.grants)),
-  [`<b>Communities</b><div class="muted">${cm.length} tracked</div>`,plC,doneC,pc(doneC,plC+doneC),'—',repC,pc(repC,doneC)]];
- return card(`<div class="sectionhead"><h2>Outreach statistics</h2></div>${table(['Channel','Still planned','Applied / contacted','Planned → done','Accepted','Replied','Result rate'],rows)}<div class="note"><b>Planned → done</b> = applied (or contacted) ÷ everything that was planned, i.e. still-planned + already applied/contacted. <b>Accepted</b> (conferences, funds) = outcome Accepted; <b>Replied</b> (communities) = status Replied / Partnership, or at least one response logged; <b>Result rate</b> = accepted or replied ÷ applied/contacted. Contacted means status Contacted, Posted, Replied or Partnership. Hidden rows are not counted.</div>`)}
+/** Outreach statistics for the roadmap: one funnel image per channel: in list -> applied / contacted -> replied / accepted */
+function funnelSvg(title,stages){const W=300,H=44,G=6,top=stages[0].n||1,h=stages.length*(H+G)+4;
+ const cols=['#3f78d8','#4e9bff','#5fd6b8'];
+ const bars=stages.map((st,i)=>{const w=Math.max(st.n?W*st.n/top:0,st.n?44:8),x=(W-w)/2,y=2+i*(H+G),nw=i<stages.length-1?Math.max(stages[i+1].n?W*stages[i+1].n/top:0,stages[i+1].n?44:8):w,nx=(W-nw)/2;
+  const pct=i&&stages[i-1].n?Math.round(st.n/stages[i-1].n*100)+'%':'';
+  return `<path d="M${x},${y} L${x+w},${y} L${nx+nw},${y+H} L${nx},${y+H} Z" fill="${cols[i]||cols[2]}" opacity="${st.n?1:.35}"/>
+  <text x="${W/2}" y="${y+H/2+5}" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">${st.n}</text>
+  <text x="${W+14}" y="${y+H/2-2}" fill="#dce8f8" font-size="12.5" font-weight="600">${esc(st.l)}</text>
+  <text x="${W+14}" y="${y+H/2+14}" fill="#8fa3bd" font-size="11.5">${pct?pct+' of previous step':'all tracked'}</text>`}).join('');
+ return `<div style="flex:1;min-width:380px"><h3 style="margin:0 0 8px;font-size:14px">${esc(title)}</h3><svg viewBox="0 0 ${W+190} ${h}" width="100%" role="img" aria-label="${esc(title)} funnel">${bars}</svg></div>`}
+function outreachCard(){const vis=a=>(a||[]).filter(x=>!x.hidden);
+ const cf=vis(S.confs),gr=vis(S.grants),cm=vis(S.comms),CONT=['Contacted','Posted','Replied','Partnership'];
+ const ap=rows=>[{l:'In list',n:rows.length},{l:'Applied',n:rows.filter(x=>x.applied==='Yes').length},{l:'Accepted',n:rows.filter(x=>x.result==='Accepted').length}];
+ const cmS=[{l:'In list',n:cm.length},{l:'Contacted / posted',n:cm.filter(x=>CONT.includes(x.status)).length},{l:'Replied',n:cm.filter(x=>x.status==='Replied'||x.status==='Partnership'||+x.responses>0).length}];
+ return card(`<div class="sectionhead"><h2>Outreach statistics</h2></div><div style="display:flex;flex-wrap:wrap;gap:24px">${funnelSvg('Conferences',ap(cf))}${funnelSvg('Funds & grants',ap(gr))}${funnelSvg('Communities',cmS)}</div><div class="note">Each funnel: <b>in list</b> (all tracked, hidden rows excluded) → <b>applied / contacted</b> (conferences and grants: applied = Yes; communities: status Contacted, Posted, Replied or Partnership) → <b>accepted / replied</b> (outcome Accepted; or status Replied / Partnership, or at least one response logged).</div>`)}
 function rmItemHtml(x,i,l){const jp=jiraFor(x.jira),st=RM_ST[x.status]||RM_ST.idea;
  const K=x.lane==='builder'&&/^Finish 10 interviews/.test(x.title)?fbKpi():null;
  const prog=K?`<div class="track" style="margin-top:7px"><div class="fill" style="width:${K.pct}%"></div></div><div class="muted">Live from Testers tab: ${K.done}/${K.goal} feedback · ${K.iv} interviews</div>`:jp?`<div class="track" style="margin-top:7px"><div class="fill" style="width:${Math.round(jp.done/jp.total*100)}%"></div></div><div class="muted">Jira ${esc(x.jira)}: ${jp.done}/${jp.total} issues done</div>`:'';
