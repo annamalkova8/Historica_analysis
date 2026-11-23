@@ -1,5 +1,5 @@
 // Community search: active communities of history teachers, digital humanists and map enthusiasts.
-import { today, str, yn, normUrl, normName, money, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
+import { today, str, yn, normUrl, normName, money, isBlockedComm, HISTORICA, JSON_ONLY } from '../_lib/shared.js';
 import { sameComm } from '../_lib/dedupe.js';
 export default {
   id: 'communities',
@@ -16,12 +16,12 @@ enthusiasts, historical map communities. Prefer small, active, relevant communit
     { name: 'EuroClio hubs', check_url: 'https://euroclio.eu/euroclio-hubs/', notes: 'National/regional history educator associations in Europe.' },
     { name: 'AHA Communities', check_url: 'https://communities.historians.org/', notes: 'Teaching and digital history communities.' },
     { name: 'ADHO and DH associations', check_url: 'https://adho.org/', notes: 'Constituent organisations and special interest groups; mailing lists.' },
-    { name: 'NCHE and US history educator networks', check_url: 'https://ncheteach.org/', notes: 'History educator communities, Discord and mailing lists.' },
+    { name: 'NCHE and US history educator networks', check_url: 'https://ncheteach.org/', notes: 'History educator communities and mailing lists.' },
     { name: 'Humanist and DH mailing lists', check_url: 'https://dhhumanist.org/', notes: 'Open digital humanities lists that accept project announcements.' },
     { name: 'Geovistory and linked-open-data history communities', check_url: 'https://www.geovistory.org/community', notes: 'Digital historians and developers working on historical data.' },
   ],
   queries: [
-    'active Discord servers for history teachers and educators',
+    'active online forums for history teachers and educators',
     'Facebook groups LinkedIn groups historical maps and historical geography',
     'digital humanities mailing lists that accept project announcements',
     'forums for historical cartography and map enthusiasts',
@@ -33,12 +33,12 @@ Project profile:
 
 ${profile}
 
-You have a web search tool. Find ACTIVE communities (forums, Discord/Slack servers, mailing lists,
+You have a web search tool. Find ACTIVE communities (forums, mailing lists,
 association networks, social groups) relevant to the profile. Today is ${today()}.
 
 For each community output a JSON object with exactly these fields:
 - "name": community name
-- "platform": "Discord" | "Slack" | "Mailing list" | "Forum" | "Facebook group" | "LinkedIn group" | "Association network" | "Other"
+- "platform": "Mailing list" | "Forum" | "Facebook group" | "LinkedIn group" | "Association network" | "Other"
 - "audience": who is in it
 - "url": direct URL to the community or its join page
 - "size_activity": member count / activity level if stated, else "unknown"
@@ -48,7 +48,7 @@ For each community output a JSON object with exactly these fields:
 - "best_approach": one sentence on how to engage (value first, not repeated promotion)
 - "relevance_note": one sentence on why it fits
 
-Only include communities that appear active and open to newcomers. Skip dead or private-only ones.
+Never include Discord or Slack servers, or websites of competing historical-map products. Only include communities that appear active and open to newcomers. Skip dead or private-only ones.
 
 ${JSON_ONLY}`;
   },
@@ -68,7 +68,7 @@ ${qs.map((x) => `- ${x}`).join('\n')}
 
 Follow the output format exactly.`;
   },
-  accept: (it) => !!it.name && !!it.url && !/reddit\.com/i.test(String(it.url)) && !/reddit/i.test(String(it.platform || '')),   // Reddit is excluded on purpose
+  accept: (it) => !!it.name && !!it.url && !isBlockedComm(it) && !/reddit\.com/i.test(String(it.url)) && !/reddit/i.test(String(it.platform || '')),   // Reddit is excluded on purpose
   key: (it) => normUrl(it.url) || normName(it.name),
   similar: sameComm,
   toRecord(it, taskName) {

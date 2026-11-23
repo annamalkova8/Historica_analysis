@@ -31,3 +31,7 @@ export const JSON_ONLY = `Respond with ONLY a JSON array of these objects, nothi
 If you find nothing relevant, respond with exactly: []
 Do not invent or guess facts, dates, prices or links. If genuinely unknown, write "unknown".`;
 
+
+// Communities we never track: Discord / Slack (any link or platform) and rival products' sites.
+export const COMM_BLOCK_RE = /(^|[/.@])(discord\.(com|gg)|discordapp\.com|slack\.com|slack-redir\.net|geacron\.com|chronas\.org|openhistoricalmap\.org|oldmapsonline\.org|davidrumsey\.com|timemap\.org|pelagios\.org|panchronia\.[a-z]+|natagant\.[a-z]+|apps\.apple\.com)(?=[/:?#]|$)/i;
+export const isBlockedComm = (it) => COMM_BLOCK_RE.test(String(it.url || '')) || /discord|slack/i.test(String(it.platform || '')) || /\b(discord|slack)\b/i.test(String(it.name || ''));
