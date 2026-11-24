@@ -1018,20 +1018,20 @@ function roadmapView(){const R=S.roadmap,cnt=s=>R.filter(x=>x.status===s).length
   <input class="field" id="rmt" style="width:210px" placeholder="New roadmap item"><select class="mini" id="rml">${LANES.map(l=>`<option value="${l.id}">${l.name}</option>`).join('')}</select><select class="mini" id="rmq">${QTR.map((q,i)=>`<option value="${i}">${q}</option>`).join('')}</select><select class="mini" id="rmg">${RM_OWNERS.map(o=>`<option>${o}</option>`).join('')}</select><button class="btn small" onclick="addRm()">+ Add</button></div></div>${board}<div class="note">Draft for discussion — dates and scope are proposals. Click an item title for its rationale, metric and Jira link.</div>`)}
  ${card(`<h2 style="margin-bottom:10px">Jira epics</h2>${E.length?table(['Epic','Issues','Done','Progress','Story points'],E.map(e=>[esc(e.n)+' <span class="muted">'+esc(e.k)+'</span>',e.t,e.d,`<div class="track" style="width:140px"><div class="fill" style="width:${Math.round(e.d/e.t*100)}%"></div></div>`,e.p?e.pd+'/'+e.p:'—'])):'<div class="mock" style="height:110px">No epics yet. Connect Jira, give issues a parent epic, then press ↻ Update.</div>'}`)}`}
 /** Outreach statistics for the roadmap: one funnel image per channel: in list -> applied / contacted -> replied / accepted */
-function funnelSvg(title,stages){const W=300,H=44,G=6,top=stages[0].n||1,h=stages.length*(H+G)+4;
- const cols=['#3f78d8','#4e9bff','#5fd6b8'];
- const bars=stages.map((st,i)=>{const w=Math.max(st.n?W*st.n/top:0,st.n?44:8),x=(W-w)/2,y=2+i*(H+G),nw=i<stages.length-1?Math.max(stages[i+1].n?W*stages[i+1].n/top:0,stages[i+1].n?44:8):w,nx=(W-nw)/2;
-  const pct=i&&stages[i-1].n?Math.round(st.n/stages[i-1].n*100)+'%':'';
+function funnelSvg(title,stages){const W=170,H=28,G=4,top=stages[0].n||1,h=stages.length*(H+G),cols=['#3f78d8','#4e9bff','#5fd6b8'];
+ const wd=n=>Math.max(n?W*n/top:0,n?30:6);
+ const bars=stages.map((st,i)=>{const w=wd(st.n),x=(W-w)/2,y=i*(H+G),nw=i<stages.length-1?wd(stages[i+1].n):w,nx=(W-nw)/2,pct=i&&stages[i-1].n?Math.round(st.n/stages[i-1].n*100)+'% of previous':'all tracked';
   return `<path d="M${x},${y} L${x+w},${y} L${nx+nw},${y+H} L${nx},${y+H} Z" fill="${cols[i]||cols[2]}" opacity="${st.n?1:.35}"/>
-  <text x="${W/2}" y="${y+H/2+5}" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">${st.n}</text>
-  <text x="${W+14}" y="${y+H/2-2}" fill="#dce8f8" font-size="12.5" font-weight="600">${esc(st.l)}</text>
-  <text x="${W+14}" y="${y+H/2+14}" fill="#8fa3bd" font-size="11.5">${pct?pct+' of previous step':'all tracked'}</text>`}).join('');
- return `<div style="flex:1;min-width:380px"><h3 style="margin:0 0 8px;font-size:14px">${esc(title)}</h3><svg viewBox="0 0 ${W+190} ${h}" width="100%" role="img" aria-label="${esc(title)} funnel">${bars}</svg></div>`}
+  <text x="${W/2}" y="${y+H/2+5}" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">${st.n}</text>
+  <text x="${W+10}" y="${y+H/2-1}" fill="#dce8f8" font-size="11" font-weight="600">${esc(st.l)}</text>
+  <text x="${W+10}" y="${y+H/2+11}" fill="#8fa3bd" font-size="10">${pct}</text>`}).join('');
+ return `<div><h3 style="margin:0 0 6px;font-size:13px">${esc(title)}</h3><svg viewBox="0 0 ${W+120} ${h}" style="width:100%;max-width:340px" role="img" aria-label="${esc(title)} funnel">${bars}</svg></div>`}
 function outreachCard(){const vis=a=>(a||[]).filter(x=>!x.hidden);
- const cf=vis(S.confs),gr=vis(S.grants),cm=vis(S.comms),CONT=['Contacted','Posted','Replied','Partnership'];
+ const cf=vis(S.confs),gr=vis(S.grants),cm=vis(S.comms),bl=vis(S.bloggers),CONT=['Contacted','Posted','Replied','Partnership'],BC=['Contacted','Replied','In talks','Collaboration','Declined'],BR=['Replied','In talks','Collaboration','Declined'];
  const ap=rows=>[{l:'In list',n:rows.length},{l:'Applied',n:rows.filter(x=>x.applied==='Yes').length},{l:'Accepted',n:rows.filter(x=>x.result==='Accepted').length}];
  const cmS=[{l:'In list',n:cm.length},{l:'Contacted / posted',n:cm.filter(x=>CONT.includes(x.status)).length},{l:'Replied',n:cm.filter(x=>x.status==='Replied'||x.status==='Partnership'||+x.responses>0).length}];
- return card(`<div class="sectionhead"><h2>Outreach statistics</h2></div><div style="display:flex;flex-wrap:wrap;gap:24px">${funnelSvg('Conferences',ap(cf))}${funnelSvg('Funds & grants',ap(gr))}${funnelSvg('Communities',cmS)}</div><div class="note">Each funnel: <b>in list</b> (all tracked, hidden rows excluded) → <b>applied / contacted</b> (conferences and grants: applied = Yes; communities: status Contacted, Posted, Replied or Partnership) → <b>accepted / replied</b> (outcome Accepted; or status Replied / Partnership, or at least one response logged).</div>`)}
+ const blS=[{l:'In list',n:bl.length},{l:'Contacted',n:bl.filter(x=>BC.includes(x.status)).length},{l:'Replied',n:bl.filter(x=>BR.includes(x.status)).length}];
+ return card(`<div class="sectionhead"><h2>Outreach statistics</h2></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px">${funnelSvg('Conferences',ap(cf))}${funnelSvg('Funds & grants',ap(gr))}${funnelSvg('Communities',cmS)}${funnelSvg('Bloggers',blS)}</div><div class="note"><b>In list</b> = tracked rows (hidden excluded) → <b>applied / contacted</b> (conferences, grants: applied = Yes; communities: Contacted, Posted, Replied, Partnership; bloggers: Contacted or later) → <b>accepted / replied</b> (accepted outcome; communities: Replied / Partnership or a logged response; bloggers: Replied, In talks, Collaboration or Declined).</div>`)}
 function rmItemHtml(x,i,l){const jp=jiraFor(x.jira),st=RM_ST[x.status]||RM_ST.idea;
  const K=x.lane==='builder'&&/^Finish 10 interviews/.test(x.title)?fbKpi():null;
  const prog=K?`<div class="track" style="margin-top:7px"><div class="fill" style="width:${K.pct}%"></div></div><div class="muted">Live from Testers tab: ${K.done}/${K.goal} feedback · ${K.iv} interviews</div>`:jp?`<div class="track" style="margin-top:7px"><div class="fill" style="width:${Math.round(jp.done/jp.total*100)}%"></div></div><div class="muted">Jira ${esc(x.jira)}: ${jp.done}/${jp.total} issues done</div>`:'';
