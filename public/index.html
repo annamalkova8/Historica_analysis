@@ -900,8 +900,9 @@ async function mqFiles(id,change){
   if(!h){h=await window.showDirectoryPicker({id:pid,mode:'read'});await mqSet('dir_'+pid,h)}
   return {name:h.name,files:await mqWalk(h)}}
  return new Promise(ok=>{const i=document.createElement('input');i.type='file';i.webkitdirectory=true;i.multiple=true;i.onchange=()=>ok(i.files.length?{name:(i.files[0].webkitRelativePath||'').split('/')[0],files:mqFromInput(i.files)}:null);i.click()})}
-/** Folder suffix may be any year inside a century: _100 … _199 all mean the 100s (−150 → −100). */
-const mqCentury=p=>Number.isFinite(p)&&Math.abs(p)>=100?Math.trunc(p/100)*100:p;
+/** Folder suffix may be any year inside a period: up to −2000 periods are 500 years (−4000, −3500 … −2000; −2250 → −2000),
+    after that 100 years (_100 … _199 all mean the 100s, −150 → −100). */
+const mqCentury=p=>{if(!Number.isFinite(p))return p;const st=p<=-2000?500:100;return Math.abs(p)>=st?Math.trunc(p/st)*st:p};
 /** map_score_service report.json -> one before/after row (zone + period) */
 function mqParseInside(j,path,mtime){if(!j||!j.before||!j.after||!j.before.score||!j.after.score)return null;
  const m=path.match(/(?:^|\/)([^\/]+)_(-?\d{3,4})\//),b=j.before.score,a=j.after.score,c=j.comparison||{},it=x=>(x||[]).map(y=>String(y&&y.item||y)).filter(Boolean).slice(0,6);
@@ -938,7 +939,7 @@ async function mqUpdate(id,change){
  try{localStorage.setItem('mq_last_'+id,new Date().toLocaleString()+' · folder "'+pick.name+'"')}catch(e){}
  save();render()}
 const mqUpdBtn=id=>{const r=runState[id]||{};return `<button class="btn small" ${r.running?'disabled':''} onclick="mqUpdate('${id}')" title="Reads the report files in the folder and adds new ones / refreshes changed ones">${r.running?'Updating…':'↻ Update'}</button><button class="btn secondary small" ${r.running?'disabled':''} onclick="mqUpdate('${id}',true)" title="Pick a different folder">Change folder</button>`};
-const mqInfo=id=>`<div id="prog-${id}">${progHtml(id)}</div><div class="muted" style="margin:6px 0 10px">Source folder: <code>${MQ[id].hint}</code>${id==='mqin'?' <span class="muted">(default; folder suffix may be any year of the century, e.g. _100–_199 = 100)</span>':''}${mqLast(id)?' · last update: '+esc(mqLast(id)):' · never updated'}</div>`;
+const mqInfo=id=>`<div id="prog-${id}">${progHtml(id)}</div><div class="muted" style="margin:6px 0 10px">Source folder: <code>${MQ[id].hint}</code>${id==='mqin'?' <span class="muted">(default; folder suffix may be any year of the period: every 500 years from −4000 to −2000, every 100 years after, e.g. _100–_199 = 100)</span>':''}${mqLast(id)?' · last update: '+esc(mqLast(id)):' · never updated'}</div>`;
 const mqEmpty=(t)=>`<div class="mock" style="height:120px">${NO}<br><span class="muted">${t}</span></div>`;
 let mqOpen=false;
 function mqChart(I){if(!I.length)return '';
