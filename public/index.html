@@ -909,7 +909,7 @@ const mqCentury=p=>{if(!Number.isFinite(p))return p;const st=p<=-2000?500:100;re
 /** map_score_service report.json -> one before/after row (zone + period) */
 function mqParseInside(j,path,mtime){if(!j||!j.before||!j.after||!j.before.score||!j.after.score)return null;
  const m=path.match(/(?:^|\/)([^\/]+)_(-?\d{3,4})\//),b=j.before.score,a=j.after.score,c=j.comparison||{},it=x=>(x||[]).map(y=>String(y&&y.item||y)).filter(Boolean).slice(0,6);
- const zone=j.zone||(m&&m[1]),period=mqCentury(+(j.period||(m&&m[2])));if(!zone||!period)return null;
+ const zone=j.zone||(m&&m[1]),period=mqCentury(Number.isFinite(+j.period)&&+j.period?+j.period:m?+m[2]:NaN);if(!zone||!period)return null;
  return {zone,period,beforeCommon:mqNum(b.common_score),afterCommon:mqNum(a.common_score),beforeCountry:mqNum(b.country_score),afterCountry:mqNum(a.country_score),beforeBorder:mqNum(b.border_score),afterBorder:mqNum(a.border_score),
   afterRecall:mqNum(a.recall),afterPrecision:mqNum(a.precision),afterWrong:mqNum(a.wrong_borders),afterBorders:mqNum(a.borders_on_map),afterExpected:mqNum(a.expected_countries),
   verdict:c.verdict||'',summary:c.summary||'',improved:it(c.improvements),worsened:it(c.regressions),unchanged:(c.unchanged_problems||[]).length,
@@ -928,11 +928,13 @@ async function mqUpdate(id,change){
  const R=runState[id]={running:true,log:[],total:pick.files.length,done:0,cur:pick.name};render();
  const isIn=id==='mqin',coll=isIn?'mapqIn':'mapq',parse=isIn?mqParseInside:mqParseRivals,seen=new Set();let add=0,upd=0,same=0,skip=0;
  const files=pick.files.sort((a,b)=>a.path.split('/').length-b.path.split('/').length);
+ const best=new Map(); // several folders can fall into one period (e.g. _501 and _517 = 500): the most recently changed report wins
  for(const f of files){R.cur=f.path;R.done++;
   if(isIn?!/(^|\/)[^\/]+_-?\d{3,4}\/[^\/]+_report\.json$/.test(f.path):/\/(out|cache)\//.test('/'+f.path)){continue}
-  let row=null;try{const r=await f.read();row=parse(JSON.parse(r.text),f.path,r.mtime)}catch(e){row=null}
+  let row=null,mt=0;try{const r=await f.read();mt=r.mtime;row=parse(JSON.parse(r.text),f.path,r.mtime)}catch(e){row=null}
   if(!row){skip++;continue}
-  const key=isIn?row.zone+'|'+row.period:row.region.toLowerCase()+'|'+row.year;if(seen.has(key))continue;seen.add(key);
+  const key=isIn?row.zone+'|'+row.period:row.region.toLowerCase()+'|'+row.year,o=best.get(key);if(!o||mt>o.mt)best.set(key,{row,mt});if(R.done%5===0)paint(id)}
+ for(const {row} of best.values()){
   const i=S[coll].findIndex(x=>isIn?x.zone===row.zone&&String(x.period)===String(row.period):String(x.region).toLowerCase()===row.region.toLowerCase()&&String(x.year)===String(row.year));
   if(i<0){S[coll].unshift(row);add++;R.log.push('＋ '+(isIn?mqZone(row.zone)+' '+row.period:row.region+' '+row.year)+' added')}
   else{const old=S[coll][i],{date,...a}=row,{date:_d,...b}=old,keep=!isIn&&old.note?{note:old.note}:{};
