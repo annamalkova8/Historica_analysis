@@ -315,7 +315,7 @@ function applyState(st){
  // collections added after first launch: seed once (skipping rows the services may already have created)
  NEWK.filter(k=>!(st.seededKinds||[]).includes(k)).forEach(k=>{const have=new Set(S[k].map(x=>seedKey(k,x)));S[k]=[...S[k],...D[k].filter(x=>!have.has(seedKey(k,x)))];if(!pendingKinds.includes(k))pendingKinds.push(k)});
  if(pendingKinds.length)flush();
- if(migrateTesters()|migrateComms()|migrateRoadmap())save();
+ if(migrateTesters()|migrateComms()|migrateRoadmap()|migrateMapq())save();
  let added=false;TPL().forEach(t=>{if(!S.tplList.some(x=>x.name===t.name)){S.tplList.push(t);added=true}});if(added)save()}
 function migrateRoadmap(){const R=S.roadmap;let lq=false;R.forEach(x=>{if(x.lane==='layers'&&!x.lq){const sd=SEED.roadmap().find(y=>y.title===x.title);if(sd)x.q=sd.q;x.lq=1;lq=true}});if(lq&&R.every(x=>x.rv===2))return true;if(R.length&&!R.some(x=>x.lane==='layers')){const have=new Set(R.map(x=>x.title.toLowerCase()));let ch=false;SEED.roadmap().filter(x=>x.lane==='layers').forEach(x=>{if(!have.has(x.title.toLowerCase())){R.push(x);ch=true}});if(ch&&R.every(x=>x.rv===2))return true}
  if(!R.length||R.every(x=>x.rv===2))return false;
@@ -547,6 +547,10 @@ function setTF(id,k,v){const t=S.testers.find(t=>t.id===id);if(!t)return;t[k]=v;
 const COMM_BLOCK_RE=/(^|[/.@])(discord\.(com|gg)|discordapp\.com|slack\.com|slack-redir\.net|geacron\.com|chronas\.org|openhistoricalmap\.org|oldmapsonline\.org|davidrumsey\.com|timemap\.org|pelagios\.org|panchronia\.[a-z]+|natagant\.[a-z]+|apps\.apple\.com)(?=[/:?#]|$)/i;
 const isBlockedComm=x=>COMM_BLOCK_RE.test(String(x.url||''))||/discord|slack/i.test(String(x.platform||''))||/\b(discord|slack)\b/i.test(String(x.name||''));
 function migrateComms(){let ch=false;const n=(S.comms||[]).length;S.comms=(S.comms||[]).filter(x=>!isBlockedComm(x));if(S.comms.length!==n)ch=true;(S.comms||[]).forEach(x=>{if(!x.hidden&&(/reddit/i.test(x.platform||'')||/reddit\.com/i.test(x.url||''))){x.hidden=true;x.isNew=false;x.hiddenAt=new Date().toISOString().slice(0,10);ch=true}});return ch}
+/** Saved Map quality rows from older loads may carry raw folder years (301, 1401, −1900…): put them in their period and merge duplicates (newest wins) */
+function migrateMapq(){const I=S.mapqIn||[];let ch=false;const m=new Map();
+ I.forEach(x=>{const p=mqCentury(+x.period);if(Number.isFinite(p)&&p!==x.period){x.period=p;ch=true}const k=x.zone+'|'+x.period,o=m.get(k);if(!o)m.set(k,x);else{ch=true;if(String(x.date||'')>String(o.date||''))m.set(k,x)}});
+ if(m.size!==I.length){S.mapqIn=[...m.values()];ch=true}return ch}
 function migrateTesters(){let ch=false;S.testers.forEach(t=>{if(t.reg===undefined){t.reg='No';ch=true}});S.testers.forEach(t=>{if(t.ext==='confluence'&&!t.fbReset){t.fbReset=true;ch=true}}); // stamp only: Feedback typed by hand must never be cleared // feedback is filled in by hand now, not taken from Confluence
  S.testers.forEach(t=>{if(t.iv===undefined){t.iv=t.fb==='Interview'||t.fb==='Both'?'Yes':'No';if(t.fb==='Interview')t.fb='None';else if(t.fb==='Both')t.fb='Google Form';ch=true}
  else if(t.fb==='Interview'||t.fb==='Both'){t.iv='Yes';t.fb=t.fb==='Both'?'Google Form':'None';ch=true}});return ch}
@@ -905,11 +909,11 @@ async function mqFiles(id,change){
  return new Promise(ok=>{const i=document.createElement('input');i.type='file';i.webkitdirectory=true;i.multiple=true;i.onchange=()=>ok(i.files.length?{name:(i.files[0].webkitRelativePath||'').split('/')[0],files:mqFromInput(i.files)}:null);i.click()})}
 /** Folder suffix may be any year inside a period: up to −2000 periods are 500 years (−4000, −3500 … −2000; −2250 → −2000),
     after that 100 years (_100 … _199 all mean the 100s, −150 → −100). */
-const mqCentury=p=>{if(!Number.isFinite(p))return p;const st=p<=-2000?500:100;return Math.abs(p)>=st?Math.trunc(p/st)*st:p};
+const mqCentury=p=>{if(!Number.isFinite(p))return p;const st=p<=-2000?500:100;return Math.trunc(p/st)*st||0}; // 1…99 and −99…−1 → 0
 /** map_score_service report.json -> one before/after row (zone + period) */
 function mqParseInside(j,path,mtime){if(!j||!j.before||!j.after||!j.before.score||!j.after.score)return null;
- const m=path.match(/(?:^|\/)([^\/]+)_(-?\d{3,4})\//),b=j.before.score,a=j.after.score,c=j.comparison||{},it=x=>(x||[]).map(y=>String(y&&y.item||y)).filter(Boolean).slice(0,6);
- const zone=j.zone||(m&&m[1]),period=mqCentury(Number.isFinite(+j.period)&&+j.period?+j.period:m?+m[2]:NaN);if(!zone||!period)return null;
+ const m=path.match(/(?:^|\/)([^\/]+)_(-?\d{1,4})\//),b=j.before.score,a=j.after.score,c=j.comparison||{},it=x=>(x||[]).map(y=>String(y&&y.item||y)).filter(Boolean).slice(0,6);
+ const zone=j.zone||(m&&m[1]),period=mqCentury(Number.isFinite(+j.period)&&+j.period?+j.period:m?+m[2]:NaN);if(!zone||!Number.isFinite(period))return null;
  return {zone,period,beforeCommon:mqNum(b.common_score),afterCommon:mqNum(a.common_score),beforeCountry:mqNum(b.country_score),afterCountry:mqNum(a.country_score),beforeBorder:mqNum(b.border_score),afterBorder:mqNum(a.border_score),
   afterRecall:mqNum(a.recall),afterPrecision:mqNum(a.precision),afterWrong:mqNum(a.wrong_borders),afterBorders:mqNum(a.borders_on_map),afterExpected:mqNum(a.expected_countries),
   verdict:c.verdict||'',summary:c.summary||'',improved:it(c.improvements),worsened:it(c.regressions),unchanged:(c.unchanged_problems||[]).length,
@@ -930,7 +934,7 @@ async function mqUpdate(id,change){
  const files=pick.files.sort((a,b)=>a.path.split('/').length-b.path.split('/').length);
  const best=new Map(); // several folders can fall into one period (e.g. _501 and _517 = 500): the most recently changed report wins
  for(const f of files){R.cur=f.path;R.done++;
-  if(isIn?!/(^|\/)[^\/]+_-?\d{3,4}\/[^\/]+_report\.json$/.test(f.path):/\/(out|cache)\//.test('/'+f.path)){continue}
+  if(isIn?!/(^|\/)[^\/]+_-?\d{1,4}\/[^\/]+_report\.json$/.test(f.path):/\/(out|cache)\//.test('/'+f.path)){continue}
   let row=null,mt=0;try{const r=await f.read();mt=r.mtime;row=parse(JSON.parse(r.text),f.path,r.mtime)}catch(e){row=null}
   if(!row){skip++;continue}
   const key=isIn?row.zone+'|'+row.period:row.region.toLowerCase()+'|'+row.year,o=best.get(key);if(!o||mt>o.mt)best.set(key,{row,mt});if(R.done%5===0)paint(id)}
